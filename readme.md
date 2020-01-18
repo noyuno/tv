@@ -374,6 +374,6 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 
 サーバは有線でつなげるべき
 
-## S/N比が低い
+## C/N比が低い
 
 調査中
