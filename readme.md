@@ -376,14 +376,4 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 
 ## S/N比が低い
 
-[5ch同時録画・視聴 PCI-Express型地デジ・BS/CSマルチチューナーPX-MLT5PE 株式会社プレクス パソコン・パソコン周辺機器メーカー PLEX株式会社プレクス パソコン・パソコン周辺機器メーカー PLEX](http://www.plex-net.co.jp/support/tvtuner/)
-より
-
-~~~
-動作保証CN値は？
-地デジ:18以上
-BS:8以上
-CS:5以上
-~~~
-
-とあるので問題ない。
+調査中
