@@ -6,6 +6,7 @@
 2. PX-W3U4 (16,000円くらい)
 3. カードリーダー (1,600円くらい)
 4. CentOS 8
+5. Windows10 Pro (グループポリシーの設定をするため)
 
 ## Rufus で書き込み
 
@@ -63,7 +64,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid pcsc-lite-devel nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba python3-pip
 ~~~
 
 ## エディタのインストール
@@ -74,7 +75,7 @@ sudo dnf -y install nano ripgrep vim-enhanced
 sudo pip3 install neovim
 git clone https://github.com/noyuno/dotfiles
 ./dotfiles/bin/dfdeploy
-
+tmux
 vi
 
 :call dein#install()
@@ -86,7 +87,7 @@ vi
 ~~~
 sudo visudo
 
-Defaults timestamp_timeout = 30
+Defaults timestamp_timeout = 60
 Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 ~~~
 
@@ -101,6 +102,7 @@ unzip -oj pxw3u4_BDA_ver1x64.zip pxw3u4_BDA_ver1x64/PXW3U4.sys
 ./fwtool PXW3U4.sys it930x-firmware.bin
 sudo cp it930x-firmware.bin /lib/firmware/
 cd ../driver
+make
 sudo make install
 lsmod | grep -e ^px4_drv
 ls /dev/px4video*
@@ -110,6 +112,7 @@ ls /dev/px4video*
 
 ~~~
 wget http://ludovic.rousseau.free.fr/softwares/pcsc-perl/pcsc-perl-1.4.14.tar.bz2
+tar xf pcsc-perl-1.4.14.tar.bz2
 cd pcsc-perl-1.4.14
 perl Makefile.PL
 make
@@ -219,7 +222,6 @@ sudo mysql_secure_installation
   Disallow root login remotely: n
   Remove test database and access to it: y
   Reload privilege table now: y
-sudo vi /etc/my.cnf.d/mariadb-server.cnf
 sudo nano /etc/my.cnf.d/mariadb-server.cnf
   [mariadb]
   character-set-server = utf8mb4
@@ -237,7 +239,8 @@ mysql -u root -p
 
 ~~~
 sudo setenforce 0
-
+sudo nano /etc/selinux/config
+  SELINUX=disabled
 sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=tcp:toport=8888 --permanent
 sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=udp:toport=8888 --permanent
 sudo firewall-cmd --zone=public --add-service=http --permanent
@@ -291,6 +294,22 @@ sudo systemctl enable nmb
 
 Windows+R type `\\tv\` to connect
 
+
+~~~
+[Window Title]
+\\m1\
+
+[Content]
+\\m1\
+
+組織のセキュリティ ポリシーによって非認証のゲスト アクセスがブロックされているため、この共有フォルダーにアクセスできません。これらのポリシーは、ネットワーク上の安全でないデバイスや悪意のあるデバイスから PC を保護するのに役立ちます。
+~~~
+
+が出たら`gpedit.msc`
+
+1.［コンピューターの構成］→［管理用テンプレート］→［ネットワーク］→［Lanman ワークステーション］を開く
+2.［安全でないゲストログオンを有効にする］
+
 ## EPGStation
 
 ~~~
@@ -325,6 +344,14 @@ config/config.json
 sudo pm2 start dist/server/index.js --name "epgstation"
 sudo pm2 save
 sudo pm2 logs epgstation
+~~~
+
+`wait DB`が出続けるとき
+
+~~~
+mysql -u root -p
+set password for 'noyuno'@'localhost' = PASSWORD('pass');
+quit
 ~~~
 
 ## バッチ
