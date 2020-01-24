@@ -13,12 +13,12 @@
 
 ## インストーラを起動
 
-language: english
-keyboard: japanese
-timezone: Asia/Tokyo
-install: base only
-target: p(esp) /boot/efi, p(ext4) /boot, l(xfs) /
-hostname: tv.lan
+- language: english
+- keyboard: japanese
+- timezone: Asia/Tokyo
+- install: base only
+- target: p(esp) /boot/efi, p(ext4) /boot, l(xfs) /
+- hostname: tv.lan
 
 ## ネットワーク設定
 
