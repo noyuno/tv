@@ -2,7 +2,7 @@
 
 ## 要件
 
-1. NUC8i3BEH (Coffee Lake (8th), Intel Core i3-8109U, Intel® Iris® Plus Graphics 655, 4GB, M.2 SSD）
+1. NUC7PJYH
 2. PX4-W3U4
 3. カードリーダー
 4. CentOS 8
@@ -586,7 +586,7 @@ cmake ../media-driver \
 -DINSTALL_DRIVER_SYSCONF=OFF ../media-driver-intel-media-19.4.0r 
 ~~~
 
-また、Ffmpegのオプションを次のようにする
+また、Ffmpegのオプションを次のようにVAAPIでエンコードさせる
 
 ~~~
 time ffmpeg -y -nostdin -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i bs11.ts -vf 'format=nv12|vaapi,hwupload' -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -threads 0 bs11.mp4
@@ -654,13 +654,90 @@ video:55275kB audio:1404kB subtitle:0kB other streams:0kB global headers:0kB mux
 real    0m10.035s
 user    0m1.632s
 sys     0m0.361s
-[noyuno@m1:~] $ ls -l bs11.*
+[noyuno@m1:~] $ time ffmpeg -y -nostdin -i bs11.ts -vcodec h264 -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -threads 0 bs11-soft.mp4
+ffmpeg version 4.2.2 Copyright (c) 2000-2019 the FFmpeg developers
+  built with gcc 8 (GCC)
+  configuration: --pkg-config-flags=--static --extra-cflags=-I/opt/intel/mediasdk/include --extra-ldflags=-L/opt/intel/mediasdk/lib64 --extra-ldflags=-L/opt/intel/mediasdk/plugins --extra-libs='-lpthread -lm' --enable-vaapi --enable-libdrm --enable-libtheora --enable-opencl --enable-gpl --enable-libmfx --enable-libaom --enable-libass --enable-libfdk-aac --enable-libfreetype --enable-libmp3lame --enable-libopus --enable-libvorbis --enable-libx264 --enable-nonfree --enable-opencl
+  libavutil      56. 31.100 / 56. 31.100
+  libavcodec     58. 54.100 / 58. 54.100
+  libavformat    58. 29.100 / 58. 29.100
+  libavdevice    58.  8.100 / 58.  8.100
+  libavfilter     7. 57.100 /  7. 57.100
+  libswscale      5.  5.100 /  5.  5.100
+  libswresample   3.  5.100 /  3.  5.100
+  libpostproc    55.  5.100 / 55.  5.100
+[aac @ 0x2b18840] Multiple frames in a packet.
+[aac @ 0x2b18840] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x2b18840] decode_pce: Input buffer exhausted before END element found
+[mpeg2video @ 0x2b17680] Invalid frame dimensions 0x0.
+    Last message repeated 5 times
+[mpegts @ 0x2b125c0] start time for stream 2 is not set in estimate_timings_from_pts
+[mpegts @ 0x2b125c0] PES packet size mismatch
+Input #0, mpegts, from 'bs11.ts':
+  Duration: 00:01:00.14, start: 80528.913556, bitrate: 19048 kb/s
+  Program 211
+    Stream #0:0[0x140]: Video: mpeg2video (Main) ([2][0][0][0] / 0x0002), yuv420p(tv, bt709, top first), 1920x1080 [SAR 1:1 DAR 16:9], 29.97 fps, 29.97 tbr, 90k tbn, 59.94 tbc
+    Stream #0:1[0x141]: Audio: aac (LC) ([15][0][0][0] / 0x000F), 48000 Hz, stereo, fltp, 249 kb/s
+    Stream #0:2[0x138]: Data: bin_data ([6][0][0][0] / 0x0006)
+Stream mapping:
+  Stream #0:0 -> #0:0 (mpeg2video (native) -> h264 (libx264))
+  Stream #0:1 -> #0:1 (aac (native) -> aac (native))
+[aac @ 0x2b6f7c0] Multiple frames in a packet.
+[aac @ 0x2b6f7c0] Sample rate index in program config element does not match the sample rate index configured by the container.
+[aac @ 0x2b6f7c0] decode_pce: Input buffer exhausted before END element found
+Error while decoding stream #0:1: Invalid data found when processing input
+[libx264 @ 0x2ba1f80] using SAR=1/1
+[libx264 @ 0x2ba1f80] using cpu capabilities: MMX2 SSE2Fast SSSE3 SSE4.2 AVX FMA3 BMI2 AVX2
+[libx264 @ 0x2ba1f80] profile High, level 4.0, 4:2:0, 8-bit
+[libx264 @ 0x2ba1f80] 264 - core 157 r2980 34c06d1 - H.264/MPEG-4 AVC codec - Copyleft 2003-2019 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=6 lookahead_threads=1 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=23.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00
+Output #0, mp4, to 'bs11-soft.mp4':
+  Metadata:
+    encoder         : Lavf58.29.100
+    Stream #0:0: Video: h264 (libx264) (avc1 / 0x31637661), yuv420p, 1920x1080 [SAR 1:1 DAR 16:9], q=-1--1, 29.97 fps, 30k tbn, 29.97 tbc
+    Metadata:
+      encoder         : Lavc58.54.100 libx264
+[mpegts @ 0x2b125c0] PES packet size mismatchme=00:00:59.30 bitrate=4314.1kbits/s dup=19 drop=0 speed=0.753x
+[mpeg2video @ 0x2b70bc0] invalid cbp -1 at 42 37
+[mpeg2video @ 0x2b70bc0] Warning MVs not available
+[mpeg2video @ 0x2b70bc0] concealing 3720 DC, 3720 AC, 3720 MV errors in B frame
+bs11.ts: corrupt decoded frame in stream 0
+[aac @ 0x2b6f7c0] decode_band_types: Input buffer exhausted before END element found
+Error while decoding stream #0:1: Invalid data found when processing input
+frame= 1802 fps= 22 q=-1.0 Lsize=   32263kB time=00:01:00.02 bitrate=4403.0kbits/s dup=20 drop=0 speed=0.742x
+video:30794kB audio:1404kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 0.200249%
+[libx264 @ 0x2ba1f80] frame I:14    Avg QP:18.95  size:116078
+[libx264 @ 0x2ba1f80] frame P:500   Avg QP:22.11  size: 34320
+[libx264 @ 0x2ba1f80] frame B:1288  Avg QP:24.14  size:  9897
+[libx264 @ 0x2ba1f80] consecutive B-frames:  1.1%  2.1% 26.5% 70.4%
+[libx264 @ 0x2ba1f80] mb I  I16..4: 20.4% 73.1%  6.5%
+[libx264 @ 0x2ba1f80] mb P  I16..4:  5.4% 10.8%  0.5%  P16..4: 45.8%  9.9%  6.3%  0.0%  0.0%    skip:21.4%
+[libx264 @ 0x2ba1f80] mb B  I16..4:  0.6%  1.0%  0.0%  B16..8: 36.8%  2.1%  0.3%  direct: 3.9%  skip:55.3%  L0:44.7% L1:51.2% BI: 4.2%
+[libx264 @ 0x2ba1f80] 8x8 transform intra:65.0% inter:89.4%
+[libx264 @ 0x2ba1f80] coded y,uvDC,uvAC intra: 34.9% 61.9% 11.4% inter: 10.5% 23.2% 0.3%
+[libx264 @ 0x2ba1f80] i16 v,h,dc,p: 35% 29% 14% 22%
+[libx264 @ 0x2ba1f80] i8 v,h,dc,ddl,ddr,vr,hd,vl,hu: 23% 17% 38%  3%  4%  4%  3%  4%  3%
+[libx264 @ 0x2ba1f80] i4 v,h,dc,ddl,ddr,vr,hd,vl,hu: 24% 20% 14%  5% 10% 10%  7%  6%  4%
+[libx264 @ 0x2ba1f80] i8c dc,h,v,p: 48% 24% 24%  4%
+[libx264 @ 0x2ba1f80] Weighted P-Frames: Y:0.0% UV:0.0%
+[libx264 @ 0x2ba1f80] ref P L0: 55.5% 10.1% 24.7%  9.7%
+[libx264 @ 0x2ba1f80] ref B L0: 83.0% 14.1%  2.9%
+[libx264 @ 0x2ba1f80] ref B L1: 95.4%  4.6%
+[libx264 @ 0x2ba1f80] kb/s:4195.49
+[aac @ 0x2c86100] Qavg: 447.127
+
+real    1m20.910s
+user    5m4.477s
+sys     0m0.672s
+[noyuno@m1:~] $ ls -l bs11*
 -rw-rw-r--  1 noyuno noyuno  56M Jan 24 13:15 bs11.mp4
+-rw-rw-r--  1 noyuno noyuno  32M Jan 24 13:29 bs11-soft.mp4
 -rw-r--r--. 1 root   root   137M Jan 24 13:15 bs11.ts
+
 ~~~
 
-| 項目 | 値              |
+| エンコード | 速度（実時間比） | ファイルサイズ |
 |-----|-----------------|
-| 速度 | 2.99倍         |
-| ファイルサイズ | 40.8% |
+| CPU | 0.740倍 | 23.4% |
+| QSV(VAAPI) | 2.99倍 | 40.9% |
 
+CPUエンコードはリアルタイムエンコード不可。QSV（VAAPI）エンコードはリアルタイムエンコード可能。
