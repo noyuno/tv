@@ -25,8 +25,21 @@
 - keyboard: japanese
 - timezone: Asia/Tokyo
 - install: base only
-- target: p(esp) /boot/efi, p(ext4) /boot, l(xfs) /
-- hostname: tv.lan
+- hostname: m1.lan
+
+~~~
+Filesystem                Size  Used Avail Use% Mounted on
+devtmpfs                  1.9G     0  1.9G   0% /dev
+tmpfs                     1.9G     0  1.9G   0% /dev/shm
+tmpfs                     1.9G   17M  1.9G   1% /run
+tmpfs                     1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cl_m1-r        16G  7.9G  8.2G  50% /
+/dev/nvme0n1p2            976M  100M  810M  11% /boot
+/dev/nvme0n1p1            599M  6.8M  593M   2% /boot/efi
+tmpfs                     382M     0  382M   0% /run/user/1000
+/dev/mapper/cl_m1-backup  6.0G   76M  6.0G   2% /mnt/backup
+/dev/mapper/cl_m1-data    436G  3.6G  433G   1% /mnt/data
+~~~
 
 ## ネットワーク設定
 
@@ -38,13 +51,6 @@ nmcli d
 ~~~
 
 SSHサーバはすでに立ち上がっているので、ネットワーク設定が終わったらすぐに接続できる。
-
-## LVリサイズ
-
-~~~
-sudo lvresize -l +100%FREE cl_tv/root
-sudo xfs_growfs /
-~~~
 
 ## ソフトウェアアップグレード
 
@@ -69,7 +75,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
@@ -183,7 +189,7 @@ sudo recpt1 --b25 --strip 18 10 18.ts
 in client, type
 
 ~~~
-scp tv:bs11.ts .
+scp m1:bs11.ts .
 ~~~
 
 ## Mirakurun
@@ -280,6 +286,18 @@ sudo reboot
 ## Samba
 
 ~~~
+sudo nano /etc/fstab
+~~~
+
+~~~
+/dev/mapper/cl_m1-r     /                       xfs     defaults        0 0
+UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot                   ext4    defaults        1 2
+UUID=2971-857F          /boot/efi               vfat    umask=0077,shortname=winnt 0 2
+/dev/mapper/cl_m1-data  /mnt/data               xfs     defaults        0 0
+/dev/mapper/cl_m1-backup /mnt/backup            xfs     defaults        0 0
+~~~
+
+~~~
 sudo nano /etc/samba/smb.conf
 ~~~
 
@@ -290,14 +308,14 @@ sudo nano /etc/samba/smb.conf
     workgroup = WORKGROUP
     server string = Intel NUC/CentOS 8 TV Server
     hosts allow = 192.168.100. localhost EXCEPT 192.168.100.1
-    netbios name = tv
+    netbios name = m1
     dns proxy = no
     security = user
     map to guest = bad user
     printing = bsd
     printcap name = /dev/null
-[tv]
-    path = /data
+[m1]
+    path = /mnt/data
     browsable = yes
     writable = yes
     guest ok = yes
@@ -307,16 +325,16 @@ sudo nano /etc/samba/smb.conf
 ~~~
 
 ~~~
-sudo mkdir -p /data/{ts,mp4}
-sudo chmod -R 0777 /data
-sudo chown -R nobody:nobody /data
+sudo mkdir -p /mnt/data/{ts,mp4}
+sudo chmod -R 0777 /mnt/data
+sudo chown -R nobody:nobody /mnt/data
 sudo systemctl start smb
 sudo systemctl start nmb
 sudo systemctl enable smb
 sudo systemctl enable nmb
 ~~~
 
-Windows+R type `\\tv\` to connect
+Windows+R type `\\m1\` to connect
 
 ## EPGStation
 
@@ -345,6 +363,22 @@ sudo pm2 logs epgstation
 ## discord
 
 ## system backup
+
+~~~
+sudo chown -R root.wheel /mnt/backup
+sudo chmod -R 775 /mnt/backup
+sudo pip3 install awscli
+aws configure
+~~~
+
+~~~
+df -h > /mnt/backup/df
+lvdisplay > /mnt/backup/lvdisplay
+sudo xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz > /mnt/backup/root.gz
+aws s3 cp /mnt/backup/df s3://noyuno-m1
+aws s3 cp /mnt/backup/lvdisplay s3://noyuno-m1
+aws s3 cp /mnt/backup/root.gz s3://noyuno-m1
+~~~
 
 # トラブルシューティング
 
