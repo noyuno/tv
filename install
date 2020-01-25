@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-sudo ln -sfnv ~/tv/tv-cron /etc/cron.d
-sudo ln -sfnv ~/tv/EPGStation/config.json ~/EPGStation/config/config.json
-sudo ln -sfnv ~/tv/EPGStation/enc.sh ~/EPGStation/config/enc.sh
-sudo ln -sfnv ~/tv/EPGStation/enc.js ~/EPGStation/config/enc.js
+ln -sfnv ~/tv/EPGStation/config.json ~/EPGStation/config/config.json
+ln -sfnv ~/tv/EPGStation/enc.sh ~/EPGStation/config/enc.sh
+ln -sfnv ~/tv/EPGStation/enc.js ~/EPGStation/config/enc.js
