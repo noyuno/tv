@@ -324,27 +324,14 @@ git clone https://github.com/l3tnun/EPGStation.git
 cd EPGStation
 npm install
 npm run build
-cp config/config.sample.json config/config.json
 cp config/operatorLogConfig.sample.json config/operatorLogConfig.json
 cp config/serviceLogConfig.sample.json config/serviceLogConfig.json
+cd
 ~~~
 
-config/config.json
 ~~~
-    ...
-    "dbType": "mysql",
-    "mysql": {
-        "host": "localhost",
-        "port": 3306,
-        "user": "noyuno",
-        "password": "",
-        "database": "epgstation"
-    },
-    "ffmpeg": "/usr/bin/ffmpeg",
-    "ffprobe": "/usr/bin/ffprobe",
-    "recorded": "/data/ts",
-    "recordedFormat": "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%",
-    ...
+git clone https://github.com/noyuno/tv
+./install
 ~~~
 
 ~~~
@@ -353,13 +340,6 @@ sudo pm2 save
 sudo pm2 logs epgstation
 ~~~
 
-## バッチ
-
-~~~
-sudo systemctl status crond
-git clone https://github.com/noyuno/tv
-./install
-~~~
 
 ## discord
 
