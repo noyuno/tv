@@ -11,8 +11,9 @@
 
 1. EPGStationで視聴、録画予約
 2. 録画予約は「MP4 TS削除」
-4. ハードウェアエンコードは歪むので使わない
-5. 録画データはEPGStationとSambaで視聴
+3. ハードウェアエンコードは歪むので使わない
+4. 録画データはEPGStationとSambaで視聴
+5. エラーが発生したらDiscordで報告
 
 ## Rufus で書き込み
 
@@ -381,4 +382,8 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 ## EPGStationで視聴はできるが録画はできない
 
 時間が正しいか確認する
+
+## Windows10でグループポリシーがうんぬん
+
+[「組織のセキュリティポリシーによって非認証のゲストアクセスがブロックされているためこの共有フォルダーにアクセスできません」と表示される｜Q&A | IODATA アイ・オー・データ機器](https://www.iodata.jp/support/qanda/answer/s30200.htm)
 
