@@ -24,7 +24,7 @@ encode() {
     out="/data/mp4/$file.mp4"
     if ! `echo ${encoded[@]} | grep -q "$file"`; then
       echo "Encoding $in"
-      /usr/bin/ffmpeg -y -analyzeduration 10M -probesize 32M -dual_mono_mode main -i "$in" \
+      /usr/bin/ffmpeg -y -dual_mono_mode main -i "$in" \
         -movflags faststart -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn \
         -vf yadif=0:-1:1 -preset veryfast -aspect 16:9 \
         -c:v libx264 -crf 23 -c:a aac -ar 48000 -ab 192k -ac 2 "$out" &&:

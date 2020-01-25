@@ -1,6 +1,6 @@
 SHELL=/bin/bash
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 # JST
-14 10 * * 2-5 /home/noyuno/tv/enc.sh
-14 16 * * 2-5 /home/noyuno/tv/del.sh
+14 7 * * * /home/noyuno/tv/enc.sh
+14 10 * * * /home/noyuno/tv/del.sh
 
