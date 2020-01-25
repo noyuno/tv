@@ -44,15 +44,15 @@
     "maxStreaming": 3,
     "mpegTsStreaming": [
         {
+            "name": "無変換"
+        },
+        {
             "name": "1920x1080 CPU",
             "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -ab 192k -ac 2 -c:v libx264 -vf yadif -preset veryfast -aspect 16:9 -f mpegts pipe:1"
         },
         {
             "name": "1280x720 CPU",
             "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -ab 192k -ac 2 -c:v libx264 -s 1280x720 -vf yadif -preset veryfast -aspect 16:9 -f mpegts pipe:1"
-        },
-        {
-            "name": "無変換"
         }
     ],
     "mpegTsViewer": {
@@ -80,11 +80,11 @@
     "liveHLS": [
         {
             "name": "1920x1080 CPU",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 192k -ac 2 -c:v libx264 -preset veryfast -aspect 16:9 -flags +loop-global_header %OUTPUT%"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 192k -ac 2 -c:v libx264 -preset veryfast -aspect 16:9 -vf yadif=0:-1:1 -flags +loop-global_header %OUTPUT%"
         },
         {
             "name": "1280x720 CPU",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 128k -ac 2 -c:v libx264 -s 1280x720 -preset veryfast -aspect 16:9 -flags +loop-global_header %OUTPUT%"
+            "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 128k -ac 2 -c:v libx264 -s 1280x720 -preset veryfast -aspect 16:9 -vf yadif=0:-1:1 -flags +loop-global_header %OUTPUT%"
         },
         {
             "name": "1920x1080 VAAPI",

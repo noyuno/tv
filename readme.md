@@ -383,7 +383,7 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 
 時間が正しいか確認する
 
-## Windows10でグループポリシーがうんぬん
+## Windows10でSMBにアクセスするとセキュリティポリシーがうんぬん
 
 [「組織のセキュリティポリシーによって非認証のゲストアクセスがブロックされているためこの共有フォルダーにアクセスできません」と表示される｜Q&A | IODATA アイ・オー・データ機器](https://www.iodata.jp/support/qanda/answer/s30200.htm)
 
