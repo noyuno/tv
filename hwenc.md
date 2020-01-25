@@ -183,7 +183,7 @@ time ffmpeg -y -nostdin -i bs11.ts -vcodec h264 -acodec aac -strict -2 -ac 2 -ar
 
 ## EPGStationを再設定
 
-
+`EPGStation/config.json`を参照
 
 # トラブルシューティング
 
