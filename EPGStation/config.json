@@ -12,19 +12,25 @@
     },
     "ffmpeg": "/usr/bin/ffmpeg",
     "ffprobe": "/usr/bin/ffprobe",
-    "recorded": "/data/ts",
+    "recorded": "/data",
+    "recordedTSDefaultDirectory": "ts",
+    "recordedEncodeDefaultDirectory": "mp4",
     "recordedFormat": "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%",
     "ffmpeg": "/usr/local/bin/ffmpeg",
     "ffprobe": "/usr/local/bin/ffprobe",
     "maxEncode": 2,
     "encode": [
         {
-            "name": "H264",
-            "cmd": "%NODE% %ROOT%/config/enc.js",
+            "name": "H264 1920x1080 CPU",
+            "cmd": "%ROOT%/config/enc.sh",
             "suffix": ".mp4",
+            "rate": 30,
             "default": true
         }
     ],
+    "delts": true,
+    "storageLimitAction": "remove",
+    "storageLimitCheckIntervalTime": 3600,
 
     "recordedViewer": {
         "ios": "infuse://x-callback-url/play?url=http://ADDRESS",

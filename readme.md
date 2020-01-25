@@ -10,10 +10,9 @@
 ## 仕様
 
 1. EPGStationで視聴、録画予約
-2. 録画予約はTS　録画と同時にエンコードはしない（負荷がかかって録画失敗したりしないようにするため）
-3. H.264エンコード（FHD, CPU libx264）を1日1回昼にバッチ処理で行う。
+2. 録画予約は「MP4 TS削除」
 4. ハードウェアエンコードは歪むので使わない
-5. 録画データはSambaで視聴
+5. 録画データはEPGStationとSambaで視聴
 
 ## Rufus で書き込み
 
@@ -357,6 +356,7 @@ sudo pm2 logs epgstation
 ## バッチ
 
 ~~~
+sudo systemctl status crond
 git clone https://github.com/noyuno/tv
 sudo ln -sfnv ~/tv/tv-cron /etc/cron.d
 ~~~
