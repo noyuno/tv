@@ -358,7 +358,7 @@ sudo pm2 logs epgstation
 ~~~
 sudo systemctl status crond
 git clone https://github.com/noyuno/tv
-sudo ln -sfnv ~/tv/tv-cron /etc/cron.d
+./install
 ~~~
 
 ## discord
