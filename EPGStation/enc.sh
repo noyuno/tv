@@ -17,8 +17,13 @@ nice -n 10 comskip --ini /home/noyuno/tv/comskip.ini --output=$tmpd --output-fil
 c=0
 while read line ; do
   c=$((c+1))
+  if [ $(echo "$line" | awk '{print $2}') = 'start' ]; then
+    t='cm'
+  else
+    t='program'
+  fi
   printf "CHAPTER%02d=%s\n" c $(echo "$line" | awk '{print $1}') >> $tmpd/comskip.chp
-  printf "CHAPTER%02dNAME=chapter%02d\n" c >> $tmpd/comskip.chp
+  printf "CHAPTER%02dNAME=%02d-%s\n" c c t >> $tmpd/comskip.chp
 done < $tmpd/comskip.vdr
 
 nice -n 10 MP4Box -chap $tmpd/comskip.chp -out "$OUTPUT" "$mp4tmp"
