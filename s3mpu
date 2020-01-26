@@ -24,12 +24,15 @@ echo "Chunk Number: $chunknum"
  
 # すでにマルチパートアップロード処理が開始されていれば、レジューム処理を行う
 upload_ids=$(aws s3api list-multipart-uploads --bucket $bucket --query 'Uploads[*].UploadId' --output text --prefix $file)
-for upload_id in $upload_ids; do
-  current=$(aws s3api list-parts --bucket $bucket --key $file --upload-id $upload_id | jq "[ .Parts[] | .PartNumber ] | max")
-  current=$(($current + 1))
-done
- 
- 
+if [ "$upload_ids" = "None" ]; then
+  upload_ids=
+else
+  for upload_id in $upload_ids; do
+    current=$(aws s3api list-parts --bucket $bucket --key $file --upload-id $upload_id | jq "[ .Parts[] | .PartNumber ] | max")
+    current=$(($current + 1))
+  done
+fi
+
 # レジューム処理でなければ、マルチパートアップロードのセッションを開始する
 current=${current:=1}
 if [ -z $upload_id ]; then
