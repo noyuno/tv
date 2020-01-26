@@ -20,8 +20,8 @@ while read line ; do
   else
     t='program'
   fi
-  printf "CHAPTER%02d=%s\n" c $(echo "$line" | awk '{print $1}') >> $tmpd/comskip.chp
-  printf "CHAPTER%02dNAME=%02d-%s\n" c c t >> $tmpd/comskip.chp
+  printf "CHAPTER%02d=%s\n" $c $(echo "$line" | awk '{print $1}') >> $tmpd/comskip.chp
+  printf "CHAPTER%02dNAME=%02d-%s\n" $c $c $t >> $tmpd/comskip.chp
 done < $tmpd/comskip.vdr
 
 nice -n 10 MP4Box -chap $tmpd/comskip.chp "$OUTPUT"

@@ -407,12 +407,13 @@ aws configure
 ~~~
 
 ~~~
-df -h > /mnt/backup/df
-lvdisplay > /mnt/backup/lvdisplay
-sudo xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz > /mnt/backup/root.gz
-aws s3 cp /mnt/backup/df s3://noyuno-m1
-aws s3 cp /mnt/backup/lvdisplay s3://noyuno-m1
-aws s3 cp /mnt/backup/root.gz s3://noyuno-m1
+cd /mnt/backup
+df -h > df
+lvdisplay > lvdisplay
+sudo xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz > root.gz
+aws s3 cp df s3://noyuno-m1
+aws s3 cp lvdisplay s3://noyuno-m1
+/home/noyuno/tv/s3mpu noyuno-m1 root.gz
 ~~~
 
 # トラブルシューティング
