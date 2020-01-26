@@ -15,7 +15,7 @@ function ceil() {
 bucket=$1
 file=$2
  
-chunksize=10 # [MegaBytes]
+chunksize=50 # [MegaBytes]
 filesize=$(stat -c "%s" $file)
 chunknum=`ceil $filesize $(($chunksize * 1024 * 1024))`
  

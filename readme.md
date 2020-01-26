@@ -9,11 +9,13 @@
 
 ## 仕様
 
-1. EPGStationで視聴(Windows:VLC,iOS:Infuse)、録画予約
-2. 録画予約は「MP4 TS削除」
-3. ハードウェアエンコードは歪むので使わない
-4. 録画データはEPGStation(Windows:VLC, iOS:VLC)とSambaで視聴
-5. エラーが発生したらDiscordで報告
+1. EPGStationでTSを視聴(Windows:VLC,iOS:Infuse)、録画予約
+2. 録画予約は「MP4 1920x1080 CPU, TS削除」
+3. MP4にはCMの区切りにチャプターを付ける（CMは削除しない）
+4. ハードウェアエンコードは歪むので使わない
+5. 録画データはEPGStation(Windows:VLC, iOS:VLC)とSambaでMP4を視聴
+6. バックアップはシステムのみ行う。死活管理は行わない。録画エラーが発生したらDiscordで報告
+7. LANのみ
 
 ## Rufus で書き込み
 
@@ -378,7 +380,7 @@ docker-compose build
 cd
 ~~~
 
-# comskip
+## comskip
 
 ~~~
 curl -sLO http://prdownloads.sourceforge.net/argtable/argtable2-13.tar.gz
@@ -451,7 +453,7 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 
 ## EPGStationで視聴はできるが録画はできない
 
-時間が正しいか確認する
+時間が正しいか確認する。UTCは非対応。
 
 ## Windows10でSMBにアクセスするとセキュリティポリシーがうんぬん
 
