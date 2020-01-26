@@ -1,13 +1,13 @@
-# テレビ視聴・録画環境構築
+# 1. テレビ視聴・録画環境構築
 
-## 要件
+## 1. 要件
 
 1. NUC8i3BEH (Coffee Lake (8th), Intel Core i3-8109U, Intel® Iris® Plus Graphics 655, 4GB, M.2 SSD）
 2. PX4-W3U4 (DTV x2, BS|CS x2)
 3. カードリーダー
 4. CentOS 8
 
-## 仕様
+## 2. 仕様
 
 1. EPGStationでTSを視聴(Windows:VLC,iOS:Infuse)、録画予約
 2. 録画予約は「MP4 1920x1080 CPU, TS削除」
@@ -17,11 +17,11 @@
 6. バックアップはシステムのみ行う。死活管理は行わない。録画エラーが発生したらDiscordで報告
 7. LANのみ
 
-## Rufus で書き込み
+## 3. Rufus で書き込み
 
 [Rufus](https://rufus.ie/)
 
-## インストーラを起動
+## 4. インストーラを起動
 
 - language: english
 - keyboard: japanese
@@ -43,7 +43,7 @@ tmpfs                     382M     0  382M   0% /run/user/1000
 /dev/mapper/cl_m1-data    436G  3.6G  433G   1% /mnt/data
 ~~~
 
-## ネットワーク設定
+## 5. ネットワーク設定
 
 ~~~
 sudo mount /dev/sdb1 /mnt
@@ -54,21 +54,21 @@ nmcli d
 
 SSHサーバはすでに立ち上がっているので、ネットワーク設定が終わったらすぐに接続できる。
 
-## ソフトウェアアップグレード
+## 6. ソフトウェアアップグレード
 
 ~~~
 sudo dnf -y update
 sudo reboot
 ~~~
 
-## カーネルバージョン固定
+## 7. カーネルバージョン固定
 
 /etc/dnf/dnf.conf
 ~~~
 excludepkgs=microcode_ctl kernel*
 ~~~
 
-## 基本的なソフトウェアのインストール
+## 8. 基本的なソフトウェアのインストール
 
 ~~~
 curl -sL https://rpm.nodesource.com/setup_12.x | sudo bash -
@@ -81,7 +81,7 @@ sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make k
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
-## エディタのインストール
+## 9. エディタのインストール
 
 ~~~
 sudo yum-config-manager --add-repo=https://copr.fedorainfracloud.org/coprs/carlwgeorge/ripgrep/repo/epel-7/carlwgeorge-ripgrep-epel-7.repo
@@ -96,7 +96,7 @@ vi
 :q
 ~~~
 
-## sudoの設定
+## 10. sudoの設定
 
 ~~~
 sudo visudo
@@ -105,7 +105,7 @@ Defaults timestamp_timeout = 30
 Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 ~~~
 
-## 時刻の設定
+## 11. 時刻の設定
 
 UTC非対応なので、JSTにする。
 
@@ -117,7 +117,7 @@ sudo systemctl enable chronyd
 date
 ~~~
 
-## px4_drv
+## 12. px4_drv
 
 ~~~
 git clone https://github.com/nns779/px4_drv -b next
@@ -133,7 +133,7 @@ lsmod | grep -e ^px4_drv
 ls /dev/px4video*
 ~~~
 
-## カードリーダー
+## 13. カードリーダー
 
 ~~~
 wget http://ludovic.rousseau.free.fr/softwares/pcsc-perl/pcsc-perl-1.4.14.tar.bz2
@@ -158,7 +158,7 @@ sudo pcsc_scan
 > Japanese Chijou Digital B-CAS Card (pay TV)
 ~~~
 
-## libarib25
+## 14. libarib25
 
 ~~~
 git clone https://github.com/stz2012/libarib25
@@ -170,7 +170,7 @@ echo '/usr/local/lib64' | sudo tee /etc/ld.so.conf.d/usr-local-lib64.conf
 sudo ldconfig
 ~~~
 
-## recpt1
+## 15. recpt1
 
 ~~~
 git clone https://github.com/stz2012/recpt1
@@ -181,7 +181,7 @@ make
 sudo make install
 ~~~
 
-## チューナのテスト
+## 16. チューナのテスト
 
 ~~~
 sudo recpt1 --b25 --strip BS09_0 10 bs11.ts
@@ -194,7 +194,7 @@ in client, type
 scp m1:bs11.ts .
 ~~~
 
-## Mirakurun
+## 17. Mirakurun
 
 ~~~
 sudo npm install pm2 -g
@@ -235,7 +235,7 @@ sudo pm2 logs mirakurun-server
 curl -X PUT "http://localhost:40772/api/config/channels/scan"
 ~~~
 
-## MariaDB
+## 18. MariaDB
 
 ~~~
 sudo systemctl start mariadb
@@ -260,7 +260,7 @@ mysql -u root -p
   grant all on epgstation.* to 'noyuno'@'localhost';
 ~~~
 
-## セキュリティの設定
+## 19. セキュリティの設定
 
 ~~~
 sudo setenforce 0
@@ -285,7 +285,7 @@ sudo firewall-cmd --list-all --zone=drop
 sudo reboot
 ~~~
 
-## Samba
+## 20. Samba
 
 ~~~
 sudo nano /etc/fstab
@@ -340,7 +340,7 @@ sudo systemctl enable nmb
 
 Windows+R type `\\m1\` to connect
 
-## EPGStation
+## 21. EPGStation
 
 ~~~
 git clone https://github.com/l3tnun/EPGStation.git
@@ -364,7 +364,7 @@ sudo pm2 logs epgstation
 ~~~
 
 
-## discord
+## 22. discord
 
 ~~~
 sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
@@ -380,7 +380,7 @@ docker-compose build
 cd
 ~~~
 
-## comskip
+## 23. comskipでCMの区切りにチャプターを付ける
 
 ~~~
 curl -sLO http://prdownloads.sourceforge.net/argtable/argtable2-13.tar.gz
@@ -399,7 +399,7 @@ cd
 
 ~~~
 
-## system backup
+## 24. システムをS3にバックアップ
 
 ~~~
 sudo chown -R root.wheel /mnt/backup
@@ -418,21 +418,21 @@ aws s3 cp lvdisplay s3://noyuno-m1
 /home/noyuno/tv/s3mpu noyuno-m1 root.gz
 ~~~
 
-# トラブルシューティング
+# 2. トラブルシューティング
 
-## カクカクする
+## 1. カクカクする
 
 ドライバーのせいでもソフトウェアのせいでもない。チューナのケーブル端子が外れやすい。きちんと挿すこと！
 
-## Mirakurunが"Error: no available tuners"を吐く
+## 2. Mirakurunが"Error: no available tuners"を吐く
 
 recpt1を絶対パスで指定。sudoの`secure_path`に`/usr/local/bin`を入れても無意味。
 
-## VLCで映像が乱れる
+## 3. VLCで映像が乱れる
 
 「ツール>設定>すべて」にチェック。「ビデオ>出力モジュール」の「ビデオ出力モジュール」が「Direct3D11ビデオ出力」になっていると乱れるので、「Direct3D9ビデオ出力」にする
 
-## PM2が10分ごとに落ちる
+## 4. PM2が10分ごとに落ちる
 
 Wi-Fiの接続が途切れるのが原因
 
@@ -451,11 +451,11 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 サーバは有線でつなげるべき
 
 
-## EPGStationで視聴はできるが録画はできない
+## 5. EPGStationで視聴はできるが録画はできない
 
 時間が正しいか確認する。UTCは非対応。
 
-## Windows10でSMBにアクセスするとセキュリティポリシーがうんぬん
+## 6. Windows10でSMBにアクセスするとセキュリティポリシーがうんぬん
 
 [「組織のセキュリティポリシーによって非認証のゲストアクセスがブロックされているためこの共有フォルダーにアクセスできません」と表示される｜Q&A | IODATA アイ・オー・データ機器](https://www.iodata.jp/support/qanda/answer/s30200.htm)
 
