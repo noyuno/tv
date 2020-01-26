@@ -12,7 +12,9 @@ nice -n 10 "$FFMPEG" -y  -dual_mono_mode main -i "$INPUT" \
 
 tmpd=$(mktemp -d)
 nice -n 10 comskip --ini /home/noyuno/tv/comskip.ini --output=$tmpd --output-filename=comskip "$OUTPUT"
-c=0
+c=1
+printf "CHAPTER%02d=0:00:00.00\n" $c >> $tmpd/comskip.chp
+printf "CHAPTER%02dNAME=%02d-program\n" $c $c >> $tmpd/comskip.chp
 while read line ; do
   c=$((c+1))
   if [ $(echo "$line" | awk '{print $2}') = 'start' ]; then
