@@ -9,10 +9,10 @@
 
 ## 仕様
 
-1. EPGStationで視聴、録画予約
+1. EPGStationで視聴(Windows:VLC,iOS:Infuse)、録画予約
 2. 録画予約は「MP4 TS削除」
 3. ハードウェアエンコードは歪むので使わない
-4. 録画データはEPGStationとSambaで視聴
+4. 録画データはEPGStation(Windows:VLC, iOS:VLC)とSambaで視聴
 5. エラーが発生したらDiscordで報告
 
 ## Rufus で書き込み
@@ -314,6 +314,8 @@ sudo nano /etc/samba/smb.conf
     map to guest = bad user
     printing = bsd
     printcap name = /dev/null
+    local master = yes
+    os level = 200
 [m1]
     path = /mnt/data
     browsable = yes
@@ -361,6 +363,15 @@ sudo pm2 logs epgstation
 
 
 ## discord
+
+sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+sudo dnf install --nobest -y docker-ce
+sudo systemctl start docker
+sudo systemctl status docker
+sudo systemctl enable docker
+sudo curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
 
 ## system backup
 
