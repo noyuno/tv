@@ -1,0 +1,61 @@
+#!/bin/bash
+# [【AWS】S3のマルチパートアップロードで簡易サスペンド／レジュームを実装してみた ｜ Developers.IO](https://dev.classmethod.jp/cloud/aws/aws-s3-multipart-upload/)
+
+# 切り上げ計算
+function ceil() {
+  result=$(($1 / $2))
+  if [ $(($1 % $2)) -ne 0 ]; then
+    result=$(($result + 1))
+  fi
+  echo $result
+}
+ 
+# シェルの第1引数: S3バケット名
+# シェルの第2引数: アップロードするファイル名
+bucket=$1
+file=$2
+ 
+chunksize=5 # [MegaBytes]
+filesize=$(stat -f "%z" $file)
+chunknum=`ceil $filesize $(($chunksize * 1024 * 1024))`
+ 
+echo "File size: $filesize"
+echo "Chunk Number: $chunknum"
+ 
+# すでにマルチパートアップロード処理が開始されていれば、レジューム処理を行う
+upload_ids=$(aws s3api list-multipart-uploads --bucket $bucket --query 'Uploads[*].UploadId' --output text --prefix $file)
+for upload_id in $upload_ids; do
+  current=$(aws s3api list-parts --bucket $bucket --key $file --upload-id $upload_id | jq "[ .Parts[] | .PartNumber ] | max")
+  current=$(($current + 1))
+done
+ 
+ 
+# レジューム処理でなければ、マルチパートアップロードのセッションを開始する
+current=${current:=1}
+if [ -z $upload_id ]; then
+  result=$(aws s3api create-multipart-upload --bucket $bucket --key $file)
+  upload_id=$(echo $result | jq -r '.UploadId')
+else
+  echo "Resume upload. PartNumber: $current"
+fi
+ 
+ 
+# アップロードするファイルを断片ファイルに分割し、それぞれをアップロードする
+echo "UploadId: $upload_id"
+chunkfile=$(mktemp $$.chunk)
+while [ $current -le $chunknum ]; do
+  skip=$(((current - 1) * $chunksize))
+  dd if=$file of=$chunkfile bs=1024k skip=$skip count=$chunksize
+ 
+  echo "Upload $current of $chunknum"
+  aws s3api upload-part --bucket $bucket --key $file --part-number $current --upload-id $upload_id --body $chunkfile
+ 
+  current=$(($current + 1))
+done
+rm $chunkfile
+ 
+# アップロードした断片ファイルを指定して、マルチパートアップロードを終了する
+multipart=$(aws s3api list-parts --bucket $bucket --key $file --upload-id $upload_id | jq '{ "Parts": [ .Parts[] | { ETag, PartNumber } ] }')
+aws s3api complete-multipart-upload --bucket $bucket --key $file --multipart-upload "$multipart" --upload-id $upload_id
+ 
+echo "Done!"
