@@ -3,7 +3,7 @@
 ## 要件
 
 1. NUC8i3BEH (Coffee Lake (8th), Intel Core i3-8109U, Intel® Iris® Plus Graphics 655, 4GB, M.2 SSD）
-2. PX4-W3U4
+2. PX4-W3U4 (DTV x2, BS|CS x2)
 3. カードリーダー
 4. CentOS 8
 
