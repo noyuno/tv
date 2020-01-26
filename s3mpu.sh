@@ -16,7 +16,7 @@ bucket=$1
 file=$2
  
 chunksize=5 # [MegaBytes]
-filesize=$(stat -f "%z" $file)
+filesize=$(stat -c "%s" $file)
 chunknum=`ceil $filesize $(($chunksize * 1024 * 1024))`
  
 echo "File size: $filesize"
@@ -42,7 +42,7 @@ fi
  
 # アップロードするファイルを断片ファイルに分割し、それぞれをアップロードする
 echo "UploadId: $upload_id"
-chunkfile=$(mktemp $$.chunk)
+chunkfile=$(mktemp XXXXXXXX.chunk)
 while [ $current -le $chunknum ]; do
   skip=$(((current - 1) * $chunksize))
   dd if=$file of=$chunkfile bs=1024k skip=$skip count=$chunksize
