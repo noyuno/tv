@@ -21,11 +21,15 @@
     "maxEncode": 3,
     "encode": [
         {
-            "name": "H264 1920x1080 CPU",
+            "name": "H.264 1080p CPU",
             "cmd": "%ROOT%/config/enc.sh",
             "suffix": ".mp4",
-            "rate": 30,
             "default": true
+        },
+        {
+            "name": "H.264 720p CPU",
+            "cmd": "%ROOT%/config/enc.sh 720p",
+            "suffix": ".mp4"
         }
     ],
     "delts": true,

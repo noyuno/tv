@@ -340,6 +340,10 @@ sudo systemctl enable nmb
 
 Windows+R type `\\m1\` to connect
 
+## 21. FTP
+
+
+
 ## 21. EPGStation
 
 ~~~
