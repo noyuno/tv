@@ -342,6 +342,40 @@ Windows+R type `\\m1\` to connect
 
 ## 21. FTP
 
+iOSのInfuseからアクセスする。
+
+~~~
+dnf -y install vsftpd
+sudo nano /etc/vsftpd/vsftpd.conf
+~~~
+
+~~~
+anonymous_enable=YES
+local_enable=YES
+write_enable=NO
+local_umask=022
+dirmessage_enable=YES
+xferlog_enable=YES
+connect_from_port_20=YES
+xferlog_std_format=YES
+listen=NO
+listen_ipv6=YES
+pam_service_name=vsftpd
+userlist_enable=YES
+anon_root=/mnt/data
+pasv_min_port=4000
+pasv_max_port=4029
+allow_writeable_chroot=YES
+~~~
+
+~~~
+sudo firewall-cmd --zone=public --add-service=ftp --permanent
+sudo firewall-cmd --zone=public --add-port=4000-4029/tcp --permanent
+sudo firewall-cmd --reload
+sudo systemctl start vsftpd
+sudo systemctl status vsftpd
+sudo systemctl enable vsftpd
+~~~
 
 
 ## 21. EPGStation
