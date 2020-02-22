@@ -409,19 +409,26 @@ sudo pm2 logs epgstation
 
 ## 22. discord
 
-~~~
-sudo dnf config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
-sudo dnf install --nobest -y docker-ce
-sudo systemctl start docker
-sudo systemctl status docker
-sudo systemctl enable docker
-sudo curl -L "https://github.com/docker/compose/releases/download/1.25.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-git clone https://github.com/noyuno/notifyd
-cd notifyd
-docker-compose build
-cd
-~~~
+### IFTTT
+
+1. 右上の丸いボタンを押してCreateを押す。
+2. 「This」ボタンを押して「Webhooks」と入力してクリックする。
+3. 「Receive a web request」をクリック。
+4. 「Event Name」に「tv」と入力し、「Create trigger」をクリック。
+5. 「That」ボタンを押して「Webhooks」と入力してクリックする。
+6. 「Make a web request」を押す。
+7. 「URL」にDiscordのweb hook URLを入力する。MethodはPost。Content-Typeは「application/json」、Bodyに`{"content":"{{Value1}}"}`を入力する。
+
+### テスト
+
+https://ifttt.com/maker_webhooks に移動。右上の「Documentation」をクリック。
+eventに「tv」と入力、value1に「test」と入力して「Test it」を押す。
+
+### 設定
+
+上記テストで表示されたキーを控える。
+
+`.env`に`IFTTTKEY=(キー)`を入力。
 
 ## 23. comskipでCMの区切りにチャプターを付ける
 
