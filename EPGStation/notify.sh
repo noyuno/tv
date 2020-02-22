@@ -1,9 +1,15 @@
 #!/bin/bash -e
 
 source /home/noyuno/tv/.env
-st=$(date -d @$(echo $STARTAT/1000 | bc) +"%Y%m%d-%H%M")
-en=$(date -d @$(echo $ENDAT/1000 | bc) +"%Y%m%d-%H%M")
-du=$(echo $DURATION/1000/60 | bc)
+if [ "$STARTAT" ]; then
+  st=$(date -d @$(echo $STARTAT/1000 | bc) +"%Y%m%d-%H%M")
+fi
+if [ "$ENDAT" ]; then
+  en=$(date -d @$(echo $ENDAT/1000 | bc) +"%Y%m%d-%H%M")
+fi
+if [ "$DURATION" ]; then
+  du=$(echo $DURATION/1000/60 | bc)
+fi
 mes="$1:\\\\n\
   RECORDEDID=$RECORDEDID\\\\n\
   PROGRAMID=$PROGRAMID\\\\n\
