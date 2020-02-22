@@ -65,7 +65,12 @@ sudo reboot
 
 /etc/dnf/dnf.conf
 ~~~
-excludepkgs=microcode_ctl kernel*
+excludepkgs=microcode_ctl kernel* docker-ce
+~~~
+
+/etc/sysconfig/kernel
+~~~
+UPDATEDEFAULT=no
 ~~~
 
 ## 8. 基本的なソフトウェアのインストール
