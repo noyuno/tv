@@ -20,4 +20,4 @@ OUTPUT="$OUTPUT" bash /home/noyuno/tv/EPGStation/chapter.sh
 
 chmod 777 "$OUTPUT"
 
-bash /home/noyuno/tv/notifyenc.sh "エンコードが完了しました"
+bash /home/noyuno/tv/EPGStation/notifyenc.sh エンコードが完了しました &&:
