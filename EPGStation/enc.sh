@@ -19,3 +19,5 @@ nice -n 10 "$FFMPEG" -y  -dual_mono_mode main -i "$INPUT" \
 OUTPUT="$OUTPUT" bash /home/noyuno/tv/EPGStation/chapter.sh
 
 chmod 777 "$OUTPUT"
+
+bash /home/noyuno/tv/notifyenc.sh "エンコードが完了しました"
