@@ -16,8 +16,6 @@
     "recordedTSDefaultDirectory": "ts",
     "recordedEncodeDefaultDirectory": "mp4",
     "recordedFormat": "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%",
-    "ffmpeg": "/usr/local/bin/ffmpeg",
-    "ffprobe": "/usr/local/bin/ffprobe",
     "maxEncode": 3,
     "encode": [
         {
