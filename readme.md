@@ -407,7 +407,7 @@ sudo pm2 logs epgstation
 ~~~
 
 
-## 22. discord
+## 22. discord (IFTTT編)
 
 ### IFTTT
 
@@ -429,6 +429,8 @@ eventに「tv」と入力、value1に「test」と入力して「Test it」を�
 上記テストで表示されたキーを控える。
 
 `.env`に`IFTTTKEY=(キー)`を入力。
+
+## 22. Discord (notifyd編)
 
 ## 23. comskipでCMの区切りにチャプターを付ける
 
