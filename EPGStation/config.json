@@ -162,10 +162,10 @@
             }
         ]
     },
-    "recordedPrepRecFailedCommand": "/home/noyuno/tv/EPGStation/notify.sh 録画準備が失敗しました",
-    "recordedStartCommand": "/home/noyuno/tv/EPGStation/notify.sh 録画を開始しました",
-    "recordedEndCommand": "/home/noyuno/tv/EPGStation/notify.sh 録画を終了しました",
-    "recordedFailedCommand": "/home/noyuno/tv/EPGStation/notify.sh 録画が失敗しました",
+    "recordedPrepRecFailedCommand": "/home/noyuno/tv/EPGStation/notify.sh :x:\\ 録画準備が失敗しました",
+    "recordedStartCommand": "/home/noyuno/tv/EPGStation/notify.sh :record_button:\\ 録画を開始しました",
+    "recordedEndCommand": "/home/noyuno/tv/EPGStation/notify.sh :white_circle:\\ 録画を終了しました",
+    "recordedFailedCommand": "/home/noyuno/tv/EPGStation/notify.sh :x:\\ 録画が失敗しました",
     "storageLimitCmd": "/home/noyuno/tv/EPGStation/notify.sh ストレージの空き容量がありません"
 }
 
