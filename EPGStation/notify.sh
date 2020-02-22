@@ -1,9 +1,9 @@
 #!/bin/bash -e
 
 source /home/noyuno/tv/.env
-st=`date -d @$STARTAT +"%Y%m%d-%H%M"`
-en=`date -d @$ENDAT +"%Y%m%d-%H%M"`
-du=`echo $DURATION/1000/60 | bc`
+st=$(date -d @$(echo $STARTAT/1000 | bc) +"%Y%m%d-%H%M")
+en=$(date -d @$(echo $ENDAT/1000 | bc) +"%Y%m%d-%H%M")
+du=$(echo $DURATION/1000/60 | bc)
 mes="$1:\\\\n\
   RECORDEDID=$RECORDEDID\\\\n\
   PROGRAMID=$PROGRAMID\\\\n\
