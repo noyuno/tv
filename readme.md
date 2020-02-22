@@ -464,8 +464,10 @@ aws configure
 ~~~
 cd /mnt/backup
 df -h > df
-lvdisplay > lvdisplay
+sudo lvdisplay > lvdisplay
+sudo pm2 stop all
 sudo xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz > root.gz
+sudo pm2 start all
 aws s3 cp df s3://noyuno-m1
 aws s3 cp lvdisplay s3://noyuno-m1
 /home/noyuno/tv/s3mpu noyuno-m1 root.gz
@@ -475,7 +477,7 @@ aws s3 cp lvdisplay s3://noyuno-m1
 
 ## 1. カクカクする
 
-ドライバーのせいでもソフトウェアのせいでもない。チューナのケーブル端子が外れやすい。きちんと挿すこと！
+アンテナケーブルがねじ式でないと外れやすい。
 
 ## 2. Mirakurunが"Error: no available tuners"を吐く
 
