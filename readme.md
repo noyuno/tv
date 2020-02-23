@@ -290,6 +290,8 @@ sudo firewall-cmd --list-all --zone=drop
 sudo reboot
 ~~~
 
+firewalldではnotifydを動かすためにマスカレードを追加する
+
 ## 20. Samba
 
 ~~~
@@ -432,6 +434,9 @@ eventに「tv」と入力、value1に「test」と入力して「Test it」を�
 
 ## 22. Discord (notifyd編)
 
+~~~
+sudo nmcli c m docker0 connection.zone trusted
+~~~
 
 ## 23. comskipでCMの区切りにチャプターを付ける
 
@@ -515,3 +520,9 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 [「組織のセキュリティポリシーによって非認証のゲストアクセスがブロックされているためこの共有フォルダーにアクセスできません」と表示される｜Q&A | IODATA アイ・オー・データ機器](https://www.iodata.jp/support/qanda/answer/s30200.htm)
 
 ## 7. mpegTsViewerにInfuseを指定するとエラー
+
+## 8. docker build . をするとネットワークエラー
+
+~~~
+sudo yum upgrade docker-ce-cli
+~~~
