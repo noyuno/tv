@@ -10,9 +10,13 @@ fi
 if [ "$DURATION" ]; then
   du=$(echo $DURATION/1000/60 | bc)
 fi
-mes="$1:\\\\n\
-    番組名: $NAME\\\\n\
-    チャンネル: $CHANNELNAME\\\\n\
-    時間: $st から $du 分間"
+#mes="$1:\\\\n\
+#    番組名: $NAME\\\\n\
+#    チャンネル: $CHANNELNAME\\\\n\
+#    時間: $st から $du 分間"
 #curl -s -X POST -H "Content-Type: application/json" -d '{"value1":"'"$mes"'"}' "https://maker.ifttt.com/trigger/m1/with/key/$IFTTTKEY"
+mes="$1:\\n\
+    番組名: $NAME\\n\
+    チャンネル: $CHANNELNAME\\n\
+    時間: $st から $du 分間"
 curl -XPOST -d '{ "token": "abc", "message": "'"$mes"'" }' localhost:5050
