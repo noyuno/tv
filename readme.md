@@ -440,16 +440,23 @@ eventに「tv」と入力、value1に「test」と入力して「Test it」を�
 ## 22. Discord (notifyd編)
 
 ~~~sh
+cd
+git clone https://github.com/noyuno/notifyd
+cd notifyd
+docker-compose up
+curl localhost:5050
+> notifyd
+> hello
+~~~
+
+動かないときはファイアウォールを疑う
+
+~~~sh
 #sudo nmcli c m br-dd5bc31eebee connection.zone trusted
 #sudo firewall-cmd --change-interface=br-dd5bc31eebee --zone trusted --permanent
 #sudo iptables -I DOCKER -i eno1 -j DROP
 #echo 'iptables -I DOCKER -i eno1 -j DROP' | sudo tee -a  /etc/rc.d/rc.local
 #sudo chmod +x /etc/rc.d/rc.local
-
-docker-compose up
-curl localhost:5050
-> notifyd
-> hello
 ~~~
 
 ## 23. comskipでCMの区切りにチャプターを付ける
