@@ -69,14 +69,6 @@
         {
             "name": "1280x720 CPU",
             "cmd": "%FFMPEG% -dual_mono_mode main -i %INPUT% -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 128k -ac 2 -c:v libx264 -s 1280x720 -preset veryfast -aspect 16:9 -flags +loop-global_header %OUTPUT%"
-        },
-        {
-            "name": "1920x1080 VAAPI",
-            "cmd": "%FFMPEG% -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i %INPUT% -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -vf format=nv12|vaapi,hwupload -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -flags +loop-global_header %OUTPUT%"
-        },
-        {
-            "name": "1280x720 VAAPI",
-            "cmd": "%FFMPEG% -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i %INPUT% -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -vf format=nv12|vaapi,hwupload,scale_vaapi=w=1280:h=720 -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -flags +loop-global_header %OUTPUT%"
         }
     ],
     "liveHLS": [
@@ -87,14 +79,6 @@
         {
             "name": "1280x720 CPU",
             "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 128k -ac 2 -c:v libx264 -s 1280x720 -preset veryfast -aspect 16:9 -vf yadif=0:-1:1 -flags +loop-global_header %OUTPUT%"
-        },
-        {
-            "name": "1920x1080 VAAPI",
-            "cmd": "%FFMPEG% -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -vf format=nv12|vaapi,hwupload -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -flags +loop-global_header %OUTPUT%"
-        },
-        {
-            "name": "1280x720 VAAPI",
-            "cmd": "%FFMPEG% -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -vf format=nv12|vaapi,hwupload,scale_vaapi=w=1280:h=720 -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -flags +loop-global_header %OUTPUT%"
         }
     ],
     "liveWebM": [
@@ -111,14 +95,6 @@
         {
             "name": "1280x720 CPU",
             "cmd": "%FFMPEG% -dual_mono_mode main -re -i pipe:0 -sn -threads 0 -c:a aac -ar 48000 -ac 2 -ab 128k -c:v h264 -s 1280x720 -filter:v yadif -profile:v baseline -preset veryfast -tune fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1"
-        },
-        {
-            "name": "1920x1080 VAAPI",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i pipe:0 -vf format=nv12|vaapi,hwupload -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -tune animation,fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -f mp4 pipe:1"
-        },
-        {
-            "name": "1280x720 VAAPI",
-            "cmd": "%FFMPEG% -re -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i pipe:0 -vf format=nv12|vaapi,hwupload,scale_vaapi=w=1280:h=720 -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -tune animation,fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -f mp4 pipe:1"
         }
     ],
 
@@ -143,14 +119,6 @@
                 "cmd": "%FFMPEG% -dual_mono_mode main %RE% -i pipe:0 -sn -threads 0 -c:v h264 -c:a aac -ar 48000 -ac 2 -s 1280x720 -filter:v yadif -profile:v baseline -preset veryfast -tune fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1",
                 "vb": "1500k",
                 "ab": "128k"
-            },
-            {
-                "name": "1920x1080 VAAPI",
-                "cmd": "%FFMPEG% -re -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i pipe:0 -vf format=nv12|vaapi,hwupload -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -tune animation,fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -f mp4 pipe:1"
-            },
-            {
-                "name": "1280x720 VAAPI",
-                "cmd": "%FFMPEG% -re -dual_mono_mode main -y -vaapi_device /dev/dri/renderD128 -hwaccel vaapi -hwaccel_output_format vaapi -i pipe:0 -vf format=nv12|vaapi,hwupload,scale_vaapi=w=1280:h=720 -vcodec h264_vaapi -acodec aac -strict -2 -ac 2 -ar 48000 -ab 192k -tune animation,fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -f mp4 pipe:1"
             }
         ],
         "mpegTs": [
