@@ -276,9 +276,11 @@ sudo nano /etc/sysconfig/selinux
 SELINUX=disabled
 ~~~
 
-~~~
-sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=tcp:toport=8888 --permanent
-sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=udp:toport=8888 --permanent
+~~~sh
+#sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=tcp:toport=8888 --permanent
+sudo firewall-cmd --zone=public --add-forward-port=port=81:proto=tcp:toport=81 --permanent
+#sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=udp:toport=8888 --permanent
+sudo firewall-cmd --zone=public --add-forward-port=port=81:proto=udp:toport=81 --permanent
 sudo firewall-cmd --zone=public --add-service=http --permanent
 sudo firewall-cmd --zone=public --add-port=8889/tcp --permanent
 sudo firewall-cmd --zone=public --add-port=8889/udp --permanent
@@ -524,5 +526,7 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 ## 8. docker build . をするとネットワークエラー
 
 ~~~
-sudo yum upgrade docker-ce-cli
+sudo nmcli c m docker0 connection.zone trusted
+sudo nmcli c m br-0ce92c3e48f5 connection.zone internal
+sudo nmcli c m br-dd5bc31eebee connection.zone trusted
 ~~~
