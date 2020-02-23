@@ -82,7 +82,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump gpac
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump gpac bind-utils
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
@@ -277,11 +277,14 @@ SELINUX=disabled
 ~~~
 
 ~~~sh
-#sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=tcp:toport=8888 --permanent
-sudo firewall-cmd --zone=public --add-forward-port=port=81:proto=tcp:toport=81 --permanent
-#sudo firewall-cmd --zone=public --add-forward-port=port=80:proto=udp:toport=8888 --permanent
-sudo firewall-cmd --zone=public --add-forward-port=port=81:proto=udp:toport=81 --permanent
+#sudo firewall-cmd --zone=public --remove-forward-port=port=80:proto=tcp:toport=8888 --permanent
+#sudo firewall-cmd --zone=public --remove-forward-port=port=81:proto=tcp:toport=81 --permanent
+#sudo firewall-cmd --zone=public --remove-forward-port=port=80:proto=udp:toport=8888 --permanent
+#sudo firewall-cmd --zone=public --remove-forward-port=port=81:proto=udp:toport=81 --permanent
+
 sudo firewall-cmd --zone=public --add-service=http --permanent
+sudo firewall-cmd --zone=public --add-port=81/tcp --permanent
+sudo firewall-cmd --zone=public --add-port=81/udp --permanent
 sudo firewall-cmd --zone=public --add-port=8889/tcp --permanent
 sudo firewall-cmd --zone=public --add-port=8889/udp --permanent
 sudo firewall-cmd --permanent --zone=public --add-service=samba
@@ -436,8 +439,17 @@ eventに「tv」と入力、value1に「test」と入力して「Test it」を�
 
 ## 22. Discord (notifyd編)
 
-~~~
-sudo nmcli c m docker0 connection.zone trusted
+~~~sh
+#sudo nmcli c m br-dd5bc31eebee connection.zone trusted
+#sudo firewall-cmd --change-interface=br-dd5bc31eebee --zone trusted --permanent
+#sudo iptables -I DOCKER -i eno1 -j DROP
+#echo 'iptables -I DOCKER -i eno1 -j DROP' | sudo tee -a  /etc/rc.d/rc.local
+#sudo chmod +x /etc/rc.d/rc.local
+
+docker-compose up
+curl localhost:5050
+> notifyd
+> hello
 ~~~
 
 ## 23. comskipでCMの区切りにチャプターを付ける
@@ -525,8 +537,27 @@ Jan 18 21:59:56 tv.lan systemd[1]: Stopped PM2 process manager.
 
 ## 8. docker build . をするとネットワークエラー
 
-~~~
+~~~sh
+sudo firewall-cmd --set-log-denied all 
+journalctl -xef
+
+sudo nmcli c
 sudo nmcli c m docker0 connection.zone trusted
-sudo nmcli c m br-0ce92c3e48f5 connection.zone internal
+#sudo nmcli c m br-0ce92c3e48f5 connection.zone internal
 sudo nmcli c m br-dd5bc31eebee connection.zone trusted
+sudo firewall-cmd --change-interface=br-dd5bc31eebee --zone trusted --permanent
+
+sudo iptables -I DOCKER -i eno1 -j DROP
+echo 'iptables -I DOCKER -i eno1 -j DROP' | sudo tee -a  /etc/rc.d/rc.local
+sudo chmod +x /etc/rc.d/rc.local
+
+docker-compose up
+curl $(docker inspect $(docker ps -qf name=notifyd) | jq -r '.[].NetworkSettings.Networks.notifyd_default.IPAddress'):5050
+> notifyd
+> hello
+
+sudo firewall-cmd --add-rich-rule='rule family=ipv4 source not address=127.0.0.1 destination address=172.19.0.0/16 drop'
+
+sudo firewall-cmd --set-log-denied off
+sudo firewall-cmd --reload
 ~~~
