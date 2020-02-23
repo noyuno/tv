@@ -443,6 +443,8 @@ eventに「tv」と入力、value1に「test」と入力して「Test it」を�
 cd
 git clone https://github.com/noyuno/notifyd
 cd notifyd
+cp ../tv/docker-compose.yml .
+nano .env # DISCORD_TOKENを入力
 docker-compose up
 curl localhost:5050
 > notifyd
