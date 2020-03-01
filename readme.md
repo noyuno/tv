@@ -82,7 +82,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump gpac bind-utils
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump gpac bind-utils gdisk
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
@@ -312,32 +312,7 @@ UUID=2971-857F          /boot/efi               vfat    umask=0077,shortname=win
 ~~~
 
 ~~~
-sudo nano /etc/samba/smb.conf
-~~~
-
-~~~
-[global]
-    dos charset = CP932
-    unix charset = UTF-8
-    workgroup = WORKGROUP
-    server string = Intel NUC/CentOS 8 TV Server
-    hosts allow = 192.168.100. localhost EXCEPT 192.168.100.1
-    netbios name = m1
-    dns proxy = no
-    security = user
-    map to guest = bad user
-    printing = bsd
-    printcap name = /dev/null
-    local master = yes
-    os level = 200
-[m1]
-    path = /mnt/data
-    browsable = yes
-    writable = yes
-    guest ok = yes
-    read only = no
-    create mode = 0777
-    directory mode = 0777
+sudo cp smb.conf /etc/samba/smb.conf
 ~~~
 
 ~~~
@@ -480,7 +455,46 @@ cd
 
 ~~~
 
-## 24. システムをS3にバックアップ
+## 24. HDD増設
+
+~~~
+sudo pm2 stop all
+sudo fdisk -l
+sudo gdisk /dev/sda
+> o <enter>
+> n <enter> <enter> <enter> 8e00
+> w <enter>
+sudo partprobe
+sudo pvcreate /dev/sda1
+sudo vgcreate td0 /dev/sda1
+sudo lvcreate -l 100%FREE -n data td0
+sudo mkfs.xfs /dev/td0/data
+sudo mkdir /mnt/hdd
+sudo mount /dev/mapper/td0-data /mnt/hdd
+sudo cp -av /mnt/data/mp4 /mnt/hdd
+sudo rm -rf /mnt/data/mp4
+sudo ln -sfnv /mnt/hdd/mp4 /mnt/data/mp4
+~~~
+
+/etc/fstab
+
+~~~
+/dev/mapper/cl_m1-r      /                       xfs     defaults        0 0
+UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
+UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
+/dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
+/dev/mapper/cl_m1-backup /mnt/backup             xfs     defaults        0 0
+/dev/mapper/td0-data     /mnt/hdd                xfs     defaults        0 0
+/mnt/hdd/mp4             /mnt/data/mp4           none    bind            0 0
+~~~
+
+~~~
+sudo reboot
+sudo pm2 start all
+~~~
+
+
+## 25. システムをS3にバックアップ
 
 ~~~
 sudo chown -R root.wheel /mnt/backup
@@ -570,3 +584,24 @@ sudo firewall-cmd --add-rich-rule='rule family=ipv4 source not address=127.0.0.1
 sudo firewall-cmd --set-log-denied off
 sudo firewall-cmd --reload
 ~~~
+
+## 9. ストリーミングが読込中が頻繁に発生する
+
+iperfを入れて帯域幅計測
+
+~~~
+curl -O https://downloads.es.net/pub/iperf/iperf-3.7.tar.gz
+tar xf iperf-3.7.tar.gz
+cd iperf-3.7
+./configure
+make
+sudo make install
+sudo ldconfig
+sudo firewall-cmd --add-port=5201/tcp --zone=public 
+sudo firewall-cmd --add-port=5201/udp --zone=public 
+iperf3 -s
+
+.\iperf3 -c 192.168.100.22
+~~~
+
+iPad/iPhoneのストリーミング視聴は無変換-VLCではなくHLS-Safariが良い
