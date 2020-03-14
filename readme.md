@@ -82,7 +82,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump gpac bind-utils gdisk
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump gpac bind-utils gdisk smartmontools
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
@@ -493,8 +493,39 @@ sudo reboot
 sudo pm2 start all
 ~~~
 
+# 25. ゲストモード
 
-## 25. システムをS3にバックアップ
+ゲストがWi-Fiに接続してテレビを視聴できるようにする。
+
+~~~
+sudo yum -y install dnsmasq iw hostapd
+git clone https://github.com/oblique/create_ap
+cd create_ap
+sudo make install
+
+# test
+sudo create_ap -n wlp0s20f3 m1 wifi-passphrase
+sudo firewall-cmd --zone=trusted --change-interface=ap0
+~~~
+
+/etc/create_ap.conf
+~~~conf
+WIFI_IFACE=wlp0s20f3
+SHARE_METHOD=none
+SSID=m1
+PASSPHRASE=wifiwifi
+~~~
+
+~~~
+sudo firewall-cmd --zone=trusted --change-interface=ap0 --permanent
+sudo firewall-cmd --reload
+sudo systemctl start create_ap
+sudo systemctl status create_ap
+sudo systemctl enable create_ap
+~~~
+
+
+## 26. システムをS3にバックアップ
 
 ~~~
 sudo chown -R root.wheel /mnt/backup
