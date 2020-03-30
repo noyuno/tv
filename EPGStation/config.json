@@ -13,6 +13,7 @@
     "ffmpeg": "/usr/bin/ffmpeg",
     "ffprobe": "/usr/bin/ffprobe",
     "recorded": "/mnt/data",
+    "recordedTmp": "/mnt/data/",
     "recordedTSDefaultDirectory": "ts",
     "recordedEncodeDefaultDirectory": "mp4",
     "recordedFormat": "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%",
