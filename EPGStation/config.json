@@ -13,7 +13,7 @@
     "ffmpeg": "/usr/bin/ffmpeg",
     "ffprobe": "/usr/bin/ffprobe",
     "recorded": "/mnt/data",
-    "recordedTmp": "/mnt/data/",
+    "recordedTmp": "/mnt/data",
     "recordedTSDefaultDirectory": "ts",
     "recordedEncodeDefaultDirectory": "mp4",
     "recordedFormat": "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%",
@@ -34,7 +34,10 @@
     "delts": true,
     "storageLimitAction": "remove",
     "storageLimitCheckIntervalTime": 3600,
-
+    "mpegTsViewer": {
+        "ios": "vlc-x-callback://x-callback-url/stream?url=http://ADDRESS",
+        "android": "intent://ADDRESS#Intent;package=com.mxtech.videoplayer.ad;type=video;scheme=http;end"
+    },
     "recordedViewer": {
         "ios": "infuse://x-callback-url/play?url=http://ADDRESS",
         "android": "intent://ADDRESS#Intent;package=com.mxtech.videoplayer.ad;type=video;scheme=http;end"
@@ -43,7 +46,10 @@
         "ios": "vlc-x-callback://x-callback-url/download?url=http://ADDRESS&filename=FILENAME",
         "android": "intent://ADDRESS#Intent;package=com.dv.adm;type=video;scheme=http;end"
     },
-
+    "HLSViewer": {
+        "ios": "vlc-x-callback://x-callback-url/download?url=http://ADDRESS&filename=FILENAME",
+        "android": "intent://ADDRESS#Intent;package=com.dv.adm;type=video;scheme=http;end"
+    },
     "maxStreaming": 3,
     "mpegTsStreaming": [
         {
@@ -58,10 +64,7 @@
             "cmd": "%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -c:a aac -ar 48000 -ab 192k -ac 2 -c:v libx264 -s 1280x720 -vf yadif -preset veryfast -aspect 16:9 -f mpegts pipe:1"
         }
     ],
-    "mpegTsViewer": {
-        "ios": "vlc-x-callback://x-callback-url/stream?url=http://ADDRESS",
-        "android": "intent://ADDRESS#Intent;package=com.mxtech.videoplayer.ad;type=video;scheme=http;end"
-    },
+
     "recordedHLS": [
         {
             "name": "1920x1080 CPU",
