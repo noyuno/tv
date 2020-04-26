@@ -203,6 +203,7 @@ scp m1:bs11.ts .
 
 ~~~
 sudo npm install pm2 -g
+sudo pm2 install pm2-logrotate
 sudo npm install mirakurun -g --unsafe-perm --production
 echo [] | sudo tee /usr/local/var/db/mirakurun/programs.json
 sudo chmod -R go+rw /usr/local/etc/mirakurun
@@ -372,13 +373,12 @@ git clone https://github.com/l3tnun/EPGStation.git
 cd EPGStation
 npm install
 npm run build
-cp config/operatorLogConfig.sample.json config/operatorLogConfig.json
-cp config/serviceLogConfig.sample.json config/serviceLogConfig.json
 cd
 ~~~
 
 ~~~
 git clone https://github.com/noyuno/tv
+cd tv
 ./install
 ~~~
 
