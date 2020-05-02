@@ -3,6 +3,7 @@ services:
     notifyd:
         build: .
         restart: always
+        network_mode: "host"
         ports:
             - "5050:5050"
         volumes:
@@ -14,3 +15,5 @@ services:
             NOTIFYD_TOKEN: "abc"
             DISCORD_CHANNEL_NAME: m1
             PORT: 5050
+            DEBUG: ${DEBUG}
+            

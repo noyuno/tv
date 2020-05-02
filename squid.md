@@ -13,8 +13,8 @@ sudo yum install -y squid
 
  /etc/squid/squid.conf
 ~~~
-cache_dir ufs /mnt/data/squid 5000 16 256
-maximum_object_size 300 MB
+cache_dir ufs /mnt/data/squid 3000 16 256
+maximum_object_size 200 MB
 
 request_header_access Referer deny all
 request_header_access X-Forwarded-For deny all

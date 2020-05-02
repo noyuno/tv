@@ -278,11 +278,6 @@ SELINUX=disabled
 ~~~
 
 ~~~sh
-#sudo firewall-cmd --zone=public --remove-forward-port=port=80:proto=tcp:toport=8888 --permanent
-#sudo firewall-cmd --zone=public --remove-forward-port=port=81:proto=tcp:toport=81 --permanent
-#sudo firewall-cmd --zone=public --remove-forward-port=port=80:proto=udp:toport=8888 --permanent
-#sudo firewall-cmd --zone=public --remove-forward-port=port=81:proto=udp:toport=81 --permanent
-
 sudo firewall-cmd --zone=public --add-service=http --permanent
 sudo firewall-cmd --zone=public --add-port=81/tcp --permanent
 sudo firewall-cmd --zone=public --add-port=81/udp --permanent
@@ -305,25 +300,74 @@ sudo nano /etc/fstab
 ~~~
 
 ~~~
-/dev/mapper/cl_m1-r     /                       xfs     defaults        0 0
-UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot                   ext4    defaults        1 2
-UUID=2971-857F          /boot/efi               vfat    umask=0077,shortname=winnt 0 2
-/dev/mapper/cl_m1-data  /mnt/data               xfs     defaults        0 0
-/dev/mapper/cl_m1-backup /mnt/backup            xfs     defaults        0 0
+/dev/mapper/cl_m1-r      /                       xfs     defaults        0 0
+UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
+UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
+/dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
+/dev/mapper/cl_m1-backup /mnt/backup             xfs     defaults        0 0
+/dev/mapper/td0-data     /mnt/hdd                xfs     defaults        0 0
+/mnt/hdd/mp4             /mnt/data/mp4           none    bind            0 0
+~~~
+
+/etc/samba/smb.conf
+~~~
+[global]
+    dos charset = CP932
+    unix charset = UTF-8
+    workgroup = WORKGROUP
+    server string = Intel NUC/CentOS 8 TV Server
+    hosts allow = 192.168.100. localhost EXCEPT 192.168.100.1
+    netbios name = m1
+    dns proxy = no
+    security = user
+    map to guest = bad user
+    printing = bsd
+    printcap name = /dev/null
+    local master = yes
+    os level = 200
+    browseable = yes
+    min protocol = SMB3
+    max protocol = SMB3
+    unix extensions = no
+    wide links = yes
+
+[tv]
+    path = /mnt/data/share
+    browsable = yes
+    writable = yes
+    guest ok = no
+    read only = no
+    create mode = 0777
+    directory mode = 0777
+
 ~~~
 
 ~~~
-sudo cp smb.conf /etc/samba/smb.conf
-~~~
+sudo mkdir -p /mnt/data/share
+cd /mnt/data/share
+ln -sfnv /mnt/data/ts m2-ts
+ln -sfnv /mnt/data/encoder m2-encoder
+ln -sfnv /mnt/data/m2mp4 m2-mp4
 
-~~~
-sudo mkdir -p /mnt/data/{ts,mp4}
-sudo chmod -R 0777 /mnt/data
-sudo chown -R nobody:nobody /mnt/data
+ln -sfnv /mnt/hdd/mp4 hdd-mp4
+ln -sfnv /mnt/hdd/data hdd-data
+
+sudo chmod -R 0777 /mnt/data/share
+
 sudo systemctl start smb
 sudo systemctl start nmb
 sudo systemctl enable smb
 sudo systemctl enable nmb
+
+sudo pdbedit -a noyuno
+sudo pdbedit -L
+~~~
+
+~~~
+lrwxrwxrwx 1 noyuno noyuno 13 2020-05-02 18:17 hdd-data -> /mnt/hdd/data/
+lrwxrwxrwx 1 noyuno noyuno 12 2020-05-02 18:17 hdd-mp4 -> /mnt/hdd/mp4/
+lrwxrwxrwx 1 noyuno noyuno 17 2020-05-02 18:16 m2-encoder -> /mnt/data/encoder/
+lrwxrwxrwx 1 noyuno noyuno 12 2020-05-02 18:09 m2-ts -> /mnt/data/ts/
 ~~~
 
 Windows+R type `\\m1\` to connect
@@ -338,19 +382,21 @@ sudo nano /etc/vsftpd/vsftpd.conf
 ~~~
 
 ~~~
-anonymous_enable=YES
+anonymous_enable=NO
 local_enable=YES
-write_enable=NO
-local_umask=022
+write_enable=YES
+local_umask=000
 dirmessage_enable=YES
 xferlog_enable=YES
 connect_from_port_20=YES
 xferlog_std_format=YES
+chroot_local_user=YES
+chroot_list_enable=YES
+chroot_list_file=/etc/vsftpd/chroot_list
 listen=NO
 listen_ipv6=YES
 pam_service_name=vsftpd
 userlist_enable=YES
-anon_root=/mnt/data
 pasv_min_port=4000
 pasv_max_port=4029
 allow_writeable_chroot=YES
@@ -380,6 +426,7 @@ cd
 git clone https://github.com/noyuno/tv
 cd tv
 ./install
+sudo mkdir /mnt/data/{mp4,ts}
 ~~~
 
 ~~~
@@ -493,7 +540,7 @@ sudo reboot
 sudo pm2 start all
 ~~~
 
-# 25. ゲストモード
+## 25. ゲストモード
 
 ゲストがWi-Fiに接続してテレビを視聴できるようにする。
 
