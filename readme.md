@@ -295,6 +295,8 @@ firewalldではnotifydを動かすためにマスカレードを追加する
 
 ## 20. Samba
 
+Windows 10， iOS Infuseで閲覧
+
 ~~~
 sudo nano /etc/fstab
 ~~~
@@ -326,13 +328,13 @@ UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=wi
     local master = yes
     os level = 200
     browseable = yes
-    min protocol = SMB3
+    min protocol = SMB2
     max protocol = SMB3
     unix extensions = no
     wide links = yes
 
 [tv]
-    path = /mnt/data/share
+    path = /mnt/data/share/tv
     browsable = yes
     writable = yes
     guest ok = no
@@ -340,15 +342,41 @@ UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=wi
     create mode = 0777
     directory mode = 0777
 
+[m2]
+    path = /mnt/data/share/m2
+    browsable = yes
+    writable = yes
+    guest ok = no
+    read only = no
+    create mode = 0777
+    directory mode = 0777
+
+[hdd]
+    path = /mnt/hdd/share/hdd
+    browsable = yes
+    writable = yes
+    guest ok = no
+    read only = no
+    create mode = 0777
+    directory mode = 0777
 ~~~
 
 ~~~
-sudo mkdir -p /mnt/data/share
-cd /mnt/data/share
+sudo mkdir -p /mnt/data/share/{tv,m2,hdd}
+cd /mnt/data/share/tv
 ln -sfnv /mnt/data/ts m2-ts
 ln -sfnv /mnt/data/encoder m2-encoder
 ln -sfnv /mnt/data/m2mp4 m2-mp4
 
+ln -sfnv /mnt/hdd/mp4 hdd-mp4
+ln -sfnv /mnt/hdd/data hdd-data
+
+cd ../m2
+ln -sfnv /mnt/data/ts m2-ts
+ln -sfnv /mnt/data/encoder m2-encoder
+ln -sfnv /mnt/data/m2mp4 m2-mp4
+
+cd ../hdd
 ln -sfnv /mnt/hdd/mp4 hdd-mp4
 ln -sfnv /mnt/hdd/data hdd-data
 
@@ -374,7 +402,7 @@ Windows+R type `\\m1\` to connect
 
 ## 21. FTP
 
-iOSのInfuseからアクセスする。
+webブラウザ
 
 ~~~
 dnf -y install vsftpd
