@@ -1,5 +1,7 @@
 # 1. テレビ視聴・録画環境構築
 
+![image](https://raw.githubusercontent.com/noyuno/tv/master/image.jpg)
+
 ## 1. 要件
 
 1. NUC8i3BEH (Coffee Lake (8th), Intel Core i3-8109U, Intel® Iris® Plus Graphics 655, 4GB, M.2 SSD）
@@ -598,6 +600,32 @@ sudo systemctl start create_ap
 sudo systemctl status create_ap
 sudo systemctl enable create_ap
 ~~~
+
+## 26. 外部からVPNアクセス
+
+### 26.1. DDNSを設定する
+
+ドメイン設定で、「ダイナミックDNS機能」を有効にする
+
+### 26.2. IPアドレスを定期的に通知する
+
+cat /etc/cron.d/ddns
+~~~
+# Run the hourly jobs
+SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+02,17,32,47 * * * * root curl 'https://dyn.value-domain.com/cgi-bin/dyn.fcg?d=noyuno.jp&p=xxxxxxxxxxxxxxxxxxxx&h=m1'
+~~~
+
+### 26.3. SoftEther VPN をインストール
+
+Webサイトからソースコードをダウンロード、解凍
+
+~~~
+sudo yum -y install readline-devel ncurses-devel openssl-devel
+~~~
+
 
 
 ## 26. システムをS3にバックアップ
