@@ -1,0 +1,3 @@
+[submodule "notifyd"]
+	path = notifyd
+	url = https://github.com/noyuno/notifyd.git
