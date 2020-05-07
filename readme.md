@@ -47,6 +47,8 @@ tmpfs                     382M     0  382M   0% /run/user/1000
 
 ## 5. ネットワーク設定
 
+予め[RPM resource NetworkManager-wifi(x86-64)](https://rpmfind.net/linux/rpm2html/search.php?query=NetworkManager-wifi(x86-64))をダウンロードする。
+
 ~~~
 sudo mount /dev/sdb1 /mnt
 sudo rpm -ivh /mnt/NetworkManager-wifi* /mnt/wpa_supplicant*
@@ -55,6 +57,10 @@ nmcli d
 ~~~
 
 SSHサーバはすでに立ち上がっているので、ネットワーク設定が終わったらすぐに接続できる。
+
+avahiを設定
+
+[Avahi - ArchWiki](https://wiki.archlinux.jp/index.php/Avahi)を参照。
 
 ## 6. ソフトウェアアップグレード
 
@@ -84,7 +90,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba chrony xfsdump gpac bind-utils gdisk smartmontools
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools avahi perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba samba-client chrony xfsdump gpac bind-utils gdisk smartmontools sm
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
@@ -320,7 +326,7 @@ UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=wi
     unix charset = UTF-8
     workgroup = WORKGROUP
     server string = Intel NUC/CentOS 8 TV Server
-    hosts allow = 192.168.100. localhost EXCEPT 192.168.100.1
+    hosts allow = 192.168.100. 192.168.5. localhost EXCEPT 192.168.100.1
     netbios name = m1
     dns proxy = no
     security = user
@@ -601,7 +607,7 @@ sudo systemctl status create_ap
 sudo systemctl enable create_ap
 ~~~
 
-## 26. 外部からVPNアクセス
+## 26. 外部からVPNアクセス（共通）
 
 ### 26.1. DDNSを設定する
 
@@ -618,17 +624,116 @@ MAILTO=root
 02,17,32,47 * * * * root curl 'https://dyn.value-domain.com/cgi-bin/dyn.fcg?d=noyuno.jp&p=xxxxxxxxxxxxxxxxxxxx&h=m1'
 ~~~
 
-### 26.3. SoftEther VPN をインストール
-
-Webサイトからソースコードをダウンロード、解凍
+### 26.3 プライベートIPアドレスを固定する
 
 ~~~
-sudo yum -y install readline-devel ncurses-devel openssl-devel
+sudo nmcli connection modify eno1 ipv4.addresses 192.168.100.222/24
+sudo nmcli connection modify eno1 ipv4.gateway 192.168.100.1
+sudo nmcli connection modify eno1 ipv4.dns 192.168.100.1
+sudo nmcli connection modify eno1 ipv4.method manual
 ~~~
 
+## 27. WireGuardで接続（動かない）
+
+### 27.1. WireGuard をインストール
 
 
-## 26. システムをS3にバックアップ
+~~~
+sudo yum -y install elrepo-release epel-release
+sudo yum -y install kmod-wireguard wireguard-tools qrencode
+sudo mkdir -p /etc/wireguard
+cd /etc/wireguard
+sudo sh -c 'umask 077; touch wg0.conf'
+sudo sh -c 'umask 077; wg genkey | tee privatekey | wg pubkey > publickey; chmod 644 publickey'
+
+sudo sh -c 'umask 077; touch client.conf'
+sudo sh -c 'umask 077; wg genkey | tee client-privatekey | wg pubkey > client-publickey; chmod 644 client-publickey'
+~~~
+
+/etc/wireguard/wg0.conf
+~~~
+[Interface]
+Address = 192.168.5.1/24
+DNS = 192.168.100.1
+SaveConfig = false
+ListenPort = 51820
+PrivateKey = xxxxxxxxxxxx=
+PostUp = ip -4 route del 0.0.0.0/0 dev %i table $(wg show %i listen-port)
+FwMark = 0xca6c
+
+[Peer]
+PublicKey = xxxxxxxxxxxx=
+Endpoint = m1.noyuno.jp:51820
+AllowedIPs = 0.0.0.0/0
+~~~
+
+/etc/wireguard/client.conf
+~~~
+[Interface]
+PrivateKey = xxxxxxxxxxxx=
+Address = 192.168.5.2/24
+
+[Peer]
+PublicKey = xxxxxxxxxxxx=
+Endpoint = m1.noyuno.jp:51820
+AllowedIPs = 0.0.0.0/0,::/0
+~~~
+
+~~~
+sudo cat client.conf | qrencode -t PNG -o /mnt/hdd/data/system/wireguard-client.png
+~~~
+
+### 27.2. ネットワーク設定
+
+ルータで51820ポートを転送するよう設定する。
+
+~~~
+sudo sysctl net.ipv4.ip_forward=1
+sudo firewall-cmd --permanent --add-port=51820/udp --zone=public
+sudo firewall-cmd --permanent --zone=public --add-masquerade
+sudo firewall-cmd --permanent --add-interface=wg0 --zone=internal
+sudo firewall-cmd --permanent --zone=internal --add-masquerade
+
+sudo firewall-cmd --zone=internal --add-service=http --permanent
+sudo firewall-cmd --zone=internal --add-port=81/tcp --permanent
+sudo firewall-cmd --zone=internal --add-port=81/udp --permanent
+sudo firewall-cmd --zone=internal --add-port=8889/tcp --permanent
+sudo firewall-cmd --zone=internal --add-port=8889/udp --permanent
+sudo firewall-cmd --permanent --zone=internal --add-service=samba
+sudo firewall-cmd --zone=internal --add-service=ftp --permanent
+sudo firewall-cmd --zone=internal --add-port=4000-4029/tcp --permanent
+sudo firewall-cmd --zone=internal --add-port=5353/udp --permanent
+sudo firewall-cmd --reload
+~~~
+
+/etc/sysctl.d/99-sysctl.conf
+~~~
+## Turn on bbr ##
+net.core.default_qdisc = fq
+net.ipv4.tcp_congestion_control = bbr
+## for IPv4 ##
+net.ipv4.ip_forward = 1
+## Turn on basic protection/security ##
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.tcp_syncookies = 1
+## for IPv6 - uncomment the following line ##
+net.ipv6.conf.all.forwarding = 1
+~~~
+
+~~~
+sudo sysctl -p /etc/sysctl.d/99-sysctl.conf
+~~~
+
+### 27.3. WireGuardサービスを有効にする
+
+~~~
+sudo systemctl enable wg-quick@wg0
+sudo systemctl start wg-quick@wg0
+sudo systemctl status wg-quick@wg0
+~~~
+
+## 29. システムをS3にバックアップ
 
 ~~~
 sudo chown -R root.wheel /mnt/backup
