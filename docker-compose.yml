@@ -2,7 +2,7 @@ version: "3"
 services:
     notifyd:
         build: notifyd
-        restart: always
+        restart: "on-failure:5"
         network_mode: "host"
         ports:
             - "5050:5050"
@@ -17,60 +17,60 @@ services:
             PORT: 5050
             DEBUG: ${DEBUG}
 
-    owncloud:
-        image: owncloud/server:latest
-        restart: "on-failure:5"
-        links:
-            - owncloud-db
-        ports:
-            - 8080:8080
-        volumes:
-            - /mnt/hdd/owncloud/files:/mnt/data
-        environment:
-            OWNCLOUD_DOMAIN: 192.168.100.222
-            OWNCLOUD_DB_TYPE: pgsql
-            OWNCLOUD_DB_HOST: owncloud-db
-            OWNCLOUD_DB_NAME: owncloud
-            OWNCLOUD_DB_USERNAME: owncloud
-            OWNCLOUD_DB_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
-            OWNCLOUD_ADMIN_USERNAME: ${OWNCLOUD_ADMIN_USER}
-            OWNCLOUD_ADMIN_PASSWORD: ${OWNCLOUD_ADMIN_PASSWORD}
-        healthcheck:
-            test: ["CMD", "/usr/bin/healthcheck"]
-            interval: 30s
-            timeout: 10s
-            retries: 5
-        logging:
-            driver: none
+    # owncloud:
+    #     image: owncloud/server:latest
+    #     restart: "on-failure:5"
+    #     links:
+    #         - owncloud-db
+    #     ports:
+    #         - 8080:8080
+    #     volumes:
+    #         - /mnt/hdd/owncloud/files:/mnt/data
+    #     environment:
+    #         OWNCLOUD_DOMAIN: 192.168.100.222
+    #         OWNCLOUD_DB_TYPE: pgsql
+    #         OWNCLOUD_DB_HOST: owncloud-db
+    #         OWNCLOUD_DB_NAME: owncloud
+    #         OWNCLOUD_DB_USERNAME: owncloud
+    #         OWNCLOUD_DB_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
+    #         OWNCLOUD_ADMIN_USERNAME: ${OWNCLOUD_ADMIN_USER}
+    #         OWNCLOUD_ADMIN_PASSWORD: ${OWNCLOUD_ADMIN_PASSWORD}
+    #     healthcheck:
+    #         test: ["CMD", "/usr/bin/healthcheck"]
+    #         interval: 30s
+    #         timeout: 10s
+    #         retries: 5
+    #     logging:
+    #         driver: none
 
-    owncloud-db:
-        image: postgres:9.6-alpine
-        restart: "on-failure:5"
-        environment:
-            POSTGRES_USER: owncloud
-            POSTGRES_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
-        volumes:
-            - /mnt/data/owncloud/db:/var/lib/postgresql/data
+    # owncloud-db:
+    #     image: postgres:9.6-alpine
+    #     restart: "on-failure:5"
+    #     environment:
+    #         POSTGRES_USER: owncloud
+    #         POSTGRES_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
+    #     volumes:
+    #         - /mnt/data/owncloud/db:/var/lib/postgresql/data
 
-    owncloud-db-backup:
-        build: postgres-backup-s3
-        restart: "on-failure:5"
-        links:
-            - owncloud-db
-            - notifyd
-        environment:
-            CONTAINER_NAME: owncloud-db-backup
-            S3_REGION: ap-northeast-1
-            S3_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-            S3_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-            S3_BUCKET: ${S3_BUCKET}
-            S3_PREFIX: backup
-            POSTGRES_HOST: owncloud-db
-            POSTGRES_DATABASE: owncloud
-            POSTGRES_USER: owncloud
-            POSTGRES_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
-            POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
-            SCHEDULE: '23 16 18 * * 0,3' # 3:16: sec min hour day month week
-            #DATETIME: "true"
-            DISCORDBOT: notifyd
-            DISCORDBOT_TOKEN: "${NOTIFYD_TOKEN}"
+    # owncloud-db-backup:
+    #     build: postgres-backup-s3
+    #     restart: "on-failure:5"
+    #     links:
+    #         - owncloud-db
+    #         - notifyd
+    #     environment:
+    #         CONTAINER_NAME: owncloud-db-backup
+    #         S3_REGION: ap-northeast-1
+    #         S3_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+    #         S3_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+    #         S3_BUCKET: ${S3_BUCKET}
+    #         S3_PREFIX: backup
+    #         POSTGRES_HOST: owncloud-db
+    #         POSTGRES_DATABASE: owncloud
+    #         POSTGRES_USER: owncloud
+    #         POSTGRES_PASSWORD: ${OWNCLOUD_DB_PASSWORD}
+    #         POSTGRES_EXTRA_OPTS: '--schema=public --blobs'
+    #         SCHEDULE: '23 16 18 * * 0,3' # 3:16: sec min hour day month week
+    #         #DATETIME: "true"
+    #         DISCORDBOT: notifyd
+    #         DISCORDBOT_TOKEN: "${NOTIFYD_TOKEN}"

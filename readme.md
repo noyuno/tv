@@ -461,6 +461,7 @@ cd
 ~~~
 git clone https://github.com/noyuno/tv
 cd tv
+git submodule update --init --recursive
 ./install
 sudo mkdir /mnt/data/{mp4,ts}
 ~~~
@@ -498,12 +499,8 @@ eventに「tv」と入力、value1に「test」と入力して「Test it」を�
 ## 22. Discord (notifyd編)
 
 ~~~sh
-cd
-git clone https://github.com/noyuno/notifyd
-cd notifyd
-cp ../tv/docker-compose.yml .
 nano .env # DISCORD_TOKENを入力
-docker-compose up
+docker-compose up notifyd
 curl localhost:5050
 > notifyd
 > hello
@@ -733,6 +730,15 @@ sudo systemctl start wg-quick@wg0
 sudo systemctl status wg-quick@wg0
 ~~~
 
+## 28. ファイルストレージサービス
+
+~~~
+docker-compose up -d owncloud
+dc exec owncloud occ user:resetpassword noyuno
+~~~
+
+`192.168.100.222:8080` にアクセスしてログインする！
+
 ## 29. システムをS3にバックアップ
 
 ~~~
@@ -844,3 +850,14 @@ iperf3 -s
 ~~~
 
 iPad/iPhoneのストリーミング視聴は無変換-VLCではなくHLS-Safariが良い
+
+## 10. `docker-compose build` を実行すると `ERROR: http://dl-cdn.alpinelinux.org/alpine/v3.11/main: temporary error (try again later)`
+
+DockerデーモンのDNSを設定する
+
+/etc/docker/daemon.json
+~~~
+{
+  "dns": ["8.8.8.8"]
+}
+~~~
