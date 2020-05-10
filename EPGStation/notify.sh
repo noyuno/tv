@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 source /home/noyuno/tv/.env
 if [ "$STARTAT" ]; then
