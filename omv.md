@@ -44,25 +44,3 @@ sudo nmcli con add type bridge-slave ifname eno1 master br0
 sudo nmcli c up br0
 ~~~
 
-
-## 2. インストール
-
-~~~
-sudo yum -y install snapd
-sudo systemctl enable --now snapd.socket
-~~~
-
-ちょっと待つ。待たないと
-`error: too early for operation, device not yet seeded or device model not acknowledged`が出てインストールできない
-
-~~~
-sudo snap install lxd
-sudo usermod -aGlxd noyuno
-~~~
-
-ログアウト。
-
-~~~
-sudo firewall-cmd --add-interface=lxd0 --zone=trusted
-lxc launch images:debian/10/amd64 omv0
-~~~

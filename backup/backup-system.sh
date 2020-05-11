@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 mkdir -p /mnt/hdd/backup/system
 cd /mnt/hdd/backup/system

@@ -611,13 +611,14 @@ c.f. [tv/omv.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master
 ### 4.1. システムをバックアップ
 
 ~~~
-
+sudo cp /home/noyuno/tv/backup/backup-system.{service,timer} /etc/systemd/system
+sudo systemctl enable --now backup-system.timer
 ~~~
 
 ### 4.2. ホームフォルダ・データベースをバックアップ
 
 ~~~
-sudo cp /home/noyuno/k3/backup/backup-home.{service,timer} /etc/systemd/system
+sudo cp /home/noyuno/tv/backup/backup-home.{service,timer} /etc/systemd/system
 sudo systemctl enable --now backup-home.timer
 ~~~
 
