@@ -1,3 +1,6 @@
 [submodule "notifyd"]
 	path = notifyd
 	url = https://github.com/noyuno/notifyd.git
+[submodule "dots"]
+	path = dots
+	url = https://github.com/noyuno/dots.git

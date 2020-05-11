@@ -1,6 +1,4 @@
-# 1. テレビ視聴・録画環境構築
-
-![image](https://raw.githubusercontent.com/noyuno/tv/master/image.jpg)
+# 1. テレビ視聴・録画環境構築（基本システム）
 
 ## 1. 要件
 
@@ -62,14 +60,16 @@ avahiを設定
 
 [Avahi - ArchWiki](https://wiki.archlinux.jp/index.php/Avahi)を参照。
 
-## 6. ソフトウェアアップグレード
+## 6. ソフトウェアインストール
+
+### 6.1. アップグレード
 
 ~~~
 sudo dnf -y update
 sudo reboot
 ~~~
 
-## 7. カーネルバージョン固定
+### 6.2. カーネルバージョン固定
 
 /etc/dnf/dnf.conf
 ~~~
@@ -81,7 +81,7 @@ excludepkgs=microcode_ctl kernel* docker-ce
 UPDATEDEFAULT=no
 ~~~
 
-## 8. 基本的なソフトウェアのインストール
+### 6.3. 基本的なソフトウェアのインストール
 
 ~~~
 curl -sL https://rpm.nodesource.com/setup_12.x | sudo bash -
@@ -94,7 +94,7 @@ sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make k
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
-## 9. エディタのインストール
+### 6.4. エディタのインストール
 
 ~~~
 sudo yum-config-manager --add-repo=https://copr.fedorainfracloud.org/coprs/carlwgeorge/ripgrep/repo/epel-7/carlwgeorge-ripgrep-epel-7.repo
@@ -109,7 +109,7 @@ vi
 :q
 ~~~
 
-## 10. sudoの設定
+## 7. sudoの設定
 
 ~~~
 sudo visudo
@@ -118,7 +118,7 @@ Defaults timestamp_timeout = 30
 Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 ~~~
 
-## 11. 時刻の設定
+## 8. 時刻の設定
 
 UTC非対応なので、JSTにする。
 
@@ -130,7 +130,7 @@ sudo systemctl enable chronyd
 date
 ~~~
 
-## 12. px4_drv
+## 9. px4_drv
 
 ~~~
 git clone https://github.com/nns779/px4_drv -b next
@@ -146,7 +146,7 @@ lsmod | grep -e ^px4_drv
 ls /dev/px4video*
 ~~~
 
-## 13. カードリーダー
+## 10. カードリーダー
 
 ~~~
 wget http://ludovic.rousseau.free.fr/softwares/pcsc-perl/pcsc-perl-1.4.14.tar.bz2
@@ -171,7 +171,7 @@ sudo pcsc_scan
 > Japanese Chijou Digital B-CAS Card (pay TV)
 ~~~
 
-## 14. libarib25
+## 11. libarib25
 
 ~~~
 git clone https://github.com/stz2012/libarib25
@@ -183,7 +183,7 @@ echo '/usr/local/lib64' | sudo tee /etc/ld.so.conf.d/usr-local-lib64.conf
 sudo ldconfig
 ~~~
 
-## 15. recpt1
+## 12. recpt1
 
 ~~~
 git clone https://github.com/stz2012/recpt1
@@ -194,7 +194,7 @@ make
 sudo make install
 ~~~
 
-## 16. チューナのテスト
+## 13. チューナのテスト
 
 ~~~
 sudo recpt1 --b25 --strip BS09_0 10 bs11.ts
@@ -207,7 +207,9 @@ in client, type
 scp m1:bs11.ts .
 ~~~
 
-## 17. Mirakurun
+## 14. Mirakurun
+
+### 14.1. インストール・設定
 
 ~~~
 sudo npm install pm2 -g
@@ -249,7 +251,7 @@ sudo pm2 logs mirakurun-server
 curl -X PUT "http://localhost:40772/api/config/channels/scan"
 ~~~
 
-## 18. MariaDB
+### 14.2. MariaDB
 
 ~~~
 sudo systemctl start mariadb
@@ -274,7 +276,7 @@ mysql -u root -p
   grant all on epgstation.* to 'noyuno'@'localhost';
 ~~~
 
-## 19. セキュリティの設定
+## 15. セキュリティの設定
 
 ~~~
 sudo setenforce 0
@@ -301,7 +303,45 @@ sudo reboot
 
 firewalldではnotifydを動かすためにマスカレードを追加する
 
-## 20. Samba
+## 16. HDD増設
+
+~~~
+sudo pm2 stop all
+sudo fdisk -l
+sudo gdisk /dev/sda
+> o <enter>
+> n <enter> <enter> <enter> 8e00
+> w <enter>
+sudo partprobe
+sudo pvcreate /dev/sda1
+sudo vgcreate td0 /dev/sda1
+sudo lvcreate -l 100%FREE -n data td0
+sudo mkfs.xfs /dev/td0/data
+sudo mkdir /mnt/hdd
+sudo mount /dev/mapper/td0-data /mnt/hdd
+sudo cp -av /mnt/data/mp4 /mnt/hdd
+sudo rm -rf /mnt/data/mp4
+sudo ln -sfnv /mnt/hdd/mp4 /mnt/data/mp4
+~~~
+
+/etc/fstab
+
+~~~
+/dev/mapper/cl_m1-r      /                       xfs     defaults        0 0
+UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
+UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
+/dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
+/dev/mapper/cl_m1-backup /mnt/backup             xfs     defaults        0 0
+/dev/mapper/td0-data     /mnt/hdd                xfs     defaults        0 0
+/mnt/hdd/mp4             /mnt/data/mp4           none    bind            0 0
+~~~
+
+~~~
+sudo reboot
+sudo pm2 start all
+~~~
+
+## 17. Samba
 
 Windows 10， iOS Infuseで閲覧
 
@@ -408,47 +448,11 @@ lrwxrwxrwx 1 noyuno noyuno 12 2020-05-02 18:09 m2-ts -> /mnt/data/ts/
 
 Windows+R type `\\m1\` to connect
 
-## 21. FTP
+## 18.（削除）
 
-webブラウザ
+（削除）
 
-~~~
-dnf -y install vsftpd
-sudo nano /etc/vsftpd/vsftpd.conf
-~~~
-
-~~~
-anonymous_enable=NO
-local_enable=YES
-write_enable=YES
-local_umask=000
-dirmessage_enable=YES
-xferlog_enable=YES
-connect_from_port_20=YES
-xferlog_std_format=YES
-chroot_local_user=YES
-chroot_list_enable=YES
-chroot_list_file=/etc/vsftpd/chroot_list
-listen=NO
-listen_ipv6=YES
-pam_service_name=vsftpd
-userlist_enable=YES
-pasv_min_port=4000
-pasv_max_port=4029
-allow_writeable_chroot=YES
-~~~
-
-~~~
-sudo firewall-cmd --zone=public --add-service=ftp --permanent
-sudo firewall-cmd --zone=public --add-port=4000-4029/tcp --permanent
-sudo firewall-cmd --reload
-sudo systemctl start vsftpd
-sudo systemctl status vsftpd
-sudo systemctl enable vsftpd
-~~~
-
-
-## 21. EPGStation
+## 19. EPGStation
 
 ~~~
 git clone https://github.com/l3tnun/EPGStation.git
@@ -473,9 +477,9 @@ sudo pm2 logs epgstation
 ~~~
 
 
-## 22. discord (IFTTT編)
+## 20. discord (IFTTT編)
 
-### IFTTT
+### 20.A. IFTTT（非推奨）
 
 1. 右上の丸いボタンを押してCreateを押す。
 2. 「This」ボタンを押して「Webhooks」と入力してクリックする。
@@ -485,18 +489,18 @@ sudo pm2 logs epgstation
 6. 「Make a web request」を押す。
 7. 「URL」にDiscordのweb hook URLを入力する。MethodはPost。Content-Typeは「application/json」、Bodyに`{"content":"{{Value1}}"}`を入力する。
 
-### テスト
+**テスト**
 
 https://ifttt.com/maker_webhooks に移動。右上の「Documentation」をクリック。
 eventに「tv」と入力、value1に「test」と入力して「Test it」を押す。
 
-### 設定
+**設定**
 
 上記テストで表示されたキーを控える。
 
 `.env`に`IFTTTKEY=(キー)`を入力。
 
-## 22. Discord (notifyd編)
+### 20.B. Discord (notifyd編)
 
 ~~~sh
 nano .env # DISCORD_TOKENを入力
@@ -516,7 +520,7 @@ curl localhost:5050
 #sudo chmod +x /etc/rc.d/rc.local
 ~~~
 
-## 23. comskipでCMの区切りにチャプターを付ける
+## 21. ComskipでCMの区切りにチャプターを付ける
 
 ~~~
 curl -sLO http://prdownloads.sourceforge.net/argtable/argtable2-13.tar.gz
@@ -535,45 +539,9 @@ cd
 
 ~~~
 
-## 24. HDD増設
+# 2. テレビ視聴・録画環境構築（オプション）
 
-~~~
-sudo pm2 stop all
-sudo fdisk -l
-sudo gdisk /dev/sda
-> o <enter>
-> n <enter> <enter> <enter> 8e00
-> w <enter>
-sudo partprobe
-sudo pvcreate /dev/sda1
-sudo vgcreate td0 /dev/sda1
-sudo lvcreate -l 100%FREE -n data td0
-sudo mkfs.xfs /dev/td0/data
-sudo mkdir /mnt/hdd
-sudo mount /dev/mapper/td0-data /mnt/hdd
-sudo cp -av /mnt/data/mp4 /mnt/hdd
-sudo rm -rf /mnt/data/mp4
-sudo ln -sfnv /mnt/hdd/mp4 /mnt/data/mp4
-~~~
-
-/etc/fstab
-
-~~~
-/dev/mapper/cl_m1-r      /                       xfs     defaults        0 0
-UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
-UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
-/dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
-/dev/mapper/cl_m1-backup /mnt/backup             xfs     defaults        0 0
-/dev/mapper/td0-data     /mnt/hdd                xfs     defaults        0 0
-/mnt/hdd/mp4             /mnt/data/mp4           none    bind            0 0
-~~~
-
-~~~
-sudo reboot
-sudo pm2 start all
-~~~
-
-## 25. ゲストモード
+## 1. ゲストモード
 
 ゲストがWi-Fiに接続してテレビを視聴できるようにする。
 
@@ -604,13 +572,13 @@ sudo systemctl status create_ap
 sudo systemctl enable create_ap
 ~~~
 
-## 26. 外部からVPNアクセス（共通）
+## 2. 外部からVPNアクセス
 
-### 26.1. DDNSを設定する
+### 2.1. DDNSを設定する (***m1***)
 
 ドメイン設定で、「ダイナミックDNS機能」を有効にする
 
-### 26.2. IPアドレスを定期的に通知する
+### 2.2. IPアドレスを定期的に通知する (***m1***)
 
 cat /etc/cron.d/ddns
 ~~~
@@ -621,7 +589,7 @@ MAILTO=root
 02,17,32,47 * * * * root curl 'https://dyn.value-domain.com/cgi-bin/dyn.fcg?d=noyuno.jp&p=xxxxxxxxxxxxxxxxxxxx&h=m1'
 ~~~
 
-### 26.3 プライベートIPアドレスを固定する
+### 2.3 プライベートIPアドレスを固定する (***m1***)
 
 ~~~
 sudo nmcli connection modify eno1 ipv4.addresses 192.168.100.222/24
@@ -630,137 +598,35 @@ sudo nmcli connection modify eno1 ipv4.dns 192.168.100.1
 sudo nmcli connection modify eno1 ipv4.method manual
 ~~~
 
-## 27. WireGuardで接続（動かない）
+### 2.4. WireGuardで接続
 
-### 27.1. WireGuard をインストール
+c.f. [noyuno/k3 readme.md 3. VPN(WireGuard)](https://github.com/noyuno/k3#3-vpnwireguard)
 
+## 3. ファイルストレージサービス
 
-~~~
-sudo yum -y install elrepo-release epel-release
-sudo yum -y install kmod-wireguard wireguard-tools qrencode
-sudo mkdir -p /etc/wireguard
-cd /etc/wireguard
-sudo sh -c 'umask 077; touch wg0.conf'
-sudo sh -c 'umask 077; wg genkey | tee privatekey | wg pubkey > publickey; chmod 644 publickey'
+c.f. [tv/omv.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/omv.md)
 
-sudo sh -c 'umask 077; touch client.conf'
-sudo sh -c 'umask 077; wg genkey | tee client-privatekey | wg pubkey > client-publickey; chmod 644 client-publickey'
-~~~
+## 4. バックアップ
 
-/etc/wireguard/wg0.conf
-~~~
-[Interface]
-Address = 192.168.5.1/24
-DNS = 192.168.100.1
-SaveConfig = false
-ListenPort = 51820
-PrivateKey = xxxxxxxxxxxx=
-PostUp = ip -4 route del 0.0.0.0/0 dev %i table $(wg show %i listen-port)
-FwMark = 0xca6c
-
-[Peer]
-PublicKey = xxxxxxxxxxxx=
-Endpoint = m1.noyuno.jp:51820
-AllowedIPs = 0.0.0.0/0
-~~~
-
-/etc/wireguard/client.conf
-~~~
-[Interface]
-PrivateKey = xxxxxxxxxxxx=
-Address = 192.168.5.2/24
-
-[Peer]
-PublicKey = xxxxxxxxxxxx=
-Endpoint = m1.noyuno.jp:51820
-AllowedIPs = 0.0.0.0/0,::/0
-~~~
+### 4.1. システムをバックアップ
 
 ~~~
-sudo cat client.conf | qrencode -t PNG -o /mnt/hdd/data/system/wireguard-client.png
-~~~
-
-### 27.2. ネットワーク設定
-
-ルータで51820ポートを転送するよう設定する。
-
-~~~
-sudo sysctl net.ipv4.ip_forward=1
-sudo firewall-cmd --permanent --add-port=51820/udp --zone=public
-sudo firewall-cmd --permanent --zone=public --add-masquerade
-sudo firewall-cmd --permanent --add-interface=wg0 --zone=internal
-sudo firewall-cmd --permanent --zone=internal --add-masquerade
-
-sudo firewall-cmd --zone=internal --add-service=http --permanent
-sudo firewall-cmd --zone=internal --add-port=81/tcp --permanent
-sudo firewall-cmd --zone=internal --add-port=81/udp --permanent
-sudo firewall-cmd --zone=internal --add-port=8889/tcp --permanent
-sudo firewall-cmd --zone=internal --add-port=8889/udp --permanent
-sudo firewall-cmd --permanent --zone=internal --add-service=samba
-sudo firewall-cmd --zone=internal --add-service=ftp --permanent
-sudo firewall-cmd --zone=internal --add-port=4000-4029/tcp --permanent
-sudo firewall-cmd --zone=internal --add-port=5353/udp --permanent
-sudo firewall-cmd --reload
-~~~
-
-/etc/sysctl.d/99-sysctl.conf
-~~~
-## Turn on bbr ##
-net.core.default_qdisc = fq
-net.ipv4.tcp_congestion_control = bbr
-## for IPv4 ##
-net.ipv4.ip_forward = 1
-## Turn on basic protection/security ##
-net.ipv4.conf.default.rp_filter = 1
-net.ipv4.conf.all.rp_filter = 1
-net.ipv4.tcp_syncookies = 1
-## for IPv6 - uncomment the following line ##
-net.ipv6.conf.all.forwarding = 1
-~~~
-
-~~~
-sudo sysctl -p /etc/sysctl.d/99-sysctl.conf
-~~~
-
-### 27.3. WireGuardサービスを有効にする
-
-~~~
-sudo systemctl enable wg-quick@wg0
-sudo systemctl start wg-quick@wg0
-sudo systemctl status wg-quick@wg0
-~~~
-
-## 28. ファイルストレージサービス
-
-~~~
-docker-compose up -d owncloud
-dc exec owncloud occ user:resetpassword noyuno
-~~~
-
-`192.168.100.222:8080` にアクセスしてログインする！
-
-## 29. システムをS3にバックアップ
-
-~~~
-sudo chown -R root.wheel /mnt/backup
-sudo chmod -R 775 /mnt/backup
-sudo pip3 install awscli
-aws configure
-~~~
-
-~~~
-cd /mnt/backup
+cd /mnt/hdd/backup/system
 df -h > df
 sudo lvdisplay > lvdisplay
 sudo pm2 stop all
-sudo xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz > root.gz
+sudo xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz -f root-xfsdump.gz
 sudo pm2 start all
-aws s3 cp df s3://noyuno-m1
-aws s3 cp lvdisplay s3://noyuno-m1
-/home/noyuno/tv/s3mpu noyuno-m1 root.gz
 ~~~
 
-# 2. トラブルシューティング
+### 4.2. ホームフォルダ・データベースをバックアップ
+
+~~~
+sudo cp /home/noyuno/k3/backup/backup-home.{service,timer} /etc/systemd/system
+sudo systemctl enable --now backup-home.timer
+~~~
+
+# 3. トラブルシューティング
 
 ## 1. カクカクする
 
