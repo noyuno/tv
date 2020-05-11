@@ -1,5 +1,5 @@
 [Unit]
-Description=backup service
+Description=home backup service
 RefuseManualStart=no
 RefuseManualStop=yes
 

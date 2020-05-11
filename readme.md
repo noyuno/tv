@@ -611,12 +611,7 @@ c.f. [tv/omv.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master
 ### 4.1. システムをバックアップ
 
 ~~~
-cd /mnt/hdd/backup/system
-df -h > df
-sudo lvdisplay > lvdisplay
-sudo pm2 stop all
-sudo xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz -f root-xfsdump.gz
-sudo pm2 start all
+
 ~~~
 
 ### 4.2. ホームフォルダ・データベースをバックアップ
