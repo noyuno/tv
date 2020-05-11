@@ -470,6 +470,8 @@ git submodule update --init --recursive
 sudo mkdir /mnt/data/{mp4,ts}
 ~~~
 
+`EPGStation/config.json.example`をコピーしてパスワード部分を編集する！
+
 ~~~
 sudo pm2 start dist/server/index.js --name "epgstation"
 sudo pm2 save

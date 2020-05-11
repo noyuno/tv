@@ -7,6 +7,7 @@ cp /etc/fstab fstab
 pvdisplay > pvdisplay
 vgdisplay > vgdisplay
 lvdisplay > lvdisplay
+sudo nmcli > nmcli
 firewall-cmd --list-all-zones > firewall-all-zones
 pm2 stop all
 xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz > root-xfsdump.gz
