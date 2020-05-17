@@ -21,7 +21,7 @@ fi
 #     時間: $st から $du 分間"
 #curl -XPOST -d '{ "token": "abc", "message": "'"$mes"'" }' localhost:5050
 curl -XPOST -d '{
-    "token": "abc",
+    "token": "'"$NOTIFYD_TOKEN"'",
     "title": "'"$1"'",
     "fields": [
         { "name": "番組名", "value": "'"$NAME"'", "inline": false },

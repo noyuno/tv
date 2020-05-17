@@ -8,7 +8,7 @@ source /home/noyuno/tv/.env
 #curl -s -X POST -H "Content-Type: application/json" -d '{"value1":"'"$mes"'"}' "https://maker.ifttt.com/trigger/m1/with/key/$IFTTTKEY"
 
 curl -XPOST -d '{
-    "token": "abc",
+    "token": "'"$NOTIFYD_TOKEN"'",
     "title": "'"$1"'",
     "fields": [
         { "name": "番組名", "value": "'"$NAME"'", "inline": false },

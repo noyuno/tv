@@ -90,7 +90,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools avahi perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba samba-client chrony xfsdump dump gpac bind-utils gdisk smartmontools sm
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools avahi perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba samba-client chrony xfsdump dump gpac bind-utils gdisk smartmontools sm rsync
 sudo chsh -s /bin/zsh noyuno
 ~~~
 

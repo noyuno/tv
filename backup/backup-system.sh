@@ -19,3 +19,9 @@ tar czf efi-vfat.tar.gz /boot/efi
 dump -0 /dev/nvme0n1p2 | nice -n 10 pigz > boot-ext4dump.gz
 xfsdump -l 0 - /dev/cl_m1/r | nice -n 10 pigz > root-xfsdump.gz
 pm2 start all
+
+# notifyd
+curl -XPOST -d '{
+    "token": "'"$NOTIFYD_TOKEN"'",
+    "message": "システムのバックアップが完了しました。"
+}' localhost:5050
