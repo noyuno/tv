@@ -624,6 +624,14 @@ sudo cp /home/noyuno/tv/backup/backup-home.{service,timer} /etc/systemd/system
 sudo systemctl enable --now backup-home.timer
 ~~~
 
+### 4.3. 録画データをバックアップ
+
+~~~
+sudo cp /home/noyuno/tv/backup/backup-videos.{service,timer} /etc/systemd/system
+sudo systemctl enable --now backup-videos.timer
+~~~
+
+
 # 3. トラブルシューティング
 
 ## 1. カクカクする

@@ -23,7 +23,7 @@ while read line ; do
 done < $list
 popd
 
-rsync -avh --files-from=/tmp/backup-videos-list $src/ $dest
+rsync -ah --files-from=/tmp/backup-videos-list $src/ $dest
 
 # notifyd
 curl -XPOST -d '{
