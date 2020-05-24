@@ -721,7 +721,8 @@ iperf3 -s
 .\iperf3 -c 192.168.100.22
 ~~~
 
-iPad/iPhoneのストリーミング視聴は無変換-VLCではなくHLS-Safariが良い
+- iPad/iPhoneのストリーミング視聴は無変換-VLCではなくHLS-Safariが良い
+- ルータを初期化してみる（治った実績あり）
 
 ## 10. `docker-compose build` を実行すると `ERROR: http://dl-cdn.alpinelinux.org/alpine/v3.11/main: temporary error (try again later)`
 

@@ -86,7 +86,7 @@ sudo mkdir -p /mnt/hdd/vm/fs
 sudo chown -R noyuno.noyuno $_
 cd $_
 
-virt-install --name fs --hvm --arch x86_64 --os-type linux --os-variant centos7.0 --vcpus 2 --ram 2048 --disk path=/mnt/hdd/vm/fs/root.qcow2,format=qcow2,size=250 --network bridge=br0 --graphics vnc,keymap=us --noautoconsole --location CentOS-8.1.1911-x86_64-dvd1.iso
+virt-install --name fs --hvm --arch x86_64 --os-type linux --os-variant centos7.0 --vcpus 2 --ram 2048 --disk path=/mnt/hdd/vm/fs/root.qcow2,format=qcow2,size=250 --network bridge=br0 --graphics vnc,keymap=us --noautoconsole --location CentOS-8.1.1911-x86_64-dvd1.iso --extra-args ro
 ~~~
 
 メモリが１GBだとインストール途中でフリーズする。
@@ -199,6 +199,8 @@ drwxr-xr-x. 2 noyuno noyuno  6 May 13 22:03 .
 drwxr-xr-x. 3 root   root   19 May 13 22:03 ..
 ~~~
 
+Windows+R type `\\v1\` to connect
+
 ## 8. セキュリティの設定
 
 ## 8.1. firewalld
@@ -219,16 +221,62 @@ sudo nano /etc/sysconfig/selinux
 SELINUX=disabled
 ~~~
 
+## 9. GitBucket
 
-Windows+R type `\\v1\` to connect
+~~~
+sudo dnf -y install java-11-openjdk
+sudo mkdir /var/gitbucket
+sudo chown noyuno.noyuno $_
+cd $_
+curl -sLo gitbucket.war https://github.com/gitbucket/gitbucket/releases/download/4.33.0/gitbucket.war
+mkdir data
+GITBUCKET_HOME=/var/gitbucket/data sudo java -jar gitbucket.war --port=80
+~~~
+
+/etc/systemd/system/gitbucket.service
+
+~~~
+[Unit]
+Description=GitBucket service
+
+[Service]
+WorkingDirectory=/var/gitbucket
+Environment=GITBUCKET_HOME=/var/gitbucket/data
+ExecStart=/usr/bin/java -jar gitbucket.war --port=80
+User=root
+
+[Install]
+WantedBy=multi-user.target
+~~~
+
+~~~
+sudo systemctl daemon-reload
+sudo systemctl enable --now gitbucket
+~~~
 
 ## 9. 調整
 
-最大メモリを調整する。インストール時は２GBないとクラッシュしたが、運用中は500MBでも十分すぎる。
+最大メモリを調整する。インストール時は２GBないとクラッシュしたが、運用中はSambaだけなら500MBでも十分。GitBucketを動かすなら2GB必須。
 
 ~~~
 virsh shutdown fs
 virsh setmaxmem fs 500M
 virsh start fs
 virsh autostart fs
+~~~
+
+# トラブルシューティング
+
+## 1. インストール中に"DNF error: Error in POSTTRANS scriptlet in rpm package kernel-core"
+
+
+
+# 参考
+
+## 1. ファイル名のバイト数を調べる
+
+~~~
+find . -type f | sed 's|.*/||' | while read line ; do echo "$line" | wc -c ; done > /tmp/length
+find . -type f > /tmp/files
+paste /tmp/length /tmp/files | sort -n
 ~~~
