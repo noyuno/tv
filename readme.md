@@ -13,8 +13,8 @@
 2. 録画予約は「MP4 1920x1080 CPU, TS削除」
 3. MP4にはCMの区切りにチャプターを付ける（CMは削除しない）
 4. ハードウェアエンコードは歪むので使わない
-5. 録画データはEPGStation(Windows:VLC, iOS:VLC)とSambaでMP4を視聴
-6. バックアップはシステムのみ行う。死活管理は行わない。録画エラーが発生したらDiscordで報告
+5. 録画データはEPGStation(Windows:VLC, iOS:Infuse)とSambaでMP4を視聴
+6. HDD2台構成（rsync同期）。死活管理は行わない。録画エラーが発生したらDiscordで報告
 7. LANのみ
 
 ## 3. Rufus で書き込み
@@ -90,7 +90,7 @@ sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rp
 sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
 sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
 sudo dnf -y update
-sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools avahi perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba samba-client chrony xfsdump dump gpac bind-utils gdisk smartmontools sm rsync
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools avahi perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba samba-client chrony xfsdump dump gpac bind-utils gdisk smartmontools sm rsync lm_sensors
 sudo chsh -s /bin/zsh noyuno
 ~~~
 
@@ -305,41 +305,7 @@ firewalldではnotifydを動かすためにマスカレードを追加する
 
 ## 16. HDD増設
 
-~~~
-sudo pm2 stop all
-sudo fdisk -l
-sudo gdisk /dev/sda
-> o <enter>
-> n <enter> <enter> <enter> 8e00
-> w <enter>
-sudo partprobe
-sudo pvcreate /dev/sda1
-sudo vgcreate td0 /dev/sda1
-sudo lvcreate -l 100%FREE -n data td0
-sudo mkfs.xfs /dev/td0/data
-sudo mkdir /mnt/hdd
-sudo mount /dev/mapper/td0-data /mnt/hdd
-sudo cp -av /mnt/data/mp4 /mnt/hdd
-sudo rm -rf /mnt/data/mp4
-sudo ln -sfnv /mnt/hdd/mp4 /mnt/data/mp4
-~~~
-
-/etc/fstab
-
-~~~
-/dev/mapper/cl_m1-r      /                       xfs     defaults        0 0
-UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
-UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
-/dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
-/dev/mapper/cl_m1-backup /mnt/backup             xfs     defaults        0 0
-/dev/mapper/td0-data     /mnt/hdd                xfs     defaults        0 0
-/mnt/hdd/mp4             /mnt/data/mp4           none    bind            0 0
-~~~
-
-~~~
-sudo reboot
-sudo pm2 start all
-~~~
+c.f. [tv/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk.md)
 
 ## 17. Samba
 
@@ -354,9 +320,8 @@ sudo nano /etc/fstab
 UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
 UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
 /dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
-/dev/mapper/cl_m1-backup /mnt/backup             xfs     defaults        0 0
-/dev/mapper/td0-data     /mnt/hdd                xfs     defaults        0 0
-/mnt/hdd/mp4             /mnt/data/mp4           none    bind            0 0
+/dev/mapper/cl_m1-vm     /mnt/vm                 xfs     defaults        0 0
+/dev/mapper/hddsg0-data  /mnt/hddsg0-data        xfs     defaults        0 0
 ~~~
 
 /etc/samba/smb.conf
@@ -387,26 +352,17 @@ UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=wi
     writable = yes
     guest ok = no
     read only = no
-    create mode = 0777
-    directory mode = 0777
+    create mode = 0644
+    directory mode = 0755
 
-[m2]
-    path = /mnt/data/share/m2
+[private]
+    path = /mnt/hddsg0-crypt/data
     browsable = yes
     writable = yes
     guest ok = no
     read only = no
-    create mode = 0777
-    directory mode = 0777
-
-[hdd]
-    path = /mnt/hdd/share/hdd
-    browsable = yes
-    writable = yes
-    guest ok = no
-    read only = no
-    create mode = 0777
-    directory mode = 0777
+    create mode = 0644
+    directory mode = 0755
 ~~~
 
 ~~~
@@ -440,10 +396,9 @@ sudo pdbedit -L
 ~~~
 
 ~~~
-lrwxrwxrwx 1 noyuno noyuno 13 2020-05-02 18:17 hdd-data -> /mnt/hdd/data/
-lrwxrwxrwx 1 noyuno noyuno 12 2020-05-02 18:17 hdd-mp4 -> /mnt/hdd/mp4/
-lrwxrwxrwx 1 noyuno noyuno 17 2020-05-02 18:16 m2-encoder -> /mnt/data/encoder/
-lrwxrwxrwx 1 noyuno noyuno 12 2020-05-02 18:09 m2-ts -> /mnt/data/ts/
+[noyuno@m1 /mnt/hddsg0/backup/home] $ ll /mnt/data/share/tv
+lrwxrwxrwx 1 noyuno noyuno 20 2020-06-06 19:48 hdd-mp4 -> /mnt/hddsg0-data/mp4/
+lrwxrwxrwx 1 noyuno noyuno 12 2020-05-03 15:22 m2-ts -> /mnt/data/ts/
 ~~~
 
 Windows+R type `\\m1\` to connect
@@ -604,33 +559,10 @@ sudo nmcli connection modify eno1 ipv4.method manual
 
 c.f. [noyuno/k3 readme.md 3. VPN(WireGuard)](https://github.com/noyuno/k3#3-vpnwireguard)
 
-## 3. ファイルストレージサービス
 
-c.f. [tv/omv.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/omv.md)
+## 3. バックアップ
 
-## 4. バックアップ
-
-### 4.1. システムをバックアップ
-
-~~~
-sudo cp /home/noyuno/tv/backup/backup-system.{service,timer} /etc/systemd/system
-sudo systemctl enable --now backup-system.timer
-~~~
-
-### 4.2. ホームフォルダ・データベースをバックアップ
-
-~~~
-sudo cp /home/noyuno/tv/backup/backup-home.{service,timer} /etc/systemd/system
-sudo systemctl enable --now backup-home.timer
-~~~
-
-### 4.3. 録画データをバックアップ
-
-~~~
-sudo cp /home/noyuno/tv/backup/backup-videos.{service,timer} /etc/systemd/system
-sudo systemctl enable --now backup-videos.timer
-~~~
-
+c.f. [tv/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk.md)
 
 # 3. トラブルシューティング
 
@@ -723,6 +655,7 @@ iperf3 -s
 
 - iPad/iPhoneのストリーミング視聴は無変換-VLCではなくHLS-Safariが良い
 - ルータを初期化してみる（治った実績あり）
+- Infuse6はSMB3のバグがあり、転送速度が遅い。SMB2を強制する。
 
 ## 10. `docker-compose build` を実行すると `ERROR: http://dl-cdn.alpinelinux.org/alpine/v3.11/main: temporary error (try again later)`
 
@@ -734,3 +667,7 @@ DockerデーモンのDNSを設定する
   "dns": ["8.8.8.8"]
 }
 ~~~
+
+## 11. CPU温度が100度とか爆熱
+
+- 必ずTurboBoostを切ること。切ると最高でも60度程度になる。

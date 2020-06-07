@@ -1,8 +1,0 @@
-[Unit]
-Description=system backup timer
-
-[Timer]
-OnCalendar=Tue *-*-* 9:00:00
-
-[Install]
-WantedBy=timers.target
