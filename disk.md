@@ -58,3 +58,8 @@ sudo rsync -av /mnt/hdd/ /mnt/hddsg0-data
 sudo ./tv/backup.sh
 ~~~
 
+## パフォーマンス測定
+
+~~~
+dd if=/dev/zero of=/mnt/hddsg0-data/test bs=1M count=1024 oflag=direct
+~~~
