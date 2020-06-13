@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{917953CC-6A3D-43A2-B78E-95A07154412E}]
+"Name"="m1-tv-mp4"
+"Category"=dword:00000004
+"RelativePath"="Y:\\"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FolderDescriptions\{681657F8-C828-4A0B-A8A0-9C6361F9B46B}]
+"Name"="m1-private"
+"Category"=dword:00000004
+"RelativePath"="Z:\\"

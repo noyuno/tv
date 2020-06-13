@@ -305,103 +305,12 @@ firewalldではnotifydを動かすためにマスカレードを追加する
 
 ## 16. HDD増設
 
-c.f. [tv/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk.md)
+c.f. [tv/disk/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk/disk.md)
 
 ## 17. Samba
 
-Windows 10， iOS Infuseで閲覧
+c.f. [tv/disk/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk/disk.md)
 
-~~~
-sudo nano /etc/fstab
-~~~
-
-~~~
-/dev/mapper/cl_m1-r      /                       xfs     defaults        0 0
-UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
-UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
-/dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
-/dev/mapper/cl_m1-vm     /mnt/vm                 xfs     defaults        0 0
-/dev/mapper/hddsg0-data  /mnt/hddsg0-data        xfs     defaults        0 0
-~~~
-
-/etc/samba/smb.conf
-~~~
-[global]
-    dos charset = CP932
-    unix charset = UTF-8
-    workgroup = WORKGROUP
-    server string = Intel NUC/CentOS 8 TV Server
-    hosts allow = 192.168.100. 192.168.5. localhost EXCEPT 192.168.100.1
-    netbios name = m1
-    dns proxy = no
-    security = user
-    map to guest = bad user
-    printing = bsd
-    printcap name = /dev/null
-    local master = yes
-    os level = 200
-    browseable = yes
-    min protocol = SMB2
-    max protocol = SMB3
-    unix extensions = no
-    wide links = yes
-
-[tv]
-    path = /mnt/data/share/tv
-    browsable = yes
-    writable = yes
-    guest ok = no
-    read only = no
-    create mode = 0644
-    directory mode = 0755
-
-[private]
-    path = /mnt/hddsg0-crypt/data
-    browsable = yes
-    writable = yes
-    guest ok = no
-    read only = no
-    create mode = 0644
-    directory mode = 0755
-~~~
-
-~~~
-sudo mkdir -p /mnt/data/share/{tv,m2,hdd}
-cd /mnt/data/share/tv
-ln -sfnv /mnt/data/ts m2-ts
-ln -sfnv /mnt/data/encoder m2-encoder
-ln -sfnv /mnt/data/m2mp4 m2-mp4
-
-ln -sfnv /mnt/hdd/mp4 hdd-mp4
-ln -sfnv /mnt/hdd/data hdd-data
-
-cd ../m2
-ln -sfnv /mnt/data/ts m2-ts
-ln -sfnv /mnt/data/encoder m2-encoder
-ln -sfnv /mnt/data/m2mp4 m2-mp4
-
-cd ../hdd
-ln -sfnv /mnt/hdd/mp4 hdd-mp4
-ln -sfnv /mnt/hdd/data hdd-data
-
-sudo chmod -R 0777 /mnt/data/share
-
-sudo systemctl start smb
-sudo systemctl start nmb
-sudo systemctl enable smb
-sudo systemctl enable nmb
-
-sudo pdbedit -a noyuno
-sudo pdbedit -L
-~~~
-
-~~~
-[noyuno@m1 /mnt/hddsg0/backup/home] $ ll /mnt/data/share/tv
-lrwxrwxrwx 1 noyuno noyuno 20 2020-06-06 19:48 hdd-mp4 -> /mnt/hddsg0-data/mp4/
-lrwxrwxrwx 1 noyuno noyuno 12 2020-05-03 15:22 m2-ts -> /mnt/data/ts/
-~~~
-
-Windows+R type `\\m1\` to connect
 
 ## 18.（削除）
 

@@ -1,0 +1,9 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\BitBucket\KnownFolder\{917953CC-6A3D-43A2-B78E-95A07154412E}]
+"MaxCapacity"=dword:00003ad4
+"NukeOnDelete"=dword:00000000
+
+[HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Explorer\BitBucket\KnownFolder\{681657F8-C828-4A0B-A8A0-9C6361F9B46B}]
+"MaxCapacity"=dword:00003ad4
+"NukeOnDelete"=dword:00000000
