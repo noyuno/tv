@@ -20,7 +20,7 @@ while getopts shiv opt; do
 done
 
 if [ $USER != root ]; then
-  echo 'Error: must be run as root' 1>&2
+  echo 'error: must be run as root' 1>&2
   exit 1
 fi
 
@@ -49,12 +49,17 @@ mounted_dest_data="$(is_mounted $hdddest-$data)"
 mounted_src_crypt="$(is_mounted $hddsrc-$crypt-data $hddsrc-$crypt)"
 mounted_dest_crypt="$(is_mounted $hdddest-$crypt-data $hdddest-$crypt)"
 
+pass=
 require_unlock=()
 [ ! "$mounted_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
 [ ! "$mounted_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
 if [ ${#require_unlock[@]} -gt 0 ]; then
   read -sp "Enter passphrase for ${require_unlock[@]}: " pass
   tty -s && echo
+  if [ "$pass" ]; then
+    echo 'error: empty password' 1>/dev/null
+    exit 1
+  fi
 fi
 
 # bug fix
