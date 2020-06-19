@@ -18,6 +18,7 @@ nice -n 10 "$FFMPEG" -y  -dual_mono_mode main -i "$INPUT" \
 
 OUTPUT="$OUTPUT" bash /home/noyuno/tv/EPGStation/chapter.sh
 
+dirname "$OUTPUT" | xargs chmod 777
 chmod 777 "$OUTPUT"
 
 bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードが完了しました' &&:

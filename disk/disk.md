@@ -12,7 +12,14 @@ dictcheck=0
 ### hddsg0
 
 ~~~
-sudo vgcreate hddsg0 /dev/sda
+sudo gdisk /dev/sdc
+> o y
+> n 8e00
+cryptsetup benchmark
+~~~
+
+~~~
+sudo vgcreate hddsg0 /dev/sda1
 sudo lvcreate -L 4T /dev/mapper/hddsg0 -n data
 sudo lvcreate -L 1T /dev/mapper/hddsg0 -n crypt
 sudo mkfs.xfs /dev/hddsg0/data
@@ -30,15 +37,15 @@ sudo chown noyuno.noyuno /mnt/hddsg0-crypt/private
 ### hddsg1
 
 ~~~
-sudo gdisk /dev/sdb
+sudo gdisk /dev/sdc
 > o y
 > n 8e00
 cryptsetup benchmark
 ~~~
 
 ~~~
-sudo pvcreate /dev/sdb1
-sudo vgcreate hddsg1 /dev/sdb1
+sudo pvcreate /dev/sdc1
+sudo vgcreate hddsg1 /dev/sdc1
 sudo lvcreate -L 4T /dev/mapper/hddsg1 -n data0
 sudo lvcreate -L 1T /dev/mapper/hddsg1 -n crypt0
 sudo mkfs.xfs /dev/mapper/hddsg1-data0

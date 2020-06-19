@@ -38,9 +38,9 @@ is_mounted() {
 # server implemented memory: 12GB
 # 2% = 120MB
 # dirty_expire_centisecs = 1.00 sec
-sysctl -w vm.dirty_background_ratio=1 # default 10
-sysctl -w vm.dirty_ratio=2 # default 40
-sysctl -w vm.dirty_expire_centisecs=100 # default 500
+sudo sysctl -w vm.dirty_background_ratio=1 # default 10
+sudo sysctl -w vm.dirty_ratio=2 # default 40
+sudo sysctl -w vm.dirty_expire_centisecs=100 # default 500
 
 mounted_src_data="$(is_mounted $hddsrc-$data)"
 mounted_dest_data="$(is_mounted $hdddest-$data)"
@@ -121,23 +121,8 @@ fi
 # 4. USB HDD data
 echo -e '\x1b[38;05;2mStep 4: Syncing HDD\e[0m'
 
-
-#rsync -ah --info=progress2 --exclude=.history --exclude=backup --link-dest=/mnt/$hddsrc-data /mnt/$hddsrc-data/ /mnt/$hddsrc-data/.history/$(date +%Y%m%d-%H%S)
-# copy
 rsync $rsyncopt /mnt/$hddsrc-$data/ /mnt/$hdddest-$data
-#dt=$(date +%Y%m%d-%H%S)
-#mkdir -p /mnt/$hdddest-data/.history/$dt
-#command ls -a1 /mnt/$hdddest-data | grep -v -e .history -e '^\.$' -e '^\..$' | xargs -IPLACE mv /mnt/$hdddest-data/PLACE /mnt/$hdddest-data/.history/$dt
-#rsync -auhH --delete --info=progress2 --exclude=.history --link-dest=.history/$dt /mnt/$hddsrc-data/ /mnt/$hdddest-data
-
-
-#rsync -ah --info=progress2 --exclude=.history --exclude=backup --link-dest=/mnt/$hddsrc-crypt /mnt/$hddsrc-crypt/ /mnt/$hddsrc-crypt/.history/$(date +%Y%m%d-%H%S)
-# copy
 rsync $rsyncopt /mnt/$hddsrc-$crypt/ /mnt/$hdddest-$crypt
-#dt=$(date +%Y%m%d-%H%S)
-#mkdir -p /mnt/$hdddest-crypt/.history/$dt
-#command ls -a1 /mnt/$hdddest-crypt | grep -v -e .history -e '^\.$' -e '^\..$' | xargs -IPLACE mv /mnt/$hdddest-crypt/PLACE /mnt/$hdddest-crypt/.history/$dt
-#rsync -auhH --delete --info=progress2 --exclude=.history --link-dest=.history/$dt /mnt/$hddsrc-crypt/ /mnt/$hdddest-crypt
 
 # 5. umount
 echo -e '\x1b[38;05;2mStep 5: Unmounting filesystem\e[0m'
