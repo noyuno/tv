@@ -35,6 +35,20 @@ sysctl -w vm.dirty_background_ratio=1 # default 10
 sysctl -w vm.dirty_ratio=2 # default 40
 sysctl -w vm.dirty_expire_centisecs=100 # default 500
 
+is_mounted() {
+  dev=$1
+  mpoint=$2
+  if [ ! "$mpoint" ]; then
+    mpoint=$dev
+  fi
+  mount | grep ^/dev/mapper/$dev\ on\ /mnt/$mpoint\ type\ xfs || echo ''
+}
+
+mounted_src_data="$(is_mounted $hddsrc-$data)"
+mounted_dest_data="$(is_mounted $hdddest-$data)"
+mounted_src_crypt="$(is_mounted $hddsrc-$crypt-data $hddsrc-$crypt)"
+mounted_dest_crypt="$(is_mounted $hdddest-$crypt-data $hdddest-$crypt)"
+
 # LVM bug fix
 if [ ! "$mounted_src_data" -a ! "$mounted_src_crypt" ]; then
   lvchange -an $hddsrc/$data
@@ -52,20 +66,6 @@ if [ ! "$mounted_dest_data" -a ! "$mounted_dest_crypt" ]; then
   lvchange -ay $hdddest/$data
   lvchange -ay $hdddest/$crypt
 fi
-
-is_mounted() {
-  dev=$1
-  mpoint=$2
-  if [ ! "$mpoint" ]; then
-    mpoint=$dev
-  fi
-  mount | grep ^/dev/mapper/$dev\ on\ /mnt/$mpoint\ type\ xfs || echo ''
-}
-
-mounted_src_data="$(is_mounted $hddsrc-$data)"
-mounted_dest_data="$(is_mounted $hdddest-$data)"
-mounted_src_crypt="$(is_mounted $hddsrc-$crypt-data $hddsrc-$crypt)"
-mounted_dest_crypt="$(is_mounted $hdddest-$crypt-data $hdddest-$crypt)"
 
 unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-data)"
 unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-data)"
