@@ -56,7 +56,7 @@ require_unlock=()
 if [ ${#require_unlock[@]} -gt 0 ]; then
   read -sp "Enter passphrase for ${require_unlock[@]}: " pass
   tty -s && echo
-  if [ "$pass" ]; then
+  if [ ! "$pass" ]; then
     echo 'error: empty password' 1>/dev/null
     exit 1
   fi
