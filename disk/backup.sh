@@ -67,12 +67,15 @@ mounted_dest_data="$(is_mounted $hdddest-$data)"
 mounted_src_crypt="$(is_mounted $hddsrc-$crypt-data $hddsrc-$crypt)"
 mounted_dest_crypt="$(is_mounted $hdddest-$crypt-data $hdddest-$crypt)"
 
+unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-data)"
+unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-data)"
+
 pass=
 require_unlock=()
-[ ! "$mounted_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
-[ ! "$mounted_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
+[ ! "$unlocked_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
+[ ! "$unlocked_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
 if [ ${#require_unlock[@]} -gt 0 ]; then
-  read -sp "Enter passphrase for $require_unlock: " pass
+  read -sp "Enter passphrase for ${arr[*]}: " pass
   tty -s && echo
   if [ ! "$pass" ]; then
     echo 'error: empty password' 1>/dev/null
@@ -86,6 +89,9 @@ unlock() {
   echo pass | cryptsetup open $target $dest
 }
 
+[ ! "$unlocked_src_crypt" ] && unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-data
+[ ! "$unlocked_dest_crypt" ] && unlock /dev/mapper/$hdddest-$crypt $hdddest-$crypt-data
+
 mount_lv() {
   dev=$1
   mpoint=$2
@@ -98,12 +104,8 @@ mount_lv() {
 
 [ ! "$mounted_src_data" ] &&   mount_lv $hddsrc-$data
 [ ! "$mounted_dest_data" ] &&  mount_lv $hdddest-$data
-[ ! "$mounted_src_crypt" ] &&  \
-  unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-data && \
-  mount_lv $hddsrc-$crypt-data $hddsrc-$crypt
-[ ! "$mounted_dest_crypt" ] && \
-  unlock /dev/mapper/$hdddest-$crypt $hdddest-$crypt-data && \
-  mount_lv $hdddest-$crypt-data $hdddest-$crypt
+[ ! "$mounted_src_crypt" ] &&  mount_lv $hddsrc-$crypt-data $hddsrc-$crypt
+[ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-data $hdddest-$crypt
 
 # 2. system
 if [ "$backup_system" ]; then
