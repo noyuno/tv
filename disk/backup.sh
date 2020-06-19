@@ -54,7 +54,7 @@ require_unlock=()
 [ ! "$mounted_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
 [ ! "$mounted_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
 if [ ${#require_unlock[@]} -gt 0 ]; then
-  read -sp "Enter passphrase for ${require_unlock[@]}: " pass
+  read -sp "Enter passphrase for $require_unlock: " pass
   tty -s && echo
   if [ ! "$pass" ]; then
     echo 'error: empty password' 1>/dev/null
