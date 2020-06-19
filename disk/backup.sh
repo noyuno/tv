@@ -6,7 +6,7 @@ hddsrc=hddsg0
 hdddest=hddsg1
 data=data0
 crypt=crypt0
-rsyncopt='-auhH --delete --info=progress2 --exclude=.history --rsync-path="ionice -c3 nice -n 10 rsync" --bwlimit=51200'
+rsyncopt='-auhH --delete --info=progress2 --exclude=.snapshot --rsync-path="ionice -c3 nice -n 10 rsync"'
 source /home/noyuno/tv/.env
 
 while getopts shiv opt; do
@@ -35,6 +35,24 @@ sysctl -w vm.dirty_background_ratio=1 # default 10
 sysctl -w vm.dirty_ratio=2 # default 40
 sysctl -w vm.dirty_expire_centisecs=100 # default 500
 
+# LVM bug fix
+if [ ! "$mounted_src_data" -a ! "$mounted_src_crypt" ]; then
+  lvchange -an $hddsrc/$data
+  lvchange -an $hddsrc/$crypt
+  vgchange -an $hddsrc
+  vgchange -ay $hddsrc
+  lvchange -ay $hddsrc/$data
+  lvchange -ay $hddsrc/$crypt
+fi
+if [ ! "$mounted_dest_data" -a ! "$mounted_dest_crypt" ]; then
+  lvchange -an $hdddest/$data
+  lvchange -an $hdddest/$crypt
+  vgchange -an $hdddest
+  vgchange -ay $hdddest
+  lvchange -ay $hdddest/$data
+  lvchange -ay $hdddest/$crypt
+fi
+
 is_mounted() {
   dev=$1
   mpoint=$2
@@ -60,24 +78,6 @@ if [ ${#require_unlock[@]} -gt 0 ]; then
     echo 'error: empty password' 1>/dev/null
     exit 1
   fi
-fi
-
-# bug fix
-if [ ! "$mounted_src_data" -a ! "$mounted_src_crypt" ]; then
-  lvchange -an $hddsrc/$data
-  lvchange -an $hddsrc/$crypt
-  vgchange -an $hddsrc
-  vgchange -ay $hddsrc
-  lvchange -ay $hddsrc/$data
-  lvchange -ay $hddsrc/$crypt
-fi
-if [ ! "$mounted_dest_data" -a ! "$mounted_dest_crypt" ]; then
-  lvchange -an $hdddest/$data
-  lvchange -an $hdddest/$crypt
-  vgchange -an $hdddest
-  vgchange -ay $hdddest
-  lvchange -ay $hdddest/$data
-  lvchange -ay $hdddest/$crypt
 fi
 
 unlock() {
