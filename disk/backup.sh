@@ -19,6 +19,11 @@ while getopts shiv opt; do
   esac
 done
 
+if [ $USER != root ]; then
+  echo 'Error: must be run as root'
+  exit 1
+fi
+
 # 1. mount
 echo -e '\x1b[38;05;2mStep 1: Mounting filesystem\e[0m'
 
@@ -38,9 +43,9 @@ is_mounted() {
 # server implemented memory: 12GB
 # 2% = 120MB
 # dirty_expire_centisecs = 1.00 sec
-sudo sysctl -w vm.dirty_background_ratio=1 # default 10
-sudo sysctl -w vm.dirty_ratio=2 # default 40
-sudo sysctl -w vm.dirty_expire_centisecs=100 # default 500
+sysctl -w vm.dirty_background_ratio=1 # default 10
+sysctl -w vm.dirty_ratio=2 # default 40
+sysctl -w vm.dirty_expire_centisecs=100 # default 500
 
 mounted_src_data="$(is_mounted $hddsrc-$data)"
 mounted_dest_data="$(is_mounted $hdddest-$data)"
