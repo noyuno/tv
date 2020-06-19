@@ -6,7 +6,7 @@ hddsrc=hddsg0
 hdddest=hddsg1
 data=data0
 crypt=crypt0
-rsyncopt='-auhH --delete --info=progress2 --exclude=.snapshot --rsync-path="ionice -c3 nice -n 10 rsync"'
+rsyncopt="-auhH --delete --info=progress2 --exclude=.snapshot --rsync-path='ionice -c3 nice -n 10 rsync'"
 source /home/noyuno/tv/.env
 
 while getopts shiv opt; do

@@ -73,9 +73,16 @@ sudo ./tv/backup.sh
 
 ## パフォーマンス測定
 
+### シーケンシャルライト速度
+
 ~~~
 dd if=/dev/zero of=/mnt/hddsg0-data/test bs=1M count=1024 oflag=direct
 ~~~
+
+### キャッシュ
+
+[Linuxページキャッシュの設定を変更してWrite I/Oをチューニングしたメモ - YOMON8.NET](https://yomon.hatenablog.com/entry/2017/04/01/131732)
+
 
 ## Samba
 
