@@ -53,7 +53,7 @@ require_unlock=()
 [ ! "$mounted_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
 [ ! "$mounted_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
 if [ ${#require_unlock[@]} -gt 0 ]; then
-  read -sp "Enter passphrase for ${a[@]}: " pass
+  read -sp "Enter passphrase for ${require_unlock[@]}: " pass
   tty -s && echo
 fi
 
