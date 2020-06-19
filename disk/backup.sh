@@ -20,15 +20,20 @@ while getopts shiv opt; do
 done
 
 if [ $USER != root ]; then
-  echo 'Error: must be run as root'
+  echo 'Error: must be run as root' 1>&2
   exit 1
 fi
 
 # 1. mount
 echo -e '\x1b[38;05;2mStep 1: Mounting filesystem\e[0m'
 
-read -sp "Enter passphrase for /dev/mapper/$hddsrc-$crypt and /dev/mapper/$hdddest-$crypt: " pass
-tty -s && echo
+# [Linuxページキャッシュの設定を変更してWrite I/Oをチューニングしたメモ - YOMON8.NET](https://yomon.hatenablog.com/entry/2017/04/01/131732)
+# server implemented memory: 12GB
+# 2% = 120MB
+# dirty_expire_centisecs = 1.00 sec
+sysctl -w vm.dirty_background_ratio=1 # default 10
+sysctl -w vm.dirty_ratio=2 # default 40
+sysctl -w vm.dirty_expire_centisecs=100 # default 500
 
 is_mounted() {
   dev=$1
@@ -39,18 +44,18 @@ is_mounted() {
   mount | grep ^/dev/mapper/$dev\ on\ /mnt/$mpoint\ type\ xfs || echo ''
 }
 
-# [Linuxページキャッシュの設定を変更してWrite I/Oをチューニングしたメモ - YOMON8.NET](https://yomon.hatenablog.com/entry/2017/04/01/131732)
-# server implemented memory: 12GB
-# 2% = 120MB
-# dirty_expire_centisecs = 1.00 sec
-sysctl -w vm.dirty_background_ratio=1 # default 10
-sysctl -w vm.dirty_ratio=2 # default 40
-sysctl -w vm.dirty_expire_centisecs=100 # default 500
-
 mounted_src_data="$(is_mounted $hddsrc-$data)"
 mounted_dest_data="$(is_mounted $hdddest-$data)"
 mounted_src_crypt="$(is_mounted $hddsrc-$crypt-data $hddsrc-$crypt)"
 mounted_dest_crypt="$(is_mounted $hdddest-$crypt-data $hdddest-$crypt)"
+
+require_unlock=()
+[ ! "$mounted_src_crypt" ] && ("${require_unlock[@]}" $hddsrc-$crypt)
+[ ! "$mounted_dest_crypt" ] && ("${require_unlock[@]}" $hdddest-$crypt)
+if [ ${#require_unlock[@]} -gt 0 ]; then
+  read -sp "Enter passphrase for ${a[@]}: " pass
+  tty -s && echo
+fi
 
 # bug fix
 if [ ! "$mounted_src_data" -a ! "$mounted_src_crypt" ]; then
@@ -70,6 +75,12 @@ if [ ! "$mounted_dest_data" -a ! "$mounted_dest_crypt" ]; then
   lvchange -ay $hdddest/$crypt
 fi
 
+unlock() {
+  target=$1
+  dest=$2
+  echo pass | cryptsetup open $target $dest
+}
+
 mount_lv() {
   dev=$1
   mpoint=$2
@@ -82,8 +93,12 @@ mount_lv() {
 
 [ ! "$mounted_src_data" ] &&   mount_lv $hddsrc-$data
 [ ! "$mounted_dest_data" ] &&  mount_lv $hdddest-$data
-[ ! "$mounted_src_crypt" ] &&  mount_lv $hddsrc-$crypt-data $hddsrc-$crypt
-[ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-data $hdddest-$crypt
+[ ! "$mounted_src_crypt" ] &&  \
+  unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-data && \
+  mount_lv $hddsrc-$crypt-data $hddsrc-$crypt
+[ ! "$mounted_dest_crypt" ] && \
+  unlock /dev/mapper/$hdddest-$crypt $hdddest-$crypt-data && \
+  mount_lv $hdddest-$crypt-data $hdddest-$crypt
 
 # 2. system
 if [ "$backup_system" ]; then
