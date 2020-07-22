@@ -19,19 +19,18 @@ cryptsetup benchmark
 ~~~
 
 ~~~
-sudo vgcreate hddsg0 /dev/sda1
-sudo lvcreate -L 4T /dev/mapper/hddsg0 -n data
-sudo lvcreate -L 1T /dev/mapper/hddsg0 -n crypt
-sudo mkfs.xfs /dev/hddsg0/data
-sudo cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/hddsg0/crypt
-sudo cryptsetup open /dev/mapper/hddsg0-crypt hddsg0-crypt-data
-sudo mkfs.xfs /dev/mapper/hddsg0-crypt-data
+sudo vgcreate hddsg0 /dev/sdb1
+sudo lvcreate -L 4T /dev/mapper/hddsg0 -n data0
+sudo lvcreate -L 1T /dev/mapper/hddsg0 -n crypt0
+sudo mkfs.xfs /dev/mapper/hddsg0-data0
+sudo cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/mapper/hddsg0-crypt0
+sudo cryptsetup open /dev/mapper/hddsg0-crypt0 hddsg0-crypt0-data
+sudo mkfs.xfs /dev/mapper/hddsg0-crypt0-data
 
-sudo mkdir /mnt/hddsg0-data
-sudo mount /dev/hddsg0/data /mnt/hddsg0-data
-sudo mkdir /mnt/hddsg0-crypt
-sudo mount /dev/mapper/hddsg0-crypt-data /mnt/hddsg0-crypt
-sudo chown noyuno.noyuno /mnt/hddsg0-crypt/private
+sudo mkdir /mnt/hddsg0-data0
+sudo mount /dev/mapper/hddsg0-data0 /mnt/hddsg0-data0
+sudo mkdir /mnt/hddsg0-crypt0
+sudo mount /dev/mapper/hddsg0-crypt0-data /mnt/hddsg0-crypt0
 ~~~
 
 ### hddsg2
@@ -68,10 +67,18 @@ sudo rsync -av /mnt/hdd/ /mnt/hddsg0-data
 ## バックアップ
 
 ~~~
-sudo ./tv/backup.sh
+sudo ./tv/backup.sh -sh
 ~~~
 
+## リストア
+
+/はxfsrestore、/bootはrestore、/boot/efiはtarを使って復元する。
+
+また、`/etc/default/grub`のLVMの部分を修正する。
+
 ## パフォーマンス測定
+
+ThinPoolは遅すぎ（40MB/s程度）。特に動的割り当てに時間かかる。ThinPoolでなかったら170MB/s程度出る。
 
 ### シーケンシャルライト速度
 
@@ -101,8 +108,8 @@ sudo nano /etc/fstab
 UUID=c1f041e1-2233-436f-a486-c2db9040482d /boot  ext4    defaults        1 2
 UUID=2971-857F           /boot/efi               vfat    umask=0077,shortname=winnt 0 2
 /dev/mapper/cl_m1-data   /mnt/data               xfs     defaults        0 0
-/dev/mapper/cl_m1-vm     /mnt/vm                 xfs     defaults        0 0
-/dev/mapper/hddsg0-data  /mnt/hddsg0-data        xfs     defaults        0 0
+/dev/mapper/hddtd0-data0  /mnt/hddtd0-data0        xfs     defaults,nofail        0 0
+/dev/mapper/hddsg0-data0  /mnt/hddsg0-data0        xfs     defaults,nofail        0 0
 ~~~
 
 ~~~
