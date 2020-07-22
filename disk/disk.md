@@ -12,7 +12,7 @@ dictcheck=0
 ### hddsg0
 
 ~~~
-sudo gdisk /dev/sdc
+sudo gdisk /dev/sdf
 > o y
 > n 8e00
 cryptsetup benchmark
@@ -34,29 +34,29 @@ sudo mount /dev/mapper/hddsg0-crypt-data /mnt/hddsg0-crypt
 sudo chown noyuno.noyuno /mnt/hddsg0-crypt/private
 ~~~
 
-### hddsg1
+### hddsg2
 
 ~~~
-sudo gdisk /dev/sdc
+sudo gdisk /dev/sdf
 > o y
 > n 8e00
 cryptsetup benchmark
 ~~~
 
 ~~~
-sudo pvcreate /dev/sdc1
-sudo vgcreate hddsg1 /dev/sdc1
-sudo lvcreate -L 4T /dev/mapper/hddsg1 -n data0
-sudo lvcreate -L 1T /dev/mapper/hddsg1 -n crypt0
-sudo mkfs.xfs /dev/mapper/hddsg1-data0
-sudo cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/mapper/hddsg1-crypt0
-sudo cryptsetup open /dev/mapper/hddsg1-crypt0 hddsg1-crypt0-data
-sudo mkfs.xfs /dev/mapper/hddsg1-crypt0-data
+sudo pvcreate /dev/sdf1
+sudo vgcreate hddsg2 /dev/sdf1
+sudo lvcreate -L 4T /dev/mapper/hddsg2 -n data0
+sudo lvcreate -L 1T /dev/mapper/hddsg2 -n crypt0
+sudo mkfs.xfs /dev/mapper/hddsg2-data0
+sudo cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/mapper/hddsg2-crypt0
+sudo cryptsetup open /dev/mapper/hddsg2-crypt0 hddsg2-crypt0-data
+sudo mkfs.xfs /dev/mapper/hddsg2-crypt0-data
 
-sudo mkdir /mnt/hddsg1-data0
-sudo mount /dev/mapper/hddsg1-data0 /mnt/hddsg1-data0
-sudo mkdir /mnt/hddsg1-crypt0
-sudo mount /dev/mapper/hddsg1-crypt0-data /mnt/hddsg1-crypt0
+sudo mkdir /mnt/hddsg2-data0
+sudo mount /dev/mapper/hddsg2-data0 /mnt/hddsg2-data0
+sudo mkdir /mnt/hddsg2-crypt0
+sudo mount /dev/mapper/hddsg2-crypt0-data /mnt/hddsg2-crypt0
 ~~~
 
 ## ファイルコピー
@@ -83,6 +83,9 @@ dd if=/dev/zero of=/mnt/hddsg0-data/test bs=1M count=1024 oflag=direct
 
 [Linuxページキャッシュの設定を変更してWrite I/Oをチューニングしたメモ - YOMON8.NET](https://yomon.hatenablog.com/entry/2017/04/01/131732)
 
+### rsync ハードリンク
+
+オプションに`--no-inc-recursive`を指定していればハードリンクもファイルの内容をコピーすることなく効率よくコピーできる。
 
 ## Samba
 

@@ -25,7 +25,8 @@ create () {
   h=.snapshot
   echo creating history: $d/$h/$dt
   mkdir -p $d/$h/$dt
-  command ls -1a $d | grep -v -e '^\'$h'$' -e '^\.$' -e '^\..$' | xargs -IPLACE cp -al $d/PLACE $d/$h/$dt
+  command ls -1aU $d | grep -v -e '^\'$h'$' -e '^\.$' -e '^\..$' | xargs -IPLACE cp -al $d/PLACE $d/$h/$dt
+  echo "snapshot $d: $(find $d/$h/$dt -type d -name '*' | wc -l) directories, $(find $d/$h/$dt -type f -name '*' | wc -l) files"
 }
 
 [ "$mounted_src_data" ] &&   create /mnt/$hddsrc-$data

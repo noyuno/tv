@@ -3,10 +3,11 @@
 set -e
 
 hddsrc=hddsg0
-hdddest=hddsg1
+hdddest=hddsg2
 data=data0
 crypt=crypt0
-rsyncopt="-auhH --delete --info=progress2 --exclude=.snapshot"
+rsyncopt="-auhH --delete --info=progress2 --no-inc-recursive"
+#rsyncopt="-auhH --delete --info=progress2 --exclude=.snapshot --no-inc-recursive"
 source /home/noyuno/tv/.env
 
 while getopts shiv opt; do
@@ -67,15 +68,15 @@ if [ ! "$mounted_dest_data" -a ! "$mounted_dest_crypt" ]; then
   lvchange -ay $hdddest/$crypt
 fi
 
-unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-data)"
-unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-data)"
+unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-data || echo '')"
+unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-data || echo '')"
 
 pass=
 require_unlock=()
 [ ! "$unlocked_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
 [ ! "$unlocked_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
 if [ ${#require_unlock[@]} -gt 0 ]; then
-  read -sp "Enter passphrase for ${arr[*]}: " pass
+  read -sp "Enter passphrase for ${require_unlock[*]}: " pass
   tty -s && echo
   if [ ! "$pass" ]; then
     echo 'error: empty password' 1>/dev/null
@@ -86,7 +87,7 @@ fi
 unlock() {
   target=$1
   dest=$2
-  echo pass | cryptsetup open $target $dest
+  echo "$pass" | cryptsetup open $target $dest
 }
 
 [ ! "$unlocked_src_crypt" ] && unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-data
@@ -113,8 +114,8 @@ if [ "$backup_system" ]; then
 
   mkdir -p /mnt/$hddsrc-$data/backup/system
   pushd $_
-  fdisk -l /dev/nvme0n1 >fdisk
-  gdisk -l /dev/nvme0n1 > gdisk
+  fdisk -l /dev/disk/by-id/ata-TS120GMTS820S_F908220586 > fdisk
+  gdisk -l /dev/disk/by-id/ata-TS120GMTS820S_F908220586 > gdisk
   df -h > df
   cp /etc/fstab fstab
   pvdisplay > pvdisplay
@@ -124,8 +125,10 @@ if [ "$backup_system" ]; then
   firewall-cmd --list-all-zones > firewall-all-zones
   sync
   tar czf efi-vfat.tar.gz /boot/efi
-  dump -0 -f boot-ext4dump.gz /dev/nvme0n1p2
-  xfsdump -v silent -l 0 - /dev/cl_m1/r | nice -n 10 pigz > root-xfsdump.gz
+  dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-TS120GMTS820S_F908220586-part2
+  dump -0 -z -f m2tr0-data0-ext4dump.gz /dev/mapper/m2tr0-data0
+  #xfsdump -v silent -l 0 - /dev/mapper/m2tr0-data0 | nice -n 10 pigz > m2tr0-data0-xfsdump.gz
+  xfsdump -v silent -l 0 - /dev/mapper/m2tr0-data1 | nice -n 10 pigz > m2tr0-data1-xfsdump.gz
   popd
 fi
 
