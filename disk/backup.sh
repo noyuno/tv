@@ -32,9 +32,10 @@ echo -e '\x1b[38;05;2mStep 1: Mounting filesystem\e[0m'
 # server implemented memory: 12GB
 # 2% = 120MB
 # dirty_expire_centisecs = 1.00 sec
-sysctl -w vm.dirty_background_ratio=1 # default 10
-sysctl -w vm.dirty_ratio=2 # default 40
-sysctl -w vm.dirty_expire_centisecs=100 # default 500
+
+#sysctl -w vm.dirty_background_ratio=1 # default 10
+#sysctl -w vm.dirty_ratio=2 # default 40
+#sysctl -w vm.dirty_expire_centisecs=100 # default 500
 
 is_mounted() {
   dev=$1
