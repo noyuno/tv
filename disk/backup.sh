@@ -2,11 +2,13 @@
 
 set -e
 
+dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
+snapshot=snapshot
 hddsrc=hddsg0
 hdddest=hddsg2
 data=data0
 crypt=crypt0
-rsyncopt="-auhH --delete --info=progress2 --no-inc-recursive"
+rsyncopt="-auhH --info=progress2 --no-inc-recursive"
 #rsyncopt="-auhH --delete --info=progress2 --exclude=.snapshot --no-inc-recursive"
 source /home/noyuno/tv/.env
 
@@ -113,10 +115,9 @@ mount_lv() {
 if [ "$backup_system" ]; then
   echo -e '\x1b[38;05;2mStep 2: Backup system\e[0m'
 
-  mkdir -p /mnt/$hddsrc-$data/backup/system
+  mkdir -p /mnt/$hddsrc-$data/active/backup/system
   pushd $_
-  fdisk -l /dev/disk/by-id/ata-TS120GMTS820S_F908220586 > fdisk
-  gdisk -l /dev/disk/by-id/ata-TS120GMTS820S_F908220586 > gdisk
+  gdisk -l /dev/disk/by-id/ata-SanDisk_SDSSDA240G_154594401229 > gdisk
   df -h > df
   cp /etc/fstab fstab
   pvdisplay > pvdisplay
@@ -126,10 +127,10 @@ if [ "$backup_system" ]; then
   firewall-cmd --list-all-zones > firewall-all-zones
   sync
   tar czf efi-vfat.tar.gz /boot/efi
-  dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-TS120GMTS820S_F908220586-part2
-  dump -0 -z -f m2tr0-data0-ext4dump.gz /dev/mapper/m2tr0-data0
+  dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-SanDisk_SDSSDA240G_154594401229-part2
+  #dump -0 -z -f m2tr0-data0-ext4dump.gz /dev/mapper/m2tr0-data0
   #xfsdump -v silent -l 0 - /dev/mapper/m2tr0-data0 | nice -n 10 pigz > m2tr0-data0-xfsdump.gz
-  xfsdump -v silent -l 0 - /dev/mapper/m2tr0-data1 | nice -n 10 pigz > m2tr0-data1-xfsdump.gz
+  xfsdump -v silent -l 0 - /dev/mapper/cl-root | nice -n 10 pigz > cl-root-xfsdump.gz
   popd
 fi
 
@@ -137,7 +138,7 @@ fi
 if [ "$backup_home" ]; then
   echo -e '\x1b[38;05;2mStep 3: Backup home\e[0m'
 
-  homedest=/mnt/$hddsrc-$data/backup/home
+  homedest=/mnt/$hddsrc-$data/active/backup/home
   mkdir -p $homedest
 
   # home dir
@@ -152,8 +153,14 @@ fi
 # 4. USB HDD data
 echo -e '\x1b[38;05;2mStep 4: Syncing HDD\e[0m'
 
-rsync $rsyncopt /mnt/$hddsrc-$data/ /mnt/$hdddest-$data
-rsync $rsyncopt /mnt/$hddsrc-$crypt/ /mnt/$hdddest-$crypt
+[ ! -d /mnt/$hdddest-$data/$snapshot ] && mkdir /mnt/$hdddest-$data/$snapshot
+destopt=
+if [ -d /mnt/$hdddest-$data/inactive ]; then
+    mv /mnt/$hdddest-$data/inactive /mnt/$hdddest-$data/$snapshot/$dt
+    destopt="--link-dest=../$snapshot/$dt"
+fi
+rsync $rsyncopt $destopt /mnt/$hddsrc-$data/active/ /mnt/$hdddest-$data/inactive
+rsync $rsyncopt $destopt /mnt/$hddsrc-$crypt/active/ /mnt/$hdddest-$crypt/inactive
 
 # 5. umount
 echo -e '\x1b[38;05;2mStep 5: Unmounting filesystem\e[0m'
