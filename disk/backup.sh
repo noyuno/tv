@@ -138,21 +138,25 @@ fi
 if [ "$backup_home" ]; then
   echo -e '\x1b[38;05;2mStep 3: Backup home\e[0m'
 
-  homedest=/mnt/$hddsrc-$data/active/backup/home
-  mkdir -p $homedest
+  abdest=/mnt/$hddsrc-$data/active/backup
+  mkdir -p $abdest/home
 
   # home dir
   pushd /home/noyuno
-  tar -cp . | pigz > $homedest/home.tar.gz
+  tar -cp . | pigz > $abdest/home/home.tar.gz
   popd
 
   # database
-  mysqldump -unoyuno -p$EPGSTATION_DB_PASS --single-transaction epgstation | nice -n 10 pigz > $homedest/epgstation-mysql.gz
+  #mysqldump -unoyuno -p$EPGSTATION_DB_PASS --single-transaction epgstation | nice -n 10 pigz > $homedest/epgstation-mysql.gz
+  pushd /home/noyuno/EPGStation
+  npm run backup $abdest/epgstation/database
+  popd
 fi
 
 # 4. USB HDD data
 echo -e '\x1b[38;05;2mStep 4: Syncing HDD\e[0m'
 
+# data0
 [ ! -d /mnt/$hdddest-$data/$snapshot ] && mkdir /mnt/$hdddest-$data/$snapshot
 destopt=
 if [ -d /mnt/$hdddest-$data/inactive ]; then
@@ -160,6 +164,14 @@ if [ -d /mnt/$hdddest-$data/inactive ]; then
     destopt="--link-dest=../$snapshot/$dt"
 fi
 rsync $rsyncopt $destopt /mnt/$hddsrc-$data/active/ /mnt/$hdddest-$data/inactive
+
+# crypt0
+[ ! -d /mnt/$hdddest-$crypt/$snapshot ] && mkdir /mnt/$hdddest-$crypt/$snapshot
+destopt=
+if [ -d /mnt/$hdddest-$crypt/inactive ]; then
+    mv /mnt/$hdddest-$crypt/inactive /mnt/$hdddest-$crypt/$snapshot/$dt
+    destopt="--link-dest=../$snapshot/$dt"
+fi
 rsync $rsyncopt $destopt /mnt/$hddsrc-$crypt/active/ /mnt/$hdddest-$crypt/inactive
 
 # 5. umount
