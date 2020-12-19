@@ -120,7 +120,7 @@ snapshot() {
   dest=$2
   subvolume=$(snapper -c $config --json get-config | jq -r '.SUBVOLUME')
   snapper -c $config create -t single -d backup -u important=yes
-  currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv')
+  currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv' | sort | tail -n 1)
   mkdir -p $dest
   beforerev=$(ls -v1 $dest | tail -n 1)
   if [ "$beforerev" ]; then
