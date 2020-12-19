@@ -118,10 +118,8 @@ sudo cp smb.conf /etc/samba/smb.conf
 ~~~
 
 ~~~
-sudo mkdir -p /mnt/data/share/tv
-cd /mnt/data/share/tv
-ln -sfnv /mnt/data/ts m2-ts
-ln -sfnv /mnt/hddsg0-data0/mp4 hdd-mp4
+sudo mkdir -p /mnt/data
+sudo ln -sfnv /mnt/hddsg0-data0/active/tv /mnt/data/tv
 
 sudo systemctl enable --now smb nmb
 

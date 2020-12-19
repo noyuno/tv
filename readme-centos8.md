@@ -2,10 +2,10 @@
 
 ## 1. 要件
 
-1. AMD Ryzen 3 CPU
-2. PX4-Q3PX4 (DTV x4, BS|CS x4)
+1. NUC8i3BEH (Coffee Lake (8th), Intel Core i3-8109U, Intel® Iris® Plus Graphics 655, 4GB, M.2 SSD）
+2. PX4-W3U4 (DTV x2, BS|CS x2)
 3. カードリーダー
-4. Ubuntu 20.04 LTS
+4. CentOS 8
 
 ## 2. 仕様
 
@@ -24,34 +24,89 @@
 ## 4. インストーラを起動
 
 - language: english
-- keyboard: englist
-- install: docker, microkube
+- keyboard: japanese
+- timezone: Asia/Tokyo
+- install: base only
 - hostname: m1.lan
 
 ~~~
-Filesystem                           Size  Used Avail Use% Mounted on
-udev                                 2.9G     0  2.9G   0% /dev
-tmpfs                                594M  1.4M  593M   1% /run
-/dev/mapper/ubuntu--vg-ssdub0--root  150G  6.4G  143G   5% /
-/dev/sda2                            976M  104M  805M  12% /boot
-/dev/sda1                            511M  7.8M  504M   2% /boot/efi
+Filesystem                Size  Used Avail Use% Mounted on
+devtmpfs                  1.9G     0  1.9G   0% /dev
+tmpfs                     1.9G     0  1.9G   0% /dev/shm
+tmpfs                     1.9G   17M  1.9G   1% /run
+tmpfs                     1.9G     0  1.9G   0% /sys/fs/cgroup
+/dev/mapper/cl_m1-r        16G  7.9G  8.2G  50% /
+/dev/nvme0n1p2            976M  100M  810M  11% /boot
+/dev/nvme0n1p1            599M  6.8M  593M   2% /boot/efi
+tmpfs                     382M     0  382M   0% /run/user/1000
+/dev/mapper/cl_m1-backup  6.0G   76M  6.0G   2% /mnt/backup
+/dev/mapper/cl_m1-data    436G  3.6G  433G   1% /mnt/data
 ~~~
 
-### 5. 基本的なソフトウェアのインストール
+## 5. ネットワーク設定
+
+予め[RPM resource NetworkManager-wifi(x86-64)](https://rpmfind.net/linux/rpm2html/search.php?query=NetworkManager-wifi(x86-64))をダウンロードする。
 
 ~~~
-sudo apt update
-sudo apt -y upgrade
-sudo apt -y install zsh build-essential cmake pkg-config autoconf nodejs ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon npm mariadb-server samba firewalld smartmontools neovim ripgrep jq
+sudo mount /dev/sdb1 /mnt
+sudo rpm -ivh /mnt/NetworkManager-wifi* /mnt/wpa_supplicant*
+sudo systemctl restart NetworkManager
+nmcli d
 ~~~
 
-## 6. ネットワーク設定
+SSHサーバはすでに立ち上がっているので、ネットワーク設定が終わったらすぐに接続できる。
 
+avahiを設定
 
-DNS:`/etc/systemd/resolved.conf`
+[Avahi - ArchWiki](https://wiki.archlinux.jp/index.php/Avahi)を参照。
+
+## 6. ソフトウェアインストール
+
+### 6.1. アップグレード
 
 ~~~
-DNS=192.168.100.1 8.8.8.8 8.8.4.4
+sudo dnf -y update
+sudo reboot
+~~~
+
+### 6.2. カーネルバージョン固定
+
+/etc/dnf/dnf.conf
+~~~
+excludepkgs=microcode_ctl kernel* docker-ce
+~~~
+
+/etc/sysconfig/kernel
+~~~
+UPDATEDEFAULT=no
+~~~
+
+### 6.3. 基本的なソフトウェアのインストール
+
+~~~
+curl -sL https://rpm.nodesource.com/setup_12.x | sudo bash -
+sudo dnf config-manager --set-enabled PowerTools
+sudo dnf localinstall -y --nogpgcheck https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm
+sudo dnf install -y --nogpgcheck https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm
+sudo dnf install -y http://rpmfind.net/linux/epel/7/x86_64/Packages/s/SDL2-2.0.10-1.el7.x86_64.rpm
+sudo dnf -y update
+sudo dnf -y install git tmux zsh tar wget gcc gcc-c++ nodejs ffmpeg unzip make kernel-headers kernel-devel elfutils-devel elfutils-libelf-devel yum-utils htop cmake bzip2 pcsc-lite pcsc-lite-libs pcsc-lite-ccid nss-tools avahi perl-ExtUtils-MakeMaker autoconf automake mariadb-server mariadb samba samba-client chrony xfsdump dump gpac bind-utils gdisk smartmontools sm rsync lm_sensors
+sudo chsh -s /bin/zsh noyuno
+~~~
+
+### 6.4. エディタのインストール
+
+~~~
+sudo yum-config-manager --add-repo=https://copr.fedorainfracloud.org/coprs/carlwgeorge/ripgrep/repo/epel-7/carlwgeorge-ripgrep-epel-7.repo
+sudo dnf -y install nano ripgrep vim-enhanced jq
+sudo pip3 install neovim
+git clone https://github.com/noyuno/dotfiles
+./dotfiles/bin/dfdeploy
+
+vi
+
+:call dein#install()
+:q
 ~~~
 
 ## 7. sudoの設定
@@ -69,7 +124,9 @@ UTC非対応なので、JSTにする。
 
 ~~~
 date
-timedatectl set-timezone Asia/Tokyo
+sudo systemctl start chronyd
+sudo systemctl status chronyd
+sudo systemctl enable chronyd
 date
 ~~~
 
@@ -79,25 +136,11 @@ date
 git clone https://github.com/nns779/px4_drv -b next
 cd px4_drv/fwtool
 make
-wget http://plex-net.co.jp/download/pxq3pe4v1.4.zip
-unzip -oj pxq3pe4v1.4.zip x64/PXQ3PE4.sys
-./fwtool PXQ3PE4.sys it930x-firmware.bin
+wget http://plex-net.co.jp/plex/pxw3u4/pxw3u4_BDA_ver1x64.zip -O pxw3u4_BDA_ver1x64.zip
+unzip -oj pxw3u4_BDA_ver1x64.zip pxw3u4_BDA_ver1x64/PXW3U4.sys
+./fwtool PXW3U4.sys it930x-firmware.bin
 sudo cp it930x-firmware.bin /lib/firmware/
-cd ..
-~~~
-
-DKMSを使う場合
-
-~~~
-sudo cp -a ./ /usr/src/px4_drv-0.2.1
-sudo dkms add px4_drv/0.2.1
-sudo dkms install px4_drv/0.2.1
-~~~
-
-DKMSを使わない場合
-
-~~~
-cd driver
+cd ../driver
 sudo make install
 lsmod | grep -e ^px4_drv
 ls /dev/px4video*
@@ -174,8 +217,35 @@ sudo pm2 install pm2-logrotate
 sudo npm install mirakurun -g --unsafe-perm --production
 echo [] | sudo tee /usr/local/var/db/mirakurun/programs.json
 sudo chmod -R go+rw /usr/local/etc/mirakurun
-sudo cp tuners.yml /usr/local/etc/mirakurun/tuners.yml
+vi /usr/local/etc/mirakurun/tuners.yml
+~~~
 
+/usr/local/etc/mirakurun/tuners.yml
+~~~
+- name: PX4-S1
+  types:
+    - BS
+    - CS
+  command: /usr/local/bin/recpt1 --b25 --strip --device /dev/px4video0 <channel> - -
+
+- name: PX4-S2
+  types:
+    - BS
+    - CS
+  command: /usr/local/bin/recpt1 --b25 --strip --device /dev/px4video1 <channel> - -
+
+- name: PX4-G1
+  types:
+    - GR
+  command: /usr/local/bin/recpt1 --b25 --strip --device /dev/px4video2 <channel> - -
+
+- name: PX4-G2
+  types:
+    - GR
+  command: /usr/local/bin/recpt1 --b25 --strip --device /dev/px4video3 <channel> - -
+~~~
+
+~~~
 sudo pm2 restart mirakurun-server --node-args --max_old_space_size=1024 
 sudo pm2 logs mirakurun-server
 curl -X PUT "http://localhost:40772/api/config/channels/scan"
@@ -193,30 +263,31 @@ sudo mysql_secure_installation
   Remove test database and access to it: y
   Reload privilege table now: y
 sudo vi /etc/my.cnf.d/mariadb-server.cnf
-sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
+sudo nano /etc/my.cnf.d/mariadb-server.cnf
   [mariadb]
   character-set-server = utf8mb4
-sudo nano /etc/mysql/mariadb.conf.d/50-client.cnf
   [client-mariadb]
   default-character-set = utf8mb4
 sudo systemctl restart mariadb
-sudo mysql -u root -p
+mysql -u root -p
   show variables like "chara%";
   create user  'noyuno'@'localhost' identified by '';
   create database epgstation;
   grant all on epgstation.* to 'noyuno'@'localhost';
 ~~~
 
-パスワード変更
-
-~~~
-set password for noyuno@localhost = PASSWORD('password');
-~~~
-
 ## 15. セキュリティの設定
 
+~~~
+sudo setenforce 0
+sudo nano /etc/sysconfig/selinux
+~~~
+
+~~~
+SELINUX=disabled
+~~~
+
 ~~~sh
-sudo systemctl enable --now firewalld
 sudo firewall-cmd --zone=public --add-service=http --permanent
 sudo firewall-cmd --zone=public --add-port=81/tcp --permanent
 sudo firewall-cmd --zone=public --add-port=81/udp --permanent
@@ -255,17 +326,12 @@ npm run build
 cd
 ~~~
 
-データベースを復元
-
-~~~
-npm run restore /mnt/hddsg0-data0/active/backup/epgstation/database
-~~~
-
 ~~~
 git clone https://github.com/noyuno/tv
 cd tv
 git submodule update --init --recursive
 ./install
+sudo mkdir /mnt/data/{mp4,ts}
 ~~~
 
 `EPGStation/config.json.example`をコピーしてパスワード部分を編集する！

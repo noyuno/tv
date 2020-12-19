@@ -1,3 +1,5 @@
+#!/bin/bash -e
+
 #!/bin/bash
 
 set -e
@@ -5,11 +7,9 @@ set -e
 dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
 snapshot=snapshot
 hddsrc=hddsg0
-hdddest=hddsg2
-data=data0
+hdddest=hddsg1
+data=plain0
 crypt=crypt0
-rsyncopt="-auhH --info=progress2 --no-inc-recursive"
-#rsyncopt="-auhH --delete --info=progress2 --exclude=.snapshot --no-inc-recursive"
 source /home/noyuno/tv/.env
 
 while getopts shiv opt; do
@@ -17,7 +17,6 @@ while getopts shiv opt; do
     s) backup_system=1 ;;
     h) backup_home=1 ;;
     v) verbose=-v
-       rsyncopt="$rsyncopt -v"
        set -x ;;
   esac
 done
@@ -117,20 +116,32 @@ if [ "$backup_system" ]; then
 
   mkdir -p /mnt/$hddsrc-$data/active/backup/system
   pushd $_
-  gdisk -l /dev/disk/by-id/ata-SanDisk_SDSSDA240G_154594401229 > gdisk
-  df -h > df
-  cp /etc/fstab fstab
-  pvdisplay > pvdisplay
-  vgdisplay > vgdisplay
-  lvdisplay > lvdisplay
-  sudo nmcli > nmcli
-  firewall-cmd --list-all-zones > firewall-all-zones
-  sync
-  tar czf efi-vfat.tar.gz /boot/efi
-  dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-SanDisk_SDSSDA240G_154594401229-part2
-  #dump -0 -z -f m2tr0-data0-ext4dump.gz /dev/mapper/m2tr0-data0
-  #xfsdump -v silent -l 0 - /dev/mapper/m2tr0-data0 | nice -n 10 pigz > m2tr0-data0-xfsdump.gz
-  xfsdump -v silent -l 0 - /dev/mapper/cl-root | nice -n 10 pigz > cl-root-xfsdump.gz
+    gdisk -l /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624 > gdisk
+    df -h > df
+    cp /etc/fstab fstab
+    pvdisplay > pvdisplay
+    vgdisplay > vgdisplay
+    lvdisplay > lvdisplay
+    sudo nmcli > nmcli
+    firewall-cmd --list-all-zones > firewall-all-zones
+    sync
+    tar czf efi-vfat.tar.gz /boot/efi
+    dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624-part2
+    #xfsdump -v silent -l 0 - /dev/mapper/cl-root | nice -n 10 pigz > cl-root-xfsdump.gz
+  popd
+
+  mkdir -p /mnt/$hddsrc-$data/active/backup/root
+  pushd $_
+    snapper -c root create -t single
+    latest=$(snapper --iso --csvout -c root list --columns number,type,date|grep single |tail -n 1)
+    latestid=$(echo $latest | awk -F, '{print $1}')
+    latestdate=$(echo $latest | awk -F, '{print $3}')
+    latesttime=$(echo $latest | awk -F, '{print $4}')
+    if [ -d /mnt/$hddsrc-$data/active/backup/root/snapshot ]; then
+      btrfs subvolume delete /mnt/$hddsrc-$data/active/backup/root/snapshot
+    fi
+    echo "copying root snapshot (at $latestdate $) to /mnt/$hddsrc-$data/active/backup/root"
+    btrfs send /.snapshots/$latestid/snapshot | pv | btrfs receive /mnt/$hddsrc-$data/active/backup/root
   popd
 fi
 
@@ -139,15 +150,8 @@ if [ "$backup_home" ]; then
   echo -e '\x1b[38;05;2mStep 3: Backup home\e[0m'
 
   abdest=/mnt/$hddsrc-$data/active/backup
-  mkdir -p $abdest/home
-
-  # home dir
-  pushd /home/noyuno
-  tar -cp . | pigz > $abdest/home/home.tar.gz
-  popd
-
+  mkdir -p $abdest/epgstation
   # database
-  #mysqldump -unoyuno -p$EPGSTATION_DB_PASS --single-transaction epgstation | nice -n 10 pigz > $homedest/epgstation-mysql.gz
   pushd /home/noyuno/EPGStation
   npm run backup $abdest/epgstation/database
   popd
@@ -189,3 +193,17 @@ curl -XPOST -d '{
 }' localhost:5050
 echo
 echo -e '\x1b[38;05;2mBackup finished\e[0m'
+
+
+# dump database
+
+
+# backup root
+mkdir -p /mnt/hddsg0-plain0/backup/root/1
+btrfs send /.snapshots/1/snapshot | pv | btrfs receive /mnt/hddsg0-plain0/backup/root/1
+mkdir -p /mnt/hddsg0-plain0/backup/root/153
+btrfs send -p /.snapshots/1/snapshot /.snapshots/153/snapshot | pv | btrfs receive /mnt/hddsg0-plain0/backup/root/153
+
+# backup hddsg0-plain0
+
+# backup hddsg0-crypt0
