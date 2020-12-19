@@ -8,6 +8,7 @@ hddsrc=hddsg0
 hdddest=hddsg1
 data=plain0
 crypt=crypt0
+rootdev=/dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624
 source /home/noyuno/tv/.env
 
 output () {
@@ -141,17 +142,16 @@ echo -e '\x1b[38;05;2mStep 2: Backup system\e[0m'
 
 mkdir -p /mnt/$hddsrc-$data/backup/system
 pushd $_
-  gdisk -l /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624 > gdisk
+  gdisk -l $rootdev > gdisk
   df -h > df
   cp /etc/fstab fstab
   pvdisplay > pvdisplay
   vgdisplay > vgdisplay
   lvdisplay > lvdisplay
-  sudo nmcli > nmcli
   firewall-cmd --list-all-zones > firewall-all-zones
   sync
   tar czf efi-vfat.tar.gz /boot/efi
-  dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624-part2
+  dump -0 -z -f boot-ext4dump.gz $rootdev-part2
 popd
 snapshot root /mnt/$hddsrc-$data/backup/root
 
