@@ -3,7 +3,6 @@
 set -e
 
 dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
-snapshot=snapshot
 hddsrc=hddsg0
 hdddest=hddsg1
 data=plain0
@@ -12,7 +11,7 @@ rootdev=/dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624
 source /home/noyuno/tv/.env
 
 output () {
-  if [ "$verbose" -o $1 -eq 1 ]; then
+  if [ ! "y$verbose" = "y" -o $1 -eq 1 ]; then
     echo "$2"
   elif [ $1 -eq 2 ]; then
     echo "$2"
@@ -111,39 +110,39 @@ mount_lv() {
 [ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-data $hdddest-$crypt
 
 # 2. system
-snapshot() {
+snappercopy() {
   if [ $# -lt 2 ]; then
-    output 3 'snapshot(): requires least 2 arguments: config, dest'
+    output 3 'snappercopy(): requires least 2 arguments: config, dest'
     exit 1
   fi
   config=$1
-  dest=$2
   subvolume=$(snapper -c $config --json get-config | jq -r '.SUBVOLUME')
-  snapper -c $config create -t single -d backup -u important=yes
   currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv' | sort | tail -n 1)
+  src=$subvolume/.snapshots/$currentrev/snapshot
+  dest=$2/$currentrev
   mkdir -p $dest
   beforerev=$(ls -v1 $dest | tail -n 1)
   if [ "$beforerev" ]; then
     exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number=='$beforerev'))|.[]|[.number]|@csv')
     if [ "$exists_before" ]; then
-      output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev (incremental from $subvolume/.snapshots/$beforerev/snapshot)"
-      mkdir -p $dest/$currentrev
-      btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
+      output 2 "sending snapshot from $src to $dest (incremental from $subvolume/.snapshots/$beforerev/snapshot)"
+      mkdir -p $dest
+      btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $src | pv | btrfs receive $dest
     else
-      output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev"
-      mkdir -p $dest/$currentrev
-      btrfs send $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
+      output 2 "sending snapshot from $src to $dest"
+      mkdir -p $dest
+      btrfs send $src | pv | btrfs receive $dest
     fi
   else
-    output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev"
-    mkdir -p $dest/$currentrev
-    btrfs send $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
+    output 2 "sending snapshot from $src to $dest"
+    mkdir -p $dest
+    btrfs send $src | pv | btrfs receive $dest
   fi
 }
 
-echo -e '\x1b[38;05;2mStep 2: Backup system\e[0m'
+output 4 'Step 2: Backup system'
 
-mkdir -p /mnt/$hddsrc-$data/backup/system
+mkdir -p /home/noyuno/backup/system
 pushd $_
   gdisk -l $rootdev > gdisk
   df -h > df
@@ -156,28 +155,31 @@ pushd $_
   tar czf efi-vfat.tar.gz /boot/efi
   dump -0 -z -f boot-ext4dump.gz $rootdev-part2
 popd
-snapshot root /mnt/$hddsrc-$data/backup/root
-
 # 3. database
-echo -e '\x1b[38;05;2mStep 3: Backup database\e[0m'
+output 4 'Step 3: Backup database'
 
-epgdb=/mnt/$hddsrc-$data/backup/epgstation
+epgdb=/home/noyuno/backup/epgstation
 mkdir -p $epgdb
 # database
 pushd /home/noyuno/EPGStation
   npm run backup $epgdb/database
 popd
 
-# 4. USB HDD data
-echo -e '\x1b[38;05;2mStep 4: Syncing HDD\e[0m'
+output 4 'Step 4: Syncing root'
+snapper -c root create -t single -d backup -u important=yes
+snappercopy root /mnt/$hddsrc-$data/backup/root
+snappercopy root /mnt/$hdddest-$data/backup/root
 
-# data0
-snapshot tv /mnt/$hdddest-$data/backup/tv
-# crypt0
-snapshot private /mnt/$hdddest-$crypt/backup/private
+output 4 'Step 5: Syncing tv'
+snapper -c tv create -t single -d backup -u important=yes
+snappercopy tv /mnt/$hdddest-$data/backup/tv
+
+output 4 'Step 6: Syncing private'
+snapper -c private create -t single -d backup -u important=yes
+snappercopy private /mnt/$hdddest-$crypt/backup/private
 
 # 5. umount
-echo -e '\x1b[38;05;2mStep 5: Unmounting filesystem\e[0m'
+output 4 'Step 7: Unmounting filesystem'
 
 sync
 umount /dev/mapper/$hdddest-$data
@@ -190,5 +192,5 @@ curl -XPOST -d '{
     "message": "バックアップが完了しました。"
 }' localhost:5050
 echo
-echo -e '\x1b[38;05;2mBackup finished\e[0m'
+output 4 'Backup finished. Eject USB HDD.'
 
