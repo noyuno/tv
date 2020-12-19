@@ -127,13 +127,16 @@ snapshot() {
     exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number=='$beforerev'))|.[]|[.number]|@csv')
     if [ "$exists_before" ]; then
       output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev (incremental from $subvolume/.snapshots/$beforerev/snapshot)"
+      mkdir -p $dest/$currentrev
       btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
     else
-        output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev"
+      output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev"
+      mkdir -p $dest/$currentrev
       btrfs send $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
     fi
   else
     output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev"
+    mkdir -p $dest/$currentrev
     btrfs send $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
   fi
 }
