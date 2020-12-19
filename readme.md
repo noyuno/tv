@@ -42,7 +42,7 @@ tmpfs                                594M  1.4M  593M   1% /run
 ~~~
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install zsh build-essential cmake pkg-config autoconf nodejs ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon npm mariadb-server samba firewalld smartmontools neovim ripgrep jq
+sudo apt -y install zsh build-essential cmake pkg-config autoconf nodejs ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon npm mariadb-server samba firewalld smartmontools neovim ripgrep jq dump
 ~~~
 
 ## 6. ネットワーク設定

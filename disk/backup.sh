@@ -124,7 +124,7 @@ snapshot() {
   mkdir -p $dest
   beforerev=$(ls -v1 $dest | tail -n 1)
   if [ "$beforerev" ]; then
-    exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number==$before))|.[]|[.number]|@csv')
+    exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number=='$beforerev'))|.[]|[.number]|@csv')
     if [ "$exists_before" ]; then
       output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev (incremental from $subvolume/.snapshots/$beforerev/snapshot)"
       btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
