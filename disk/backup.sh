@@ -119,11 +119,11 @@ snapshot() {
   dest=$2
   subvolume=$(snapper -c $config --json get-config | jq -r '.SUBVOLUME')
   snapper -c $config create -t single -d backup -u important=yes
-  currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.root|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv')
+  currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv')
   mkdir -p $dest
   beforerev=$(ls -v1 $dest | tail -n 1)
   if [ "$beforerev" ]; then
-    exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.root|map(select(.number==$before))|.[]|[.number]|@csv')
+    exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number==$before))|.[]|[.number]|@csv')
     if [ "$exists_before" ]; then
       output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev (incremental from $subvolume/.snapshots/$beforerev/snapshot)"
       btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
@@ -137,25 +137,23 @@ snapshot() {
   fi
 }
 
-if [ "$backup_system" ]; then
-  echo -e '\x1b[38;05;2mStep 2: Backup system\e[0m'
+echo -e '\x1b[38;05;2mStep 2: Backup system\e[0m'
 
-  mkdir -p /mnt/$hddsrc-$data/backup/system
-  pushd $_
-    gdisk -l /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624 > gdisk
-    df -h > df
-    cp /etc/fstab fstab
-    pvdisplay > pvdisplay
-    vgdisplay > vgdisplay
-    lvdisplay > lvdisplay
-    sudo nmcli > nmcli
-    firewall-cmd --list-all-zones > firewall-all-zones
-    sync
-    tar czf efi-vfat.tar.gz /boot/efi
-    dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624-part2
-  popd
-  snapshot root /mnt/$hddsrc-$data/backup/root
-fi
+mkdir -p /mnt/$hddsrc-$data/backup/system
+pushd $_
+  gdisk -l /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624 > gdisk
+  df -h > df
+  cp /etc/fstab fstab
+  pvdisplay > pvdisplay
+  vgdisplay > vgdisplay
+  lvdisplay > lvdisplay
+  sudo nmcli > nmcli
+  firewall-cmd --list-all-zones > firewall-all-zones
+  sync
+  tar czf efi-vfat.tar.gz /boot/efi
+  dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624-part2
+popd
+snapshot root /mnt/$hddsrc-$data/backup/root
 
 # 3. database
 echo -e '\x1b[38;05;2mStep 3: Backup database\e[0m'
