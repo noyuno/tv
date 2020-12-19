@@ -1,7 +1,5 @@
 #!/bin/bash -e
 
-#!/bin/bash
-
 set -e
 
 dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
@@ -12,31 +10,32 @@ data=plain0
 crypt=crypt0
 source /home/noyuno/tv/.env
 
-while getopts shiv opt; do
+output () {
+  if [ "$verbose" -o $1 -eq 1 ]; then
+    echo "$2"
+  elif [ $1 -eq 2 ]; then
+    echo "$2"
+  elif [ $1 -eq 3 ]; then
+    echo 'error: '"$2" 1>&2
+  elif [ $1 -eq 4 ]; then
+    echo -e '\x1b[38;05;2m'"$2"'\e[0m'
+  fi
+}
+
+while getopts v opt; do
   case $opt in
-    s) backup_system=1 ;;
-    h) backup_home=1 ;;
     v) verbose=-v
        set -x ;;
   esac
 done
 
 if [ $USER != root ]; then
-  echo 'error: must be run as root' 1>&2
+  output 3 'must be run as root' 1>&2
   exit 1
 fi
 
 # 1. mount
-echo -e '\x1b[38;05;2mStep 1: Mounting filesystem\e[0m'
-
-# [Linuxページキャッシュの設定を変更してWrite I/Oをチューニングしたメモ - YOMON8.NET](https://yomon.hatenablog.com/entry/2017/04/01/131732)
-# server implemented memory: 12GB
-# 2% = 120MB
-# dirty_expire_centisecs = 1.00 sec
-
-#sysctl -w vm.dirty_background_ratio=1 # default 10
-#sysctl -w vm.dirty_ratio=2 # default 40
-#sysctl -w vm.dirty_expire_centisecs=100 # default 500
+output 4 'Step 1: Mounting filesystem'
 
 is_mounted() {
   dev=$1
@@ -81,7 +80,7 @@ if [ ${#require_unlock[@]} -gt 0 ]; then
   read -sp "Enter passphrase for ${require_unlock[*]}: " pass
   tty -s && echo
   if [ ! "$pass" ]; then
-    echo 'error: empty password' 1>/dev/null
+    output 3 'error: empty password'
     exit 1
   fi
 fi
@@ -111,10 +110,37 @@ mount_lv() {
 [ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-data $hdddest-$crypt
 
 # 2. system
+snapshot() {
+  if [ $# -lt 2 ]; then
+    output 3 'snapshot(): requires least 2 arguments: config, dest'
+    exit 1
+  fi
+  config=$1
+  dest=$2
+  subvolume=$(snapper -c $config --json get-config | jq -r '.SUBVOLUME')
+  snapper -c $config create -t single -d backup -u important=yes
+  currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.root|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv')
+  mkdir -p $dest
+  beforerev=$(ls -v1 $dest | tail -n 1)
+  if [ "$beforerev" ]; then
+    exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.root|map(select(.number==$before))|.[]|[.number]|@csv')
+    if [ "$exists_before" ]; then
+      output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev (incremental from $subvolume/.snapshots/$beforerev/snapshot)"
+      btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
+    else
+        output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev"
+      btrfs send $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
+    fi
+  else
+    output 2 "sending snapshot from $subvolume/.snapshots/$currentrev/snapshot to $dest/$currentrev"
+    btrfs send $subvolume/.snapshots/$currentrev/snapshot | pv | btrfs receive $dest/$currentrev
+  fi
+}
+
 if [ "$backup_system" ]; then
   echo -e '\x1b[38;05;2mStep 2: Backup system\e[0m'
 
-  mkdir -p /mnt/$hddsrc-$data/active/backup/system
+  mkdir -p /mnt/$hddsrc-$data/backup/system
   pushd $_
     gdisk -l /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624 > gdisk
     df -h > df
@@ -127,56 +153,27 @@ if [ "$backup_system" ]; then
     sync
     tar czf efi-vfat.tar.gz /boot/efi
     dump -0 -z -f boot-ext4dump.gz /dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624-part2
-    #xfsdump -v silent -l 0 - /dev/mapper/cl-root | nice -n 10 pigz > cl-root-xfsdump.gz
   popd
-
-  mkdir -p /mnt/$hddsrc-$data/active/backup/root
-  pushd $_
-    snapper -c root create -t single
-    latest=$(snapper --iso --csvout -c root list --columns number,type,date|grep single |tail -n 1)
-    latestid=$(echo $latest | awk -F, '{print $1}')
-    latestdate=$(echo $latest | awk -F, '{print $3}')
-    latesttime=$(echo $latest | awk -F, '{print $4}')
-    if [ -d /mnt/$hddsrc-$data/active/backup/root/snapshot ]; then
-      btrfs subvolume delete /mnt/$hddsrc-$data/active/backup/root/snapshot
-    fi
-    echo "copying root snapshot (at $latestdate $) to /mnt/$hddsrc-$data/active/backup/root"
-    btrfs send /.snapshots/$latestid/snapshot | pv | btrfs receive /mnt/$hddsrc-$data/active/backup/root
-  popd
+  snapshot root /mnt/$hddsrc-$data/backup/root
 fi
 
-# 3. home
-if [ "$backup_home" ]; then
-  echo -e '\x1b[38;05;2mStep 3: Backup home\e[0m'
+# 3. database
+echo -e '\x1b[38;05;2mStep 3: Backup database\e[0m'
 
-  abdest=/mnt/$hddsrc-$data/active/backup
-  mkdir -p $abdest/epgstation
-  # database
-  pushd /home/noyuno/EPGStation
-  npm run backup $abdest/epgstation/database
-  popd
-fi
+epgdb=/mnt/$hddsrc-$data/backup/epgstation
+mkdir -p $epgdb
+# database
+pushd /home/noyuno/EPGStation
+  npm run backup $epgdb/database
+popd
 
 # 4. USB HDD data
 echo -e '\x1b[38;05;2mStep 4: Syncing HDD\e[0m'
 
 # data0
-[ ! -d /mnt/$hdddest-$data/$snapshot ] && mkdir /mnt/$hdddest-$data/$snapshot
-destopt=
-if [ -d /mnt/$hdddest-$data/inactive ]; then
-    mv /mnt/$hdddest-$data/inactive /mnt/$hdddest-$data/$snapshot/$dt
-    destopt="--link-dest=../$snapshot/$dt"
-fi
-rsync $rsyncopt $destopt /mnt/$hddsrc-$data/active/ /mnt/$hdddest-$data/inactive
-
+snapshot tv /mnt/$hdddest-$data/backup/tv
 # crypt0
-[ ! -d /mnt/$hdddest-$crypt/$snapshot ] && mkdir /mnt/$hdddest-$crypt/$snapshot
-destopt=
-if [ -d /mnt/$hdddest-$crypt/inactive ]; then
-    mv /mnt/$hdddest-$crypt/inactive /mnt/$hdddest-$crypt/$snapshot/$dt
-    destopt="--link-dest=../$snapshot/$dt"
-fi
-rsync $rsyncopt $destopt /mnt/$hddsrc-$crypt/active/ /mnt/$hdddest-$crypt/inactive
+snapshot private /mnt/$hdddest-$crypt/backup/private
 
 # 5. umount
 echo -e '\x1b[38;05;2mStep 5: Unmounting filesystem\e[0m'
@@ -194,16 +191,3 @@ curl -XPOST -d '{
 echo
 echo -e '\x1b[38;05;2mBackup finished\e[0m'
 
-
-# dump database
-
-
-# backup root
-mkdir -p /mnt/hddsg0-plain0/backup/root/1
-btrfs send /.snapshots/1/snapshot | pv | btrfs receive /mnt/hddsg0-plain0/backup/root/1
-mkdir -p /mnt/hddsg0-plain0/backup/root/153
-btrfs send -p /.snapshots/1/snapshot /.snapshots/153/snapshot | pv | btrfs receive /mnt/hddsg0-plain0/backup/root/153
-
-# backup hddsg0-plain0
-
-# backup hddsg0-crypt0
