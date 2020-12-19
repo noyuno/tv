@@ -43,7 +43,7 @@ is_mounted() {
   if [ ! "$mpoint" ]; then
     mpoint=$dev
   fi
-  mount | grep ^/dev/mapper/$dev\ on\ /mnt/$mpoint\ type\ xfs || echo ''
+  mount | grep ^/dev/mapper/$dev\ on\ /mnt/$mpoint\ type || echo ''
 }
 
 mounted_src_data="$(is_mounted $hddsrc-$data)"
