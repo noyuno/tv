@@ -12,9 +12,9 @@
 1. EPGStationでTSを視聴(Windows:VLC,iOS:Infuse)、録画予約
 2. 録画予約は「MP4 1920x1080 CPU, TS削除」
 3. MP4にはCMの区切りにチャプターを付ける（CMは削除しない）
-4. ハードウェアエンコードは歪むので使わない
+4. ソフトウェアエンコード
 5. 録画データはEPGStation(Windows:VLC, iOS:Infuse)とSambaでMP4を視聴
-6. HDD2台構成（rsync同期）。死活管理は行わない。録画エラーが発生したらDiscordで報告
+6. 死活管理は行わない。録画エラーが発生したらDiscordで報告
 7. LANのみ
 
 ## 3. Rufus で書き込み
@@ -37,7 +37,7 @@ tmpfs                                594M  1.4M  593M   1% /run
 /dev/sda1                            511M  7.8M  504M   2% /boot/efi
 ~~~
 
-### 5. 基本的なソフトウェアのインストール
+## 5. 基本的なソフトウェアのインストール
 
 ~~~
 sudo apt update
@@ -101,6 +101,16 @@ cd driver
 sudo make install
 lsmod | grep -e ^px4_drv
 ls /dev/px4video*
+~~~
+
+### 設定
+
+`usb_alloc_coherent() failed` 対策
+
+`/etc/modprobe.d/px4_drv.conf`
+
+~~~
+options px4_drv max_urbs=4
 ~~~
 
 ## 10. カードリーダー
@@ -232,18 +242,150 @@ sudo reboot
 
 firewalldではnotifydを動かすためにマスカレードを追加する
 
-## 16. HDD増設
+## 16. ストレージ
 
-c.f. [tv/disk/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk/disk.md)
+### 16.1. システム
+
+snapper 
+
+~~~
+sudo snapper -c root create-config /
+~~~
+
+### 16.2. データ (現用 hddsg0)
+
+~~~
+sudo gdisk /dev/sdX
+> o y
+> n 8e00
+cryptsetup benchmark
+~~~
+
+LVMパーティション作成
+
+~~~
+sudo vgcreate hddsg0 /dev/sdX1
+sudo lvcreate -L 4T /dev/mapper/hddsg0 -n plain0
+sudo lvcreate -L 800G /dev/mapper/hddsg0 -n crypt0
+sudo mkfs.btrfs /dev/mapper/hddsg0-plain0
+sudo cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/mapper/hddsg0-crypt0
+sudo cryptsetup open /dev/mapper/hddsg0-crypt0 hddsg0-crypt0-data
+sudo mkfs.btrfs /dev/mapper/hddsg0-crypt0-data
+
+sudo mkdir /mnt/hddsg0-plain0
+sudo mount -onoatime /dev/mapper/hddsg0-plain0 /mnt/hddsg0-plain0
+sudo mkdir /mnt/hddsg0-crypt0
+sudo mount -onoatime,compress=zstd /dev/mapper/hddsg0-crypt0-data /mnt/hddsg0-crypt0
+~~~
+
+Btrfsサブボリューム作成
+
+~~~
+sudo btrfs subvolume create /mnt/hddsg0-plain0/tv
+sudo btrfs subvolume create /mnt/hddsg0-crypt0/private
+~~~
+
+snapper
+
+~~~
+sudo snapper -c tv create-config /mnt/hddsg0-plain0/tv
+sudo snapper -c private create-config /mnt/hddsg0-crypt0/private
+~~~
+
+シンボリックリンクを作成。
+
+~~~
+sudo ln -sfnv /mnt/hddsg0-data0/active/tv /mnt/data/tv
+~~~
+
+fstabに追加
+
+~~~
+/dev/mapper/hddsg0-plain0 /mnt/hddsg0-plain0 btrfs noatime 0 0
+~~~
+
+### 16.3. データ (予備 hddsg2)
+
+~~~
+sudo gdisk /dev/sdX
+> o y
+> n 8e00
+cryptsetup benchmark
+~~~
+
+LVMパーティション作成
+
+~~~
+sudo pvcreate /dev/sdX1
+sudo vgcreate hddsg2 /dev/sdX1
+sudo lvcreate -L 4T /dev/mapper/hddsg2 -n plain0
+sudo lvcreate -L 1T /dev/mapper/hddsg2 -n crypt0
+sudo mkfs.btrfs /dev/mapper/hddsg2-plain0
+sudo cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/mapper/hddsg2-crypt0
+sudo cryptsetup open /dev/mapper/hddsg2-crypt0 hddsg2-crypt0-data
+sudo mkfs.btrfs /dev/mapper/hddsg2-crypt0-data
+
+sudo mkdir /mnt/hddsg2-plain0
+sudo mount -onoatime /dev/mapper/hddsg2-plain0 /mnt/hddsg2-plain0
+sudo mkdir /mnt/hddsg2-crypt0
+sudo mount -onoatime,compress=zstd /dev/mapper/hddsg2-crypt0-data /mnt/hddsg2-crypt0
+~~~
+
+Btrfsサブボリューム作成
+
+~~~
+sudo btrfs subvolume create /mnt/hddsg2-plain0/tv
+sudo btrfs subvolume create /mnt/hddsg2-crypt0/private
+~~~
+
 
 ## 17. Samba
 
-c.f. [tv/disk/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk/disk.md)
+### 17.1. サーバ
 
+~~~
+sudo cp disk/smb.conf /etc/samba/smb.conf
+sudo systemctl enable --now smb nmb
 
-## 18.（削除）
+sudo pdbedit -a noyuno
+sudo pdbedit -L
+~~~
 
-（削除）
+### 17.2. クライアント
+
+ごみ箱を使うには、Windows側から次のレジストリをインポートする必要がある。
+
+- disk/admin.reg : 管理者として結合
+- disk/user.reg : 一般ユーザとして結合
+
+## 18. バックアップ・リストア
+
+### 18.1. バックアップ
+
+~~~
+sudo ./disk/backup.sh
+~~~
+
+### 18.2. リストア
+
+rootはUSBbootして復元する必要がある。復元先のファイルシステムのルートディレクトリを`/mnt`にマウントする場合は次のとおりとなる。
+
+~~~
+pushd /mnt
+sudo tar xf /mnt/hddsg2-plain0/backup/root/XXX/snapshot/home/noyuno/backup/system/efi-vfat.tar.gz
+popd
+pushd /mnt/boot
+sudo restore -rf /mnt/hddsg2-plain0/backup/root/XXX/snapshot/home/noyuno/backup/system/boot-ext4dump.gz
+popd
+sudo btrfs copy /mnt/hddsg2-plain0/backup/root/XXX/snapshot /mnt
+~~~
+
+データ
+
+~~~
+sudo btrfs copy /mnt/hddsg2-plain0/tv/.snapshots/XXX/snapshot /mnt/hddsg0-plain0/tv
+sudo btrfs copy /mnt/hddsg2-crypt0/private/.snapshots/XXX/snapshot /mnt/hddsg0-crypt0/tv
+~~~
 
 ## 19. EPGStation
 
@@ -258,7 +400,7 @@ cd
 データベースを復元
 
 ~~~
-npm run restore /mnt/hddsg0-data0/active/backup/epgstation/database
+npm run restore /mnt/hddsg0-plain0/active/backup/epgstation/database
 ~~~
 
 ~~~
@@ -339,79 +481,11 @@ cd
 
 ~~~
 
-# 2. テレビ視聴・録画環境構築（オプション）
-
-## 1. ゲストモード
-
-ゲストがWi-Fiに接続してテレビを視聴できるようにする。
-
-~~~
-sudo yum -y install dnsmasq iw hostapd
-git clone https://github.com/oblique/create_ap
-cd create_ap
-sudo make install
-
-# test
-sudo create_ap -n wlp0s20f3 m1 wifi-passphrase
-sudo firewall-cmd --zone=trusted --change-interface=ap0
-~~~
-
-/etc/create_ap.conf
-~~~conf
-WIFI_IFACE=wlp0s20f3
-SHARE_METHOD=none
-SSID=m1
-PASSPHRASE=wifiwifi
-~~~
-
-~~~
-sudo firewall-cmd --zone=trusted --change-interface=ap0 --permanent
-sudo firewall-cmd --reload
-sudo systemctl start create_ap
-sudo systemctl status create_ap
-sudo systemctl enable create_ap
-~~~
-
-## 2. 外部からVPNアクセス
-
-### 2.1. DDNSを設定する (***m1***)
-
-ドメイン設定で、「ダイナミックDNS機能」を有効にする
-
-### 2.2. IPアドレスを定期的に通知する (***m1***)
-
-cat /etc/cron.d/ddns
-~~~
-# Run the hourly jobs
-SHELL=/bin/bash
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-MAILTO=root
-02,17,32,47 * * * * root curl 'https://dyn.value-domain.com/cgi-bin/dyn.fcg?d=noyuno.jp&p=xxxxxxxxxxxxxxxxxxxx&h=m1'
-~~~
-
-### 2.3 プライベートIPアドレスを固定する (***m1***)
-
-~~~
-sudo nmcli connection modify eno1 ipv4.addresses 192.168.100.222/24
-sudo nmcli connection modify eno1 ipv4.gateway 192.168.100.1
-sudo nmcli connection modify eno1 ipv4.dns 192.168.100.1
-sudo nmcli connection modify eno1 ipv4.method manual
-~~~
-
-### 2.4. WireGuardで接続
-
-c.f. [noyuno/k3 readme.md 3. VPN(WireGuard)](https://github.com/noyuno/k3#3-vpnwireguard)
-
-
-## 3. バックアップ
-
-c.f. [tv/disk.md at master · noyuno/tv](https://github.com/noyuno/tv/blob/master/disk.md)
-
-# 3. トラブルシューティング
+# 2. トラブルシューティング
 
 ## 1. カクカクする
 
-アンテナケーブルがねじ式でないと外れやすい。
+アンテナケーブルの接点不良。アンテナケーブルがねじ式でないと外れやすい。
 
 ## 2. Mirakurunが"Error: no available tuners"を吐く
 
@@ -511,6 +585,11 @@ DockerデーモンのDNSを設定する
 }
 ~~~
 
-## 11. CPU温度が100度とか爆熱
 
-- 必ずTurboBoostを切ること。切ると最高でも60度程度になる。
+### 11. dmesgに `px4_drv: usb_alloc_coherent() failed` が出て録画が失敗する
+
+モジュールの設定を変更する。`/etc/modprobe.d/px4_drv.conf` を新規作成して、次のとおり設定する。
+
+~~~
+options px4_drv max_urbs=4
+~~~
