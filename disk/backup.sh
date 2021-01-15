@@ -126,7 +126,7 @@ snappercopy() {
   if [ "$beforerev" ]; then
     exists_before=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number=='$beforerev'))|.[]|[.number]|@csv')
     if [ "$exists_before" ]; then
-      beforedate=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number=='$currentrev'))|.[]|.date')
+      beforedate=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number=='$beforerev'))|.[]|.date')
       output 2 "sending snapshot from $src($currentdate) to $dest (incremental from $subvolume/.snapshots/$beforerev/snapshot($beforedate))"
       mkdir -p $dest
       btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $src | pv | btrfs receive $dest
