@@ -117,7 +117,7 @@ snappercopy() {
   fi
   config=$1
   subvolume=$(snapper -c $config --json get-config | jq -r '.SUBVOLUME')
-  currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv' | sort | tail -n 1)
+  currentrev=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.userdata.important=="yes"))|.[]|[.number]|@csv' | sort -n | tail -n 1)
   currentdate=$(snapper --jsonout -c $config list --columns number,type,date,cleanup,userdata | jq -r '.'$config'|map(select(.number=='$currentrev'))|.[]|.date')
   src=$subvolume/.snapshots/$currentrev/snapshot
   dest=$2/$currentrev
@@ -152,7 +152,8 @@ pushd $_
   pvdisplay > pvdisplay
   vgdisplay > vgdisplay
   lvdisplay > lvdisplay
-  firewall-cmd --list-all-zones > firewall-all-zones
+  #firewall-cmd --list-all-zones > firewall-all-zones
+  docker volume ls -qf dangling=true | xargs -r docker volume rm
   sync
   tar czf efi-vfat.tar.gz /boot/efi
   dump -0 -z -f boot-ext4dump.gz $rootdev-part2
