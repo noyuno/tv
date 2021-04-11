@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-ln -sfnv ~/tv/EPGStation/config.json ~/EPGStation/config/config.json
+ln -sfnv ~/tv/EPGStation/config.yml ~/EPGStation/config/config.yml
 ln -sfnv ~/tv/EPGStation/enc.sh ~/EPGStation/config/enc.sh
 ln -sfnv ~/tv/EPGStation/enc.js ~/EPGStation/config/enc.js
-ln -sfnv ~/tv/EPGStation/operatorLogConfig.json ~/EPGStation/config/operatorLogConfig.json
-ln -sfnv ~/tv/EPGStation/serviceLogConfig.json ~/EPGStation/config/serviceLogConfig.json
+ln -sfnv ~/tv/EPGStation/operatorLogConfig.yml ~/EPGStation/config/operatorLogConfig.yml
+ln -sfnv ~/tv/EPGStation/serviceLogConfig.yml ~/EPGStation/config/serviceLogConfig.yml

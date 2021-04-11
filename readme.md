@@ -64,7 +64,7 @@ network:
   version: 2
 ~~~
 
-### ufw
+### iptables
 
 ~~~
 sudo apt remove ufw firewalld
@@ -193,7 +193,7 @@ make
 sudo make install
 cd
 
-wget http://ludovic.rousseau.free.fr/softwares/pcsc-tools/pcsc-tools-1.5.5.tar.bz2
+wget http://ludovic.rousseau.free.fr/softwares/pcsc-tools/pcsc-tools-1.5.7.tar.bz2
 tar xf pcsc-tools-1.5.5.tar.bz2
 cd pcsc-tools-1.5.5
 ./configure
@@ -272,7 +272,6 @@ sudo mysql_secure_installation
   Disallow root login remotely: n
   Remove test database and access to it: y
   Reload privilege table now: y
-sudo vi /etc/my.cnf.d/mariadb-server.cnf
 sudo nano /etc/mysql/mariadb.conf.d/50-server.cnf
   [mariadb]
   character-set-server = utf8mb4
