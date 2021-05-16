@@ -12,14 +12,14 @@ ffmpeg: "/usr/bin/ffmpeg"
 ffprobe: "/usr/bin/ffprobe"
 recorded:
   - name: recorded
-    path: "/mnt/primary/tv"
+    path: "/mnt/primary/plain/tv"
 #recordedTmp: "/mnt/data"
 #recordedTSDefaultDirectory: ts
 #recordedEncodeDefaultDirectory: mp4
 #recordedFormat: "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%"
 thumbnail: '/hddsg1/tv/thumbs'
 thumbnailSize: '960x540'
-uploadTempDir: '/mnt/primary/tmp'
+uploadTempDir: '/mnt/primary/plain/tmp'
 encodeProcessNum: 4
 concurrentEncodeNum: 1
 encode:
@@ -30,7 +30,7 @@ encode:
   - name: H.264 720p CPU
     cmd: "%ROOT%/config/enc.sh 720p"
     suffix: ".mp4"
-streamFilePath: '/mnt/primary/tmp'
+streamFilePath: '/mnt/primary/plain/tmp'
 #delts: true
 #storageLimitAction: remove
 #storageLimitCheckIntervalTime: 3600
