@@ -5,3 +5,4 @@ ln -sfnv ~/tv/EPGStation/enc.sh ~/EPGStation/config/enc.sh
 ln -sfnv ~/tv/EPGStation/enc.js ~/EPGStation/config/enc.js
 ln -sfnv ~/tv/EPGStation/operatorLogConfig.yml ~/EPGStation/config/operatorLogConfig.yml
 ln -sfnv ~/tv/EPGStation/serviceLogConfig.yml ~/EPGStation/config/serviceLogConfig.yml
+ln -sfnv ~/tv/bin ~/bin

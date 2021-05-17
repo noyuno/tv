@@ -1,15 +1,19 @@
 #!/bin/bash -e
 
-mount=$(findmnt -fno TARGET --target .)
 while [ "$1" != "" ]; do
     for file in $(find . -name $1); do
+        mount=$(findmnt -fno TARGET --target $1)
+        if [ ! -d "$mount/backup/rclone" ]; then
+            echo "$1: not applicable" >&2
+            break
+        fi
         name=$(echo $path | sed "s|$mount||")
         # check whether already marked
         name2=$name
         while [ "$(dirname /$name2)" != "/" ]; do
             name2=$(dirname /$name2)
             if [ -L "$mount/backup/rclone/$name2" ]; then
-                echo "already marked at $name2" >&2
+                echo "$name: already marked at $name2" >&2
                 break
             fi
         done
