@@ -1,0 +1,10 @@
+#!/bin/bash -e
+
+echo "Install dotfiles"
+CURRENT=$(cd $(dirname $0);pwd)
+find $CURRENT -type d -name .git -prune -o -type f | while read line ; do
+    
+    ln -sfnv $line ~
+done
+
+echo "Finished."
