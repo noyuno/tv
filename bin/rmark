@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+mount=$(findmnt -fno TARGET --target .)
+while [ "$1" != "" ]; do
+    for file in $(find . -name $1); do
+        name=$(echo $path | sed "s|$mount||")
+        # check whether already marked
+        name2=$name
+        while [ "$(dirname /$name2)" != "/" ]; do
+            name2=$(dirname /$name2)
+            if [ -L "$mount/backup/rclone/$name2" ]; then
+                echo "already marked at $name2" >&2
+                break
+            fi
+        done
+        if [ "$name2" != "/" ]; then
+            break
+        fi
+        mkdir -p "$mount/backup/rclone/$(dirname $name)"
+        ln -sfnv $1 "$mount/backup/rclone/$name"
+    done
+    shift
+done

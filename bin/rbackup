@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+config=/mnt/hddsg0-crypt0/backup/rclone-config/rclone.conf
+rclone sync -PL --config $config $* /mnt/hddsg0-plain0/backup/rclone backblaze1-crypt:/plain
+rclone sync -PL --config $config $* /mnt/hddsg0-crypt0/backup/rclone backblaze1-crypt:/crypt
