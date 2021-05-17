@@ -250,7 +250,7 @@ scp m1:bs11.ts .
 
 ~~~
 sudo npm install pm2 -g
-sudo pm2 install pm2-logrotate
+sudo pm2 install pm2-logrotate -g
 sudo npm install mirakurun -g --unsafe-perm --production
 echo [] | sudo tee /usr/local/var/db/mirakurun/programs.json
 sudo chmod -R go+rw /usr/local/etc/mirakurun
@@ -482,7 +482,7 @@ git submodule update --init --recursive
 `EPGStation/config.json.example`をコピーしてパスワード部分を編集する！
 
 ~~~
-sudo pm2 start dist/server/index.js --name "epgstation"
+sudo pm2 start dist/index.js --name "epgstation"
 sudo pm2 save
 sudo pm2 logs epgstation
 ~~~

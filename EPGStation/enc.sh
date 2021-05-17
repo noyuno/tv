@@ -1,5 +1,6 @@
 #!/bin/bash
 
+(
 case "$1" in
   "720p")
     vf="bwdif=0:-1:1,scale=-2:720"
@@ -10,6 +11,11 @@ case "$1" in
     crf=23
     ;;
 esac
+
+date +%Y%m%d-%HH%MM
+echo FFMPEG=$FFMPEG
+echo INPUT=$INPUT
+echo OUTPUT=$OUTPUT
 
 nice -n 10 "$FFMPEG" -y  -dual_mono_mode main -i "$INPUT" \
     -movflags +faststart -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn \
@@ -22,3 +28,4 @@ dirname "$OUTPUT" | xargs chmod 777
 chmod 777 "$OUTPUT"
 
 bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードが完了しました' &&:
+) | tee -a enc.sh.log

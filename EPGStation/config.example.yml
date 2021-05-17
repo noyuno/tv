@@ -16,7 +16,7 @@ recorded:
 #recordedTmp: "/mnt/data"
 #recordedTSDefaultDirectory: ts
 #recordedEncodeDefaultDirectory: mp4
-#recordedFormat: "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%"
+recordedFormat: "%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%"
 thumbnail: '/hddsg1/tv/thumbs'
 thumbnailSize: '960x540'
 uploadTempDir: '/mnt/primary/plain/tmp'
@@ -31,6 +31,14 @@ encode:
     cmd: "%ROOT%/config/enc.sh 720p"
     suffix: ".mp4"
 streamFilePath: '/mnt/primary/plain/tmp'
+stream:
+  live:
+    ts:
+      m2ts:
+        - name: 無変換
+        - name: H.264 1080p CPU
+          cmd: '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -sn -threads 0 -c:a aac -ar 48000 -b:a 192k -ac 2
+                      -c:v libx264 -vf yadif,scale=-2:1080 -b:v 3000k -preset veryfast -y -f mpegts pipe:1'
 #delts: true
 #storageLimitAction: remove
 #storageLimitCheckIntervalTime: 3600
