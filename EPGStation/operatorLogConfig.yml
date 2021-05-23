@@ -4,19 +4,19 @@ appenders:
     maxLogSize: 1048576
     backups: 3
     filename: "%OperatorSystem%"
-    pattern: "-yyyy-MM-dd"
+    pattern: "-yyyyMMdd"
   access:
     type: file
     maxLogSize: 1048576
     backups: 3
     filename: "%OperatorAccess%"
-    pattern: "-yyyy-MM-dd"
+    pattern: "-yyyyMMdd"
   stream:
     type: file
     maxLogSize: 1048576
     backups: 3
     filename: "%OperatorStream%"
-    pattern: "-yyyy-MM-dd"
+    pattern: "-yyyyMMdd"
   console:
     type: console
   stdout:

@@ -1,0 +1,51 @@
+appenders: 
+  system: 
+    type: file
+    maxLogSize: 1048576
+    backups: 3
+    filename: "%EPGUpdaterSystem%"
+    pattern: "-yyyyMMdd"
+  access: 
+    type: file
+    maxLogSize: 1048576
+    backups: 3
+    filename: "%EPGUpdaterAccess%"
+    pattern: "-yyyyMMdd"
+  stream: 
+    type: file
+    maxLogSize: 1048576
+    backups: 3
+    filename: "%EPGUpdaterStream%"
+    pattern: "-yyyyMMdd"
+  encode: 
+    type: file
+    maxLogSize: 1048576
+    backups: 3
+    filename: "%EPGUpdaterEncode%"
+    pattern: "-yyyyMMdd"
+  console: 
+    type: console
+  stdout: 
+    type: stdout
+categories: 
+  default: 
+    appenders: 
+      - console
+      - stdout
+    level: info
+  system: 
+    appenders: 
+      - system
+      - stdout
+    level: info
+  access: 
+    appenders: 
+      - access
+      - stdout
+    level: info
+  stream: 
+    appenders: 
+      - stream
+      - stdout
+    level: info
+    
