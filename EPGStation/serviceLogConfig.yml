@@ -21,6 +21,12 @@ appenders:
     type: console
   stdout:
     type: stdout
+  encode:
+    type: file
+    maxLogSize: 1048576
+    backups: 3
+    filename: "encode"
+    pattern: "-yyyyMMdd"
 categories:
   default:
     appenders:
