@@ -1,0 +1,101 @@
+#!/bin/bash -e
+
+set -e
+
+#dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
+dt=$(TZ=GMT date +%Y%m%d-%H%M)
+primary=$(readlink /mnt/primary | sed 's|^/||')
+secondary=$(readlink /mnt/secondary | sed 's|^/||')
+
+output () {
+  if [ ! "y$verbose" = "y" -o $1 -eq 1 ]; then
+    echo "$2"
+  elif [ $1 -eq 2 ]; then
+    echo "$2"
+  elif [ $1 -eq 3 ]; then
+    echo 'error: '"$2" 1>&2
+  elif [ $1 -eq 4 ]; then
+    echo -e '\x1b[38;05;2m'"$2"'\e[0m'
+  fi
+}
+
+while getopts v opt; do
+  case $opt in
+    v) verbose=-v
+       set -x ;;
+  esac
+done
+
+if [ $USER != root ]; then
+  output 3 'must be run as root' 1>&2
+  exit 1
+fi
+
+# 1. mount
+output 4 'Step 1: Mounting filesystem'
+
+zpool_list=$(zpool list -H | grep $secondary | awk '{print$10}')
+if [ $? -ne 0 ]; then
+    zpool import -f $secondary
+fi
+
+zfs list -H | grep $secondary/plain
+mounted_crypt=$(zfs list -H | grep $secondary/crypt || echo '')
+if [ "$mounted_crypt" = "" ]; then
+    /$secondary/plain/etc/unlock
+fi
+
+output 4 'Step 2: Backup system'
+
+mkdir -p /home/noyuno/backup/system
+pushd $_
+  gdisk -l $rootdev > gdisk
+  df -h > df
+  cp /etc/fstab fstab
+  pvdisplay > pvdisplay
+  vgdisplay > vgdisplay
+  lvdisplay > lvdisplay
+  #firewall-cmd --list-all-zones > firewall-all-zones
+  docker volume ls -qf dangling=true | xargs -r docker volume rm
+  sync
+  tar czf efi-vfat.tar.gz /boot/efi
+  #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
+popd
+# 3. database
+output 4 'Step 3: Backup database'
+
+epgdb=/home/noyuno/backup/epgstation
+mkdir -p $epgdb
+# database
+pushd /home/noyuno/EPGStation
+  npm run backup $epgdb/database
+popd
+
+output 4 'Step 5: Syncing zfs'
+
+snapshot() {
+    fs=$1
+    last_primary=$(zfs list -H -t snapshot $primary/$fs | sort | tail -n 1 | awk '{print$1}')
+    last_secondary=$(zfs list -H -t snapshot $secondary/$fs | sort | tail -n 1 | awk '{print$1}')
+
+    zfs snapshot $primary/$fs@zbackup-$dt
+    if [ "$last_primary" = "$last_secondary" ]; then
+        zfs send -i /$primary/$fs/.zfs/snapshot/$last_primary /$primary/$fs/.zfs/snapshot/zbackup-$dt /$secondary/$fs/.zfs/snapshot/zbackup-$dt
+    else
+        zfs send /$primary/$fs/.zfs/snapshot/zbackup-$dt /$secondary/$fs/.zfs/snapshot/zbackup-$dt
+    fi
+}
+
+snapshot plain
+snapshot crypt
+
+sync
+zpool export -f $secondary
+
+# notifyd
+curl -XPOST -d '{
+    "token": "'$NOTIFYD_TOKEN'",
+    "message": "バックアップが完了しました。"
+}' localhost:5050
+echo
+output 4 'Backup finished. Eject USB HDD.'
