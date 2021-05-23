@@ -24,7 +24,7 @@ encodeProcessNum: 4
 concurrentEncodeNum: 1
 encode:
   - name: 'H.264 1080p CPU'
-    cmd: '%ROOT%/config/enc.sh'
+    cmd: '/bin/bash %ROOT%/config/enc.sh'
     suffix: '.mp4'
   - name: 'H.264 720p CPU'
     cmd: '%ROOT%/config/enc.sh 720p'
