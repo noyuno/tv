@@ -28,4 +28,4 @@ dirname "$OUTPUT" | xargs chmod 777
 chmod 777 "$OUTPUT"
 
 bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードが完了しました' &&:
-) | tee -a enc.sh.log
+) | tee /home/noyuno/EPGStation/logs/enc.sh.log
