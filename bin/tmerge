@@ -5,17 +5,26 @@ if [ $# -ne 1 ]; then
     exit 1
 fi
 
-ret=$(find . -type f "$1" || echo '')
-if [ "$ret" = "" ]; then
+declare -a ret=()
+while read line; do
+    ret+=("$line")
+done < <(find . -maxdepth 1 -type f -name '*'"$1"'*')
+
+if [ ${#ret[@]} -eq 0 ]; then
     echo "keyword '$1' not found" >&2
     exit 1
 else
-    echo "$ret"
+    for ((i=0; i < ${#ret[@]}; i++)); do
+        echo "${ret[$i]}"
+    done
     echo ""
     read -p "continue?[Y/n]:" yn
     if [ "$yn" = "" -o "$yn" = "Y" -o "$yn" = "y" ]; then
-        mkdir "$1"
-        mv $ret "$1"
+        mkdir -p "$1"
+        for ((i=0; i < ${#ret[@]}; i++)); do
+            mv "${ret[$i]}" "$1"
+        done
+        tree "$1"
     fi
 fi
 
