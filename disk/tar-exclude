@@ -1,8 +1,6 @@
 ./snap
 ./tmp
 ./mnt
-./hddsg1
-./hddsg2
 ./run
 ./dev
 ./sys
