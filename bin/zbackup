@@ -60,7 +60,7 @@ pushd $_
   #docker volume ls -qf dangling=true | xargs -r docker volume rm
   sync
   pushd /
-      tar cpzf root.tar.gz -X $uhome/tv/disk/root-exclude /
+      tar $verbose cpzf root.tar.gz -X $uhome/tv/disk/root-exclude /
   popd
   #tar czf efi-vfat.tar.gz /boot/efi
   #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
@@ -79,14 +79,14 @@ output 4 'Step 5: Syncing zfs'
 
 snapshot() {
     fs=$1
-    last_primary=$(zfs list -H -t snapshot $primary/$fs | sort | tail -n 1 | awk '{print$1}')
-    last_secondary=$(zfs list -H -t snapshot $secondary/$fs | sort | tail -n 1 | awk '{print$1}')
+    last_primary=$(zfs list -H -t snapshot $primary/$fs | grep @zbackup | tail -n 1 | awk '{print$1}')
+    last_secondary=$(zfs list -H -t snapshot $secondary/$fs | grep @zbackup | tail -n 1 | awk '{print$1}')
 
     zfs snapshot $primary/$fs@zbackup-$dt
     if [ "$last_primary" = "$last_secondary" ]; then
-        zfs send -i /$primary/$fs/.zfs/snapshot/$last_primary /$primary/$fs/.zfs/snapshot/zbackup-$dt /$secondary/$fs/.zfs/snapshot/zbackup-$dt
+        zfs send $verbose -i $last_primary $primary/$fs@zbackup-$dt $secondary/$fs@zbackup-$dt
     else
-        zfs send /$primary/$fs/.zfs/snapshot/zbackup-$dt /$secondary/$fs/.zfs/snapshot/zbackup-$dt
+        zfs send $verbose $primary/$fs@zbackup-$dt $secondary/$fs@zbackup-$dt
     fi
 }
 
