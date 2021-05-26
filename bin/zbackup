@@ -62,6 +62,7 @@ pushd $_
   pushd /
       tar $verbose -zcf $primary/plain/backup/root.tar.gz --exclude-from=$uhome/tv/disk/tar-exclude /
   popd
+  cp $primary/plain/backup/root.tar.gz $secondary/plain/backup/root.tar.gz
   #tar czf efi-vfat.tar.gz /boot/efi
   #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
 popd
