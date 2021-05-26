@@ -24,6 +24,7 @@ while getopts v opt; do
   case $opt in
     v) verbose=-v
        set -x ;;
+    n) dryrun=-n ;;
   esac
 done
 
@@ -60,9 +61,9 @@ pushd $_
   #docker volume ls -qf dangling=true | xargs -r docker volume rm
   sync
   pushd /
-      tar $verbose -zcf $primary/plain/backup/root.tar.gz --exclude-from=$uhome/tv/disk/tar-exclude /
+      tar $verbose -zcf /$primary/plain/backup/root.tar.gz --exclude-from=$uhome/tv/disk/tar-exclude /
   popd
-  cp $primary/plain/backup/root.tar.gz $secondary/plain/backup/root.tar.gz
+  cp /$primary/plain/backup/root.tar.gz /$secondary/plain/backup/root.tar.gz
   #tar czf efi-vfat.tar.gz /boot/efi
   #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
 popd
@@ -85,9 +86,9 @@ snapshot() {
 
     zfs snapshot $primary/$fs@zbackup-$dt
     if [ "$last_primary" = "$last_secondary" ]; then
-        zfs send $verbose -i $last_primary $primary/$fs@zbackup-$dt $secondary/$fs@zbackup-$dt
+        zfs send $verbose -i $last_primary $primary/$fs@zbackup-$dt | pv | zfs recv $secondary/$fs@zbackup-$dt
     else
-        zfs send $verbose $primary/$fs@zbackup-$dt $secondary/$fs@zbackup-$dt
+        zfs send $verbose $primary/$fs@zbackup-$dt | pv | zfs recv $secondary/$fs@zbackup-$dt
     fi
 }
 
