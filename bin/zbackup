@@ -91,9 +91,9 @@ snapshot() {
 
     zfs snapshot $primary/$fs@zbackup-$dt
     if [ ! "$last_primary" -a "$last_primary" = "$last_secondary" ]; then
-        zfs send -i $last_primary $primary/$fs@zbackup-$dt | pv | zfs recv -dF $verbose $secondary
+        zfs send -Ri $last_primary $primary/$fs@zbackup-$dt | pv | zfs recv -dF $verbose $secondary
     else
-        zfs send $primary/$fs@zbackup-$dt | pv | zfs recv $verbose -dF $secondary
+        zfs send -R $primary/$fs@zbackup-$dt | pv | zfs recv $verbose -dF $secondary
     fi
 }
 
