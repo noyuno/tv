@@ -4,8 +4,10 @@ set -e
 
 #dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
 dt=$(TZ=GMT date +%Y%m%d-%H%M)
-primary=$(readlink /mnt/primary | sed 's|^/||')
-secondary=$(readlink /mnt/secondary | sed 's|^/||')
+primary=$(readlink /mnt/primary)
+primary=$(basename $primary)
+secondary=$(readlink /mnt/secondary)
+secondary=$(basename $secondary)
 uhome=/home/noyuno
 
 output () {
@@ -63,7 +65,7 @@ pushd $_
   pushd /
       tar $verbose -zcf /$primary/plain/backup/root.tar.gz --exclude-from=$uhome/tv/disk/tar-exclude /
   popd
-  cp /$primary/plain/backup/root.tar.gz /$secondary/plain/backup/root.tar.gz
+  cp /mnt/primary/plain/backup/root.tar.gz /mnt/secondary/plain/backup/root.tar.gz
   #tar czf efi-vfat.tar.gz /boot/efi
   #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
 popd
