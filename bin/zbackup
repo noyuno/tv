@@ -26,7 +26,7 @@ while getopts v opt; do
   case $opt in
     v) verbose=-v
        set -x ;;
-    n) dryrun=-n ;;
+    r) root=1 ;;
   esac
 done
 
@@ -49,26 +49,29 @@ if [ "$mounted_crypt" = "" ]; then
     /$secondary/plain/etc/unlock
 fi
 
-output 4 'Step 2: Backup system'
+if [ "y$root" != "y" ]; then
+    output 4 'Step 2: Backup system'
 
-mkdir -p $uhome/backup/system
-pushd $_
-  gdisk -l $rootdev > gdisk
-  df -h > df
-  cp /etc/fstab fstab
-  pvdisplay > pvdisplay
-  vgdisplay > vgdisplay
-  lvdisplay > lvdisplay
-  #firewall-cmd --list-all-zones > firewall-all-zones
-  #docker volume ls -qf dangling=true | xargs -r docker volume rm
-  sync
-  pushd /
-      tar $verbose -zcf /$primary/plain/backup/root.tar.gz --exclude-from=$uhome/tv/disk/tar-exclude /
-  popd
-  cp /mnt/primary/plain/backup/root.tar.gz /mnt/secondary/plain/backup/root.tar.gz
-  #tar czf efi-vfat.tar.gz /boot/efi
-  #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
-popd
+    mkdir -p $uhome/backup/system
+    pushd $_
+    gdisk -l $rootdev > gdisk
+    df -h > df
+    cp /etc/fstab fstab
+    pvdisplay > pvdisplay
+    vgdisplay > vgdisplay
+    lvdisplay > lvdisplay
+    #firewall-cmd --list-all-zones > firewall-all-zones
+    #docker volume ls -qf dangling=true | xargs -r docker volume rm
+    sync
+    pushd /
+        tar $verbose -zcf /$primary/plain/backup/root.tar.gz --exclude-from=$uhome/tv/disk/tar-exclude /
+    popd
+    cp /mnt/primary/plain/backup/root.tar.gz /mnt/secondary/plain/backup/root.tar.gz
+    #tar czf efi-vfat.tar.gz /boot/efi
+    #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
+    popd
+fi
+
 # 3. database
 output 4 'Step 3: Backup database'
 
@@ -88,9 +91,9 @@ snapshot() {
 
     zfs snapshot $primary/$fs@zbackup-$dt
     if [ "$last_primary" = "$last_secondary" ]; then
-        zfs send $verbose -i $last_primary $primary/$fs@zbackup-$dt | pv | zfs recv $secondary/$fs@zbackup-$dt
+        zfs send -i $last_primary $primary/$fs@zbackup-$dt | zfs recv -F $verbose $secondary/$fs@zbackup-$dt
     else
-        zfs send $verbose $primary/$fs@zbackup-$dt | pv | zfs recv $secondary/$fs@zbackup-$dt
+        zfs send $primary/$fs@zbackup-$dt | zfs recv $verbose -F $secondary/$fs@zbackup-$dt
     fi
 }
 
