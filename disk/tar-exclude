@@ -10,3 +10,9 @@
 /cdrom/*
 .cache
 .vscode-server
+.snapshots
+.emacs.d
+_cacache
+.antigen
+.cache
+old
