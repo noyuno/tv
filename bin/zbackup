@@ -92,7 +92,7 @@ snapshot() {
 
     zfs snapshot -r $primary/$fs@zbackup-$dt
     if [ "$last" ]; then
-        zfs send -Ri $last $primary/$fs@zbackup-$dt | pv | zfs recv -dF $verbose $secondary
+        zfs send -Ri $primary/$last $primary/$fs@zbackup-$dt | pv | zfs recv -dF $verbose $secondary
     else
         zfs send -R $primary/$fs@zbackup-$dt | pv | zfs recv $verbose -dF $secondary
     fi
