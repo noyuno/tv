@@ -5,7 +5,7 @@ size=1g
 direct=1
 runtime=60
 directory=${TARGET}
-stonewall
+stonewall   
 
 [Seq-Read]
 bs=1m
