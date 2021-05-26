@@ -16,3 +16,4 @@ _cacache
 .antigen
 .cache
 old
+/vm/*
