@@ -60,7 +60,7 @@ pushd $_
   #docker volume ls -qf dangling=true | xargs -r docker volume rm
   sync
   pushd /
-      tar $verbose cpzf root.tar.gz --exclude-from $uhome/tv/disk/tar-exclude /
+      tar $verbose czxpf root.tar.gz --exclude-from $uhome/tv/disk/tar-exclude /
   popd
   #tar czf efi-vfat.tar.gz /boot/efi
   #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
