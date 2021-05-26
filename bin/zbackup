@@ -6,6 +6,7 @@ set -e
 dt=$(TZ=GMT date +%Y%m%d-%H%M)
 primary=$(readlink /mnt/primary | sed 's|^/||')
 secondary=$(readlink /mnt/secondary | sed 's|^/||')
+uhome=/home/noyuno
 
 output () {
   if [ ! "y$verbose" = "y" -o $1 -eq 1 ]; then
@@ -47,7 +48,7 @@ fi
 
 output 4 'Step 2: Backup system'
 
-mkdir -p /home/noyuno/backup/system
+mkdir -p $uhome/backup/system
 pushd $_
   gdisk -l $rootdev > gdisk
   df -h > df
@@ -56,18 +57,21 @@ pushd $_
   vgdisplay > vgdisplay
   lvdisplay > lvdisplay
   #firewall-cmd --list-all-zones > firewall-all-zones
-  docker volume ls -qf dangling=true | xargs -r docker volume rm
+  #docker volume ls -qf dangling=true | xargs -r docker volume rm
   sync
-  tar czf efi-vfat.tar.gz /boot/efi
+  pushd /
+      tar cpzf root.tar.gz -X $uhome/tv/disk/root-exclude /
+  popd
+  #tar czf efi-vfat.tar.gz /boot/efi
   #dump -0 -z -f boot-ext4dump.gz $rootdev-part2
 popd
 # 3. database
 output 4 'Step 3: Backup database'
 
-epgdb=/home/noyuno/backup/epgstation
+epgdb=$uhome/backup/epgstation
 mkdir -p $epgdb
 # database
-pushd /home/noyuno/EPGStation
+pushd $uhome/EPGStation
   npm run backup $epgdb/database
 popd
 
