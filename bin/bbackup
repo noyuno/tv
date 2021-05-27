@@ -3,8 +3,8 @@
 set -e
 
 dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
-hddsrc=hddsg0
-hdddest=hddsg1
+hddsrc=hddsg3
+hdddest=hddsg4
 data=plain0
 crypt=crypt0
 rootdev=/dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624
@@ -153,7 +153,7 @@ pushd $_
   vgdisplay > vgdisplay
   lvdisplay > lvdisplay
   #firewall-cmd --list-all-zones > firewall-all-zones
-  docker volume ls -qf dangling=true | xargs -r docker volume rm
+  #docker volume ls -qf dangling=true | xargs -r docker volume rm
   sync
   tar czf efi-vfat.tar.gz /boot/efi
   dump -0 -z -f boot-ext4dump.gz $rootdev-part2
