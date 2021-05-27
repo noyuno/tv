@@ -12,14 +12,14 @@ ffmpeg: '/usr/bin/ffmpeg'
 ffprobe: '/usr/bin/ffprobe'
 recorded:
   - name: recorded
-    path: '/mnt/primary/plain/tv'
+    path: '/mnt/primary-plain0/tv'
 #recordedTmp: '/mnt/data'
 #recordedTSDefaultDirectory: ts
 #recordedEncodeDefaultDirectory: mp4
 recordedFormat: '%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%'
-thumbnail: '/mnt/primary/plain/tv/thumbs'
+thumbnail: '/mnt/primary-plain0/tv/thumbs'
 thumbnailSize: '960x540'
-uploadTempDir: '/mnt/primary/plain/tv/tmp'
+uploadTempDir: '/mnt/primary-plain0/tv/tmp'
 encodeProcessNum: 4
 concurrentEncodeNum: 1
 encode:
@@ -29,7 +29,7 @@ encode:
   - name: 'H.264 720p CPU'
     cmd: '%ROOT%/config/enc.sh 720p'
     suffix: '.mp4'
-streamFilePath: '/mnt/primary/plain/tv/tmp'
+streamFilePath: '/mnt/primary-plain0/tv/tmp'
 stream:
   live:
     ts:

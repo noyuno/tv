@@ -48,8 +48,8 @@ is_mounted() {
 
 mounted_src_data="$(is_mounted $hddsrc-$data)"
 mounted_dest_data="$(is_mounted $hdddest-$data)"
-mounted_src_crypt="$(is_mounted $hddsrc-$crypt-data $hddsrc-$crypt)"
-mounted_dest_crypt="$(is_mounted $hdddest-$crypt-data $hdddest-$crypt)"
+mounted_src_crypt="$(is_mounted $hddsrc-$crypt-open $hddsrc-$crypt)"
+mounted_dest_crypt="$(is_mounted $hdddest-$crypt-open $hdddest-$crypt)"
 
 # LVM bug fix
 if [ ! "$mounted_src_data" -a ! "$mounted_src_crypt" ]; then
@@ -69,8 +69,8 @@ if [ ! "$mounted_dest_data" -a ! "$mounted_dest_crypt" ]; then
   lvchange -ay $hdddest/$crypt
 fi
 
-unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-data || echo '')"
-unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-data || echo '')"
+unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-open || echo '')"
+unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-open || echo '')"
 
 pass=
 require_unlock=()
