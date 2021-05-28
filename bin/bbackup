@@ -131,12 +131,12 @@ snappercopy() {
       mkdir -p $dest
       btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $src | pv | btrfs receive $dest
     else
-      output 2 "sending snapshot from $src($currentdate) to $dest"
+      output 2 "sending snapshot from $src ($currentdate) to $dest"
       mkdir -p $dest
       btrfs send $src | pv | btrfs receive $dest
     fi
   else
-    output 2 "sending snapshot from $src$($currentdate) to $dest"
+    output 2 "sending snapshot from $src ($currentdate) to $dest"
     mkdir -p $dest
     btrfs send $src | pv | btrfs receive $dest
   fi
