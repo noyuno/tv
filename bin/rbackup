@@ -1,10 +1,10 @@
 #!/bin/bash -e
 
-config=/mnt/primary/crypt/backup/rclone-config/rclone.conf
+config=/mnt/hddsg3-crypt0/backup/rclone-config/rclone.conf
 opt=$*
 rb() {
     find $1 -xtype l -delete
-    rclone copy -PL --transfers=1 --config $config $opt $1 mega:m1backup/$2
+    rclone copy -PL --transfers=1 --exclude=.snapshots/ --config $config $opt $1 mega:m1backup/$2
 }
-rb /mnt/primary/plain/backup/rclone plain
-rb /mnt/primary/crypt/backup/rclone crypt
+rb /mnt/hddsg3-plain0/backup/rclone plain
+rb /mnt/hddsg3-crypt0/backup/rclone crypt
