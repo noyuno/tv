@@ -216,8 +216,8 @@ output 4 'Step 7: Unmounting filesystem'
 
 sync
 umount /dev/mapper/$hdddest-$data
-umount /dev/mapper/$hdddest-$crypt-data
-cryptsetup close $hdddest-$crypt-data
+umount /dev/mapper/$hdddest-$crypt-open
+cryptsetup close $hdddest-$crypt-open
 
 # notifyd
 curl -XPOST -d '{
