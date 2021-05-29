@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 while [ "$1" != "" ]; do
+    name=$(basename "$1")
     file=$(readlink -f "$1")
     mount=$(findmnt -fno TARGET --target "$file")
     if [ ! -d "$mount/backup/rclone" ]; then
@@ -27,7 +28,7 @@ while [ "$1" != "" ]; do
     mkdir -p "$mount/backup/rclone/$d"
     pushd "$mount/backup/rclone/$d"
         parent=../../$(echo "$d" | awk -F/ '{print NF}' | xargs -INF seq -s "../" 0 NF | tr -d '[0-9]')
-        ln -sfnv "$parent$file" "$file"
+        ln -snv "$parent$name" "$name"
     popd
     shift
 done
