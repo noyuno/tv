@@ -207,7 +207,7 @@ output 4 'Step 6: Syncing private'
 snapper -c private create -t single -d backup -u important=yes
 snappercopy2 private /mnt/$hdddest-$crypt/backup/private.b
 
-output4 'Step 7: Syncing rclone symlink directory'
+output 4 'Step 7: Syncing rclone symlink directory'
 snapper -c rclone-tv create -t single -d backup -u important=yes
 snappercopy2 rclone-tv /mnt/$hdddest-$data/backup/rclone.b
 
