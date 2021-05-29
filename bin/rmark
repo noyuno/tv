@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 while [ "$1" != "" ]; do
     fname=$(basename "$1")
@@ -25,10 +25,10 @@ while [ "$1" != "" ]; do
         break
     fi
     d=$(dirname "$name")
-    mkdir -p "$mount/backup/rclone/$d"
-    pushd "$mount/backup/rclone/$d"
+    mkdir -p "$mount/backup/rclone$d"
+    pushd "$mount/backup/rclone$d"
         parent=../../$(echo "$d" | awk -F/ '{print NF-1}' | xargs -INF seq -s "../" 0 NF | tr -d '[0-9]')
-        ln -snv "$parent$fname" "$fname"
+        ln -snv "$parent$name" "$fname"
     popd
     shift
 done
