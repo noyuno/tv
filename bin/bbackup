@@ -170,16 +170,20 @@ popd
 
 output 4 'Step 4: Syncing root'
 snapper -c root create -t single -d backup -u important=yes
-snappercopy root /mnt/$hddsrc-$data/backup/root
-snappercopy root /mnt/$hdddest-$data/backup/root
+snappercopy root /mnt/$hddsrc-$data/backup/root.b
+snappercopy root /mnt/$hdddest-$data/backup/root.b
 
 output 4 'Step 5: Syncing tv'
 snapper -c tv create -t single -d backup -u important=yes
-snappercopy tv /mnt/$hdddest-$data/backup/tv
+snappercopy tv /mnt/$hdddest-$data/backup/tv.b
 
 output 4 'Step 6: Syncing private'
 snapper -c private create -t single -d backup -u important=yes
-snappercopy private /mnt/$hdddest-$crypt/backup/private
+snappercopy private /mnt/$hdddest-$crypt/backup/private.b
+
+output4 'Step 7: Syncing rclone symlink directory'
+snapper -c rclone-tv create -t single -d backup -u important=yes
+snappercopy rclone-tv /mnt/$hdddest-$data/backup/rclone.b
 
 # 5. umount
 output 4 'Step 7: Unmounting filesystem'

@@ -25,6 +25,9 @@ while [ "$1" != "" ]; do
     fi
     d=$(dirname "$name")
     mkdir -p "$mount/backup/rclone/$d"
-    ln -sfnv "$file" "$mount/backup/rclone/$name"
+    pushd "$mount/backup/rclone/$d"
+        parent=../../$(echo "$d" | awk -F/ '{print NF}' | xargs -INF seq -s "../" 0 NF | tr -d '[0-9]')
+        ln -sfnv "$parent$file" "$file"
+    popd
     shift
 done
