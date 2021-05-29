@@ -116,17 +116,17 @@ snappercopy2() {
     exit 1
   fi
   config=$1
-  subvolume=$(snapper --csvout -c $config get-config | awk -F, '/^SUBVOLUME/{print$2}')
+  subvolume=$(snapper --csvout -c $config get-config | awk -F, '/^SUBVOLUME$/{print$2}')
   currentrev=$(snapper --csvout -c $config list | awk -F, '/important=yes/{print$3}' | tail -n 1)
   beforerev=$(cat <(snapper --csvout -c $config list | awk -F, '/important=yes/{print$3}' ) \
                   <( command ls -1 $2 ) | \
               sort | uniq -d | tail -n 1)
-  currentdate=$(snapper --csvout -c $config list --column number,date | awk -F, '/^'$currentrev'/{print$2}')
+  currentdate=$(snapper --csvout -c $config list --column number,date | awk -F, '/^'$currentrev'$/{print$2}')
   src=$subvolume/.snapshots/$currentrev/snapshot
   dest=$2/$currentrev
   mkdir -p $dest
   if [ "$beforerev" ]; then
-    beforedate=$(snapper --csvout -c root list --column number,date | awk -F, '/^'$beforerev'/{print$2}')
+    beforedate=$(snapper --csvout -c $config list --column number,date | awk -F, '/^'$beforerev'$/{print$2}')
     output 2 "sending snapshot from $src($currentdate) to $dest (incremental from $subvolume/.snapshots/$beforerev/snapshot($beforedate))"
     btrfs send -p $subvolume/.snapshots/$beforerev/snapshot $src | pv | btrfs receive $dest
   else
