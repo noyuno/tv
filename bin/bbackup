@@ -121,7 +121,7 @@ snappercopy2() {
   beforerev=$(cat <(snapper --csvout -c $config list | awk -F, '/important=yes/{print$3}' ) \
                   <( command ls -1 $2 ) | \
               sort | uniq -d | tail -n 1)
-  currentdate=$(snapper --csvout -c $config list --column number,date | awk -F, '^'$currentrev'/{print$2}')
+  currentdate=$(snapper --csvout -c $config list --column number,date | awk -F, '/^'$currentrev'/{print$2}')
   src=$subvolume/.snapshots/$currentrev/snapshot
   dest=$2/$currentrev
   mkdir -p $dest
