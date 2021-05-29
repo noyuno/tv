@@ -4,7 +4,7 @@ config=/mnt/primary/crypt/backup/rclone-config/rclone.conf
 opt=$*
 rb() {
     find $1 -xtype l -delete
-    rclone sync -PL --transfers=1 --config $config $opt $1 mega:m1backup/$2
+    rclone copy -PL --transfers=1 --config $config $opt $1 mega:m1backup/$2
 }
 rb /mnt/primary/plain/backup/rclone plain
 rb /mnt/primary/crypt/backup/rclone crypt

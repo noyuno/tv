@@ -229,3 +229,5 @@ if [[ "$TERM" == "dumb" ]]; then
     PS1='$ '
 fi
 
+. /etc/profile.d/nvm.sh
+
