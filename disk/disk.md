@@ -128,3 +128,14 @@ sudo pdbedit -L
 ~~~
 
 Windows+R type `\\m1\` to connect
+
+
+## snapper
+
+VSS
+
+~~~
+sudo snapper -c tv set-config SYNC_ACL=yes ALLOW_USERS=noyuno ALLOW_GROUPS=noyuno
+sudo snapper -c private set-config SYNC_ACL=yes ALLOW_USERS=noyuno ALLOW_GROUPS=noyuno
+sudo snapper -c root set-config SYNC_ACL=yes ALLOW_USERS=noyuno ALLOW_GROUPS=noyuno
+~~~
