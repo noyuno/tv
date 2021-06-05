@@ -51,11 +51,11 @@ stream:
         #- name: '1280x720 CPU'
         #  cmd: '%FFMPEG% -re -dual_mono_mode main -i pipe:0 -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 17 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 128k -ac 2 -c:v libx264 -s 1280x720 -preset veryfast -aspect 16:9 -vf yadif=0:-1:1 -flags +loop-global_header %OUTPUT%'
         - name: '1080p'
-          cmd: '%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 0 -ignore_unknown
+          cmd: '%FFMPEG% -dual_mono_mode main -ss %SS% -i pipe:0 -sn -threads 0 -ignore_unknown
                       -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
                       -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
                       aac -ar 48000 -b:a 192k -ac 2 -c:v libx264 -vf scale=-2:1080 -b:v 6000k -preset veryfast -flags
-                      +loop-global_header %OUTPUT%'
+                      +loop-global_header pipe:1'
   recorded:
     ts:
       m2ts:
@@ -95,12 +95,6 @@ stream:
               '%FFMPEG% -dual_mono_mode main -re -i pipe:0 -sn -threads 0 -c:v h264 -c:a aac -ar 48000 -ac 2 -b:a 192k -s 1920x1080 -filter:v yadif -profile:v baseline -preset veryfast -b:v 3000k -tune fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
         - name: '1280x720 CPU'
           cmd: '%FFMPEG% -dual_mono_mode main -re -i pipe:0 -sn -threads 0 -c:v h264 -c:a aac -ar 48000 -ac 2 -b:a 192k -s 1280x720 -filter:v yadif -profile:v baseline -preset veryfast -b:v 1500k -tune fastdecode,zerolatency -movflags frag_keyframe+empty_moov+faststart+default_base_moof -y -f mp4 pipe:1'
-        - name: '1080p iOS'
-          cmd: '%FFMPEG% -dual_mono_mode main -ss %SS% -i %INPUT% -sn -threads 0 -ignore_unknown
-                      -max_muxing_queue_size 1024 -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1
-                      -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
-                      aac -ar 48000 -b:a 192k -ac 2 -c:v libx264 -vf scale=-2:1080 -b:v 6000k -preset veryfast -flags
-                      +loop-global_header %OUTPUT%'
       webm:
         - name: '1280x720'
           cmd: '%FFMPEG% -dual_mono_mode main -re -i pipe:0 -sn -threads 0 -c:a libvorbis -ar 48000 -ac 2 -b:a 192k -c:v vp8 -s 1280x720 -b:v 3000k -deadline realtime -speed 4 -cpu-used -8 -filter:v yadif -y -f webm pipe:1'
@@ -117,15 +111,15 @@ stream:
         #- name: '1280x720 CPU'
         #  cmd: '%FFMPEG% -dual_mono_mode main -i %INPUT% -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn -f hls -hls_time 3 -hls_list_size 0 -hls_allow_cache 1 -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -threads auto -c:a aac -ar 48000 -ab 128k -ac 2 -c:v libx264 -s 1280x720 -preset veryfast -aspect 16:9 -flags +loop-global_header %OUTPUT%'
 
-urlscheme:
-    m2ts:
-        ios: 'infuse://x-callback-url/play?url=PROTOCOL://ADDRESS'
-        android: 'intent://ADDRESS#Intent;package=org.videolan.vlc;type=video;scheme=PROTOCOL;end'
-    video:
-        ios: 'infuse://x-callback-url/play?url=PROTOCOL://ADDRESS'
-        android: 'intent://ADDRESS#Intent;package=com.mxtech.videoplayer.ad;type=video;scheme=PROTOCOL;end'
-    download:
-        ios: 'infuse://x-callback-url/play?url=PROTOCOL://ADDRESS'
+# urlscheme:
+#     m2ts:
+#         ios: 'infuse://x-callback-url/play?url=PROTOCOL://ADDRESS'
+#         android: 'intent://ADDRESS#Intent;package=org.videolan.vlc;type=video;scheme=PROTOCOL;end'
+#     video:
+#         ios: 'infuse://x-callback-url/play?url=PROTOCOL://ADDRESS'
+#         android: 'intent://ADDRESS#Intent;package=com.mxtech.videoplayer.ad;type=video;scheme=PROTOCOL;end'
+#     download:
+#         ios: 'infuse://x-callback-url/play?url=PROTOCOL://ADDRESS'
 
 #delts: true
 #storageLimitAction: remove
