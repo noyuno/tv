@@ -19,6 +19,7 @@ recorded:
 recordedFormat: '%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%'
 thumbnail: '/mnt/hddsg3-plain0/tv/thumbs'
 thumbnailSize: '960x540'
+thumbnailPosition: 7
 uploadTempDir: '/mnt/hddsg3-plain0/tv/tmp'
 encodeProcessNum: 4
 concurrentEncodeNum: 1
