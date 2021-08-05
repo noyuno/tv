@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 src=/mnt/hddsg3-plain0/tv/ts
 dst=/mnt/hddsg3-plain0/tv/mp4/2021/00_アニメ
@@ -9,7 +9,7 @@ find "$src" -name '*.ts' | while read line ; do
     INPUT=$line \
     OUTPUT=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|') \
     $enc 1080p
-    if [ -e "$OUTPUT" ]; then
+    if [ -f "$OUTPUT" ]; then
         if [ $(stat -c %s "$OUTPUT") -gt 10000 ]; then
             rm -f "$INPUT"
         else
