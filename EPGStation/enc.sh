@@ -17,23 +17,15 @@ echo FFMPEG=$FFMPEG
 echo INPUT=$INPUT
 echo OUTPUT=$OUTPUT
 
-tmpfile=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 | tr -d '\n')
-tmpts=$(dirname "$INPUT")/"$tmpfile".ts
-tmpmp4=$(dirname "$OUTPUT")/"$tmpfile".mp4
-
-mv "$INPUT" "$tmpts"
-
-nice -n 10 "$FFMPEG" -y  -dual_mono_mode main -i "$tmpts" \
+nice -n 10 "$FFMPEG" -y  -dual_mono_mode main -i "$INPUT" \
     -movflags +faststart -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn \
     -vf "$vf" -preset veryfast -aspect 16:9 \
-    -c:v libx264 -crf "$crf" -coder 1 -c:a aac -ar 48000 -ab 192k -ac 2 "$tmpmp4"
+    -c:v libx264 -crf "$crf" -coder 1 -c:a aac -ar 48000 -ab 192k -ac 2 "$OUTPUT"
 
-OUTPUT="$tmpmp4" bash /home/noyuno/tv/EPGStation/chapter.sh
+OUTPUT="$OUTPUT" bash /home/noyuno/tv/EPGStation/chapter.sh
 
-dirname "$tmpmp4" | xargs chmod 777
-chmod 777 "$tmpmp4"
-
-mv "$tmpmp4" "$OUTPUT"
+dirname "$OUTPUT" | xargs chmod 777
+chmod 777 "$OUTPUT"
 
 bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードが完了しました' &&:
 ) | tee -a /home/noyuno/EPGStation/logs/enc.sh.log
