@@ -7,7 +7,12 @@ FFMPEG=$(yq -r .ffmpeg < /home/noyuno/tv/EPGStation/config.yml)
 
 find "$src" -name '*.ts' | while read line ; do
     INPUT=$line \
-    OUTPUT=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|') \
+    OUTPUT=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|') \
     $enc 1080p
-    rm -f "$line"
+    if [ -e "$OUTPUT" -a $(stat -c %s "$OUTPUT") -gt 10000 ]; then
+        rm -f "$INPUT"
+    else
+        echo "encode error"
+        exit 1
+    fi
 done
