@@ -7,12 +7,28 @@ source /home/noyuno/tv/.env
 #    ファイル: $OUTPUT"
 #curl -s -X POST -H "Content-Type: application/json" -d '{"value1":"'"$mes"'"}' "https://maker.ifttt.com/trigger/m1/with/key/$IFTTTKEY"
 
+title=$1
+if [ ! "$title" ]; then
+    title="（タイトルなし）"
+fi
+
+name=$NAME
+if [ ! "$name" ]; then
+    name="（番組名なし）"
+fi
+
+output=$OUTPUT
+if [ ! "$output" ]; then
+    output="（ファイルなし）"
+fi
+
+
 curl -XPOST -sd '{
     "token": "'"$NOTIFYD_TOKEN"'",
-    "title": "'"$1"'",
+    "title": "'"$title"'",
     "fields": [
-        { "name": "番組名", "value": "'"$NAME"'", "inline": false },
-        { "name": "ファイル", "value": "'"$OUTPUT"'", "inline": false }
+        { "name": "番組名", "value": "'"$name"'", "inline": false },
+        { "name": "ファイル", "value": "'"$output"'", "inline": false }
     ]
 }' localhost:5050
 

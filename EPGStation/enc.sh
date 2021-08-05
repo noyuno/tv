@@ -27,5 +27,9 @@ OUTPUT="$OUTPUT" bash /home/noyuno/tv/EPGStation/chapter.sh
 dirname "$OUTPUT" | xargs chmod 777
 chmod 777 "$OUTPUT"
 
-bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードが完了しました' &&:
+if [ "$NAME" -a "$OUTPUT" ]; then
+  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードが完了しました' &&:
+else
+  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードに失敗しました' &&:
+fi
 ) | tee -a /home/noyuno/EPGStation/logs/enc.sh.log
