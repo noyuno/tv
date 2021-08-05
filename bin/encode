@@ -4,14 +4,15 @@ src=/mnt/hddsg3-plain0/tv/ts
 dst=/mnt/hddsg3-plain0/tv/mp4/2021/00_アニメ
 enc=/home/noyuno/tv/EPGStation/enc.sh
 
-find "$src" -name '*.ts' | while read line ; do
+find "$src" -name '*.ts' | while read input ; do
+    out=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|')
     FFMPEG=ffmpeg \
-    INPUT=$line \
-    OUTPUT=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|') \
+    INPUT=$input \
+    OUTPUT=$out \
     $enc 1080p
-    if [ -f "$OUTPUT" ]; then
-        if [ $(stat -c %s "$OUTPUT") -gt 10000 ]; then
-            rm -f "$INPUT"
+    if [ -f "$out" ]; then
+        if [ $(stat -c %s "$out") -gt 10000 ]; then
+            rm -f "$input"
         else
             echo "encode error: < 10000 bytes"
             exit 1
