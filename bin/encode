@@ -9,8 +9,13 @@ find "$src" -name '*.ts' | while read line ; do
     INPUT=$line \
     OUTPUT=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|') \
     $enc 1080p
-    if [ -e "$OUTPUT" -a $(stat -c %s "$OUTPUT") -gt 10000 ]; then
-        rm -f "$INPUT"
+    if [ -e "$OUTPUT" ]; then
+        if [ $(stat -c %s "$OUTPUT") -gt 10000 ]; then
+            rm -f "$INPUT"
+        else
+            echo "encode error: < 10000 bytes"
+            exit 1
+        fi
     else
         echo "encode error"
         exit 1
