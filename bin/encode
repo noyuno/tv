@@ -1,0 +1,13 @@
+#!/bin/bash -e
+
+src=/mnt/hddsg3-plain0/tv/ts
+dst=/mnt/hddsg3-plain0/tv/mp4/2021/00_アニメ
+enc=/home/noyuno/tv/EPGStation/enc.sh
+FFMPEG=$(yq -r .ffmpeg < tv/EPGStation/config.yml)
+
+while read line ; do
+    INPUT=$line \
+    OUTPUT=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|') \
+    $enc 1080p
+    rm -f "$line"
+done < $( find $src -name '*.ts' )
