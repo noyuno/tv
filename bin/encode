@@ -10,4 +10,4 @@ while read line ; do
     OUTPUT=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|') \
     $enc 1080p
     rm -f "$line"
-done < $( find $src -name '*.ts' )
+done < $(find "$src" -name '*.ts')
