@@ -5,7 +5,7 @@ dst=/mnt/hddsg3-plain0/tv/mp4/2021/00_アニメ
 enc=/home/noyuno/tv/EPGStation/enc.sh
 
 find "$src" -name '*.ts' | while read input ; do
-    out=$(echo "$line" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|')
+    out=$(echo "$input" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|')
     FFMPEG=ffmpeg \
     INPUT=$input \
     OUTPUT=$out \
