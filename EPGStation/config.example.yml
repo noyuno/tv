@@ -27,9 +27,11 @@ encode:
   - name: 'H.264 1080p CPU'
     cmd: '/bin/bash %ROOT%/config/enc.sh'
     suffix: '.mp4'
+    rate: 3.0
   - name: 'H.264 720p CPU'
     cmd: '%ROOT%/config/enc.sh 720p'
     suffix: '.mp4'
+    rate: 3.0
 streamFilePath: '/mnt/hddsg3-plain0/tv/tmp'
 stream:
   live:
