@@ -120,7 +120,7 @@ snappercopy2() {
   currentrev=$(snapper --csvout -c $config list | awk -F, '/important=yes/{print$3}' | tail -n 1)
   beforerev=$(cat <(snapper --csvout -c $config list | awk -F, '/important=yes/{print$3}' ) \
                   <( command ls -1 $2 ) | \
-              sort | uniq -d | tail -n 1)
+              sort -n | uniq -d | tail -n 1)
   currentdate=$(snapper --csvout -c $config list --column number,date | awk -F, '/^'$currentrev',/{print$2}')
   src=$subvolume/.snapshots/$currentrev/snapshot
   dest=$2/$currentrev
@@ -207,12 +207,16 @@ output 4 'Step 6: Syncing private'
 snapper -c private create -t single -d backup -u important=yes
 snappercopy2 private /mnt/$hdddest-$crypt/backup/private.b
 
-output 4 'Step 7: Syncing rclone symlink directory'
+output 4 'Step 7: Syncing tv rclone symlink directory'
 snapper -c rclone-tv create -t single -d backup -u important=yes
 snappercopy2 rclone-tv /mnt/$hdddest-$data/backup/rclone.b
 
+output 4 'Step 8: Syncing private rclone symlink directory'
+snapper -c rclone-private create -t single -d backup -u important=yes
+snappercopy2 rclone-tv /mnt/$hdddest-$crypt/backup/rclone.b
+
 # 5. umount
-output 4 'Step 7: Unmounting filesystem'
+output 4 'Step 9: Unmounting filesystem'
 
 sync
 umount /dev/mapper/$hdddest-$data
