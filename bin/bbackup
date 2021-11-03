@@ -91,8 +91,8 @@ unlock() {
   echo "$pass" | cryptsetup open $target $dest
 }
 
-[ ! "$unlocked_src_crypt" ] && unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-data
-[ ! "$unlocked_dest_crypt" ] && unlock /dev/mapper/$hdddest-$crypt $hdddest-$crypt-data
+[ ! "$unlocked_src_crypt" ] && unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-open
+[ ! "$unlocked_dest_crypt" ] && unlock /dev/mapper/$hdddest-$crypt $hdddest-$crypt-open
 
 mount_lv() {
   dev=$1
@@ -106,8 +106,8 @@ mount_lv() {
 
 [ ! "$mounted_src_data" ] &&   mount_lv $hddsrc-$data
 [ ! "$mounted_dest_data" ] &&  mount_lv $hdddest-$data
-[ ! "$mounted_src_crypt" ] &&  mount_lv $hddsrc-$crypt-data $hddsrc-$crypt
-[ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-data $hdddest-$crypt
+[ ! "$mounted_src_crypt" ] &&  mount_lv $hddsrc-$crypt-open $hddsrc-$crypt
+[ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-open $hdddest-$crypt
 
 # 2. system
 snappercopy2() {
@@ -220,8 +220,8 @@ output 4 'Step 9: Unmounting filesystem'
 
 sync
 umount /dev/mapper/$hdddest-$data
-umount /dev/mapper/$hdddest-$crypt-data
-cryptsetup close $hdddest-$crypt-data
+umount /dev/mapper/$hdddest-$crypt-open
+cryptsetup close $hdddest-$crypt-open
 
 # notifyd
 curl -XPOST -d '{
