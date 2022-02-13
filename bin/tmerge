@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
     echo "require one keyword" >&2
     exit 1
 fi
@@ -8,10 +8,10 @@ fi
 declare -a ret=()
 while read line; do
     ret+=("$line")
-done < <(find . -maxdepth 1 -type f -name '*'"$1"'*')
+done < <(find . -maxdepth 1 -type f -name '*'"$*"'*')
 
 if [ ${#ret[@]} -eq 0 ]; then
-    echo "keyword '$1' not found" >&2
+    echo "keyword '$*' not found" >&2
     exit 1
 else
     for ((i=0; i < ${#ret[@]}; i++)); do
@@ -20,11 +20,11 @@ else
     echo ""
     read -p "continue?[Y/n]:" yn
     if [ "$yn" = "" -o "$yn" = "Y" -o "$yn" = "y" ]; then
-        mkdir -p "$1"
+        mkdir -p "$*"
         for ((i=0; i < ${#ret[@]}; i++)); do
-            mv "${ret[$i]}" "$1"
+            mv "${ret[$i]}" "$*"
         done
-        tree "$1"
+        tree "$*"
     fi
 fi
 
