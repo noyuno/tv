@@ -1,0 +1,44 @@
+#!/bin/bash -e
+
+source /home/noyuno/tv/.env
+
+src=/mnt/hddsg3-plain0/tv/mp4/2022/00_アニメ/
+dst=/mnt/hddsg3-plain0/tv/mp4/2022/
+filenum=0
+movenum=0
+errornum=0
+
+if [ ! -d "$src" -o ! -d "$dst" ]; then
+  echo "directory $src or $dst not exists" >&2
+  exit 1
+fi
+
+keyword=$(find "$dst" -maxdepth 1 -type d | sort | sed '/^.$/d' | awk -F/ '{print $NF}')
+
+while read line; do
+  filenum=$((filenum + 1))
+  while read k; do
+    #echo "line=$line, k=$k"
+    if [ "$k" ]; then
+      fname=$(basename "$line")
+      if [[ "$fname" =~ "$k" ]]; then
+        d="$dst/$k/$fname"
+        if [ -e "$d" ]; then
+          errornum=$((errornum + 1))
+          echo "file $d already exists" >&1
+        else
+          movenum=$((movenum + 1))
+          mv -vn "$line" "$d"
+        fi
+      fi
+    #else
+    #  echo skip
+    fi
+  done < <(echo "$keyword")
+done < <(find "$src" -maxdepth 1 -type f | sort)
+
+curl -XPOST -d '{
+    "token": "'$NOTIFYD_TOKEN'",
+    "message": "ファイルの移動を完了しました。('$movenum'/'$filenum' error:'$errornum')"
+}' localhost:5050
+
