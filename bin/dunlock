@@ -2,5 +2,5 @@
 set -e
 
 cryptsetup open /dev/mapper/ssdki3-crypt0 ssdki3-crypt0-open
-mount -onoatime /dev/mapper/ssdki3-crypt0-open /mnt/ssdki3-crypt0
+mount -onoatime,compress=zstd /dev/mapper/ssdki3-crypt0-open /mnt/ssdki3-crypt0
 

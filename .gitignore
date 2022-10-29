@@ -1,5 +1,5 @@
 .env
 data
 logs
-EPGStation/config.json
 EPGStation/config.yml
+
