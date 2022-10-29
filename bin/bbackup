@@ -6,7 +6,7 @@ dt=$(TZ=GMT date +@GMT-%Y.%m.%d-%H.%M.%S)
 hddsrc=hddsg3
 hdddest=hddsg4
 data=plain0
-crypt=crypt0
+#crypt=crypt0
 rootdev=/dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624
 source /home/noyuno/tv/.env
 
@@ -48,51 +48,51 @@ is_mounted() {
 
 mounted_src_data="$(is_mounted $hddsrc-$data)"
 mounted_dest_data="$(is_mounted $hdddest-$data)"
-mounted_src_crypt="$(is_mounted $hddsrc-$crypt-open $hddsrc-$crypt)"
-mounted_dest_crypt="$(is_mounted $hdddest-$crypt-open $hdddest-$crypt)"
+#mounted_src_crypt="$(is_mounted $hddsrc-$crypt-open $hddsrc-$crypt)"
+#mounted_dest_crypt="$(is_mounted $hdddest-$crypt-open $hdddest-$crypt)"
 
 # LVM bug fix
 if [ ! "$mounted_src_data" -a ! "$mounted_src_crypt" ]; then
   lvchange -an $hddsrc/$data
-  lvchange -an $hddsrc/$crypt
+  #lvchange -an $hddsrc/$crypt
   vgchange -an $hddsrc
   vgchange -ay $hddsrc
   lvchange -ay $hddsrc/$data
-  lvchange -ay $hddsrc/$crypt
+  #lvchange -ay $hddsrc/$crypt
 fi
 if [ ! "$mounted_dest_data" -a ! "$mounted_dest_crypt" ]; then
   lvchange -an $hdddest/$data
-  lvchange -an $hdddest/$crypt
+  #lvchange -an $hdddest/$crypt
   vgchange -an $hdddest
   vgchange -ay $hdddest
   lvchange -ay $hdddest/$data
-  lvchange -ay $hdddest/$crypt
+  #lvchange -ay $hdddest/$crypt
 fi
 
-unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-open || echo '')"
-unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-open || echo '')"
+#unlocked_src_crypt="$(ls /dev/mapper/$hddsrc-$crypt-open || echo '')"
+#unlocked_dest_crypt="$(ls /dev/mapper/$hdddest-$crypt-open || echo '')"
 
-pass=
-require_unlock=()
-[ ! "$unlocked_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
-[ ! "$unlocked_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
-if [ ${#require_unlock[@]} -gt 0 ]; then
-  read -sp "Enter passphrase for ${require_unlock[*]}: " pass
-  tty -s && echo
-  if [ ! "$pass" ]; then
-    output 3 'error: empty password'
-    exit 1
-  fi
-fi
+#pass=
+#require_unlock=()
+#[ ! "$unlocked_src_crypt" ] && require_unlock=("${require_unlock[@]}" "$hddsrc-$crypt")
+#[ ! "$unlocked_dest_crypt" ] && require_unlock=("${require_unlock[@]}" "$hdddest-$crypt")
+#if [ ${#require_unlock[@]} -gt 0 ]; then
+#  read -sp "Enter passphrase for ${require_unlock[*]}: " pass
+#  tty -s && echo
+#  if [ ! "$pass" ]; then
+#    output 3 'error: empty password'
+#    exit 1
+#  fi
+#fi
 
-unlock() {
-  target=$1
-  dest=$2
-  echo "$pass" | cryptsetup open $target $dest
-}
+#unlock() {
+#  target=$1
+#  dest=$2
+#  echo "$pass" | cryptsetup open $target $dest
+#}
 
-[ ! "$unlocked_src_crypt" ] && unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-open
-[ ! "$unlocked_dest_crypt" ] && unlock /dev/mapper/$hdddest-$crypt $hdddest-$crypt-open
+#[ ! "$unlocked_src_crypt" ] && unlock /dev/mapper/$hddsrc-$crypt $hddsrc-$crypt-open
+#[ ! "$unlocked_dest_crypt" ] && unlock /dev/mapper/$hdddest-$crypt $hdddest-$crypt-open
 
 mount_lv() {
   dev=$1
@@ -106,8 +106,8 @@ mount_lv() {
 
 [ ! "$mounted_src_data" ] &&   mount_lv $hddsrc-$data
 [ ! "$mounted_dest_data" ] &&  mount_lv $hdddest-$data
-[ ! "$mounted_src_crypt" ] &&  mount_lv $hddsrc-$crypt-open $hddsrc-$crypt
-[ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-open $hdddest-$crypt
+#[ ! "$mounted_src_crypt" ] &&  mount_lv $hddsrc-$crypt-open $hddsrc-$crypt
+#[ ! "$mounted_dest_crypt" ] && mount_lv $hdddest-$crypt-open $hdddest-$crypt
 
 # 2. system
 snappercopy2() {
@@ -203,25 +203,25 @@ output 4 'Step 5: Syncing tv'
 snapper -c tv create -t single -d backup -u important=yes
 snappercopy2 tv /mnt/$hdddest-$data/backup/tv.b
 
-output 4 'Step 6: Syncing private'
-snapper -c private create -t single -d backup -u important=yes
-snappercopy2 private /mnt/$hdddest-$crypt/backup/private.b
+#output 4 'Step 6: Syncing private'
+#snapper -c private create -t single -d backup -u important=yes
+#snappercopy2 private /mnt/$hdddest-$crypt/backup/private.b
 
-output 4 'Step 7: Syncing tv rclone symlink directory'
+output 4 'Step 6: Syncing tv rclone symlink directory'
 snapper -c rclone-tv create -t single -d backup -u important=yes
 snappercopy2 rclone-tv /mnt/$hdddest-$data/backup/rclone.b
 
-output 4 'Step 8: Syncing private rclone symlink directory'
-snapper -c rclone-private create -t single -d backup -u important=yes
-snappercopy2 rclone-tv /mnt/$hdddest-$crypt/backup/rclone.b
+#output 4 'Step 7: Syncing private rclone symlink directory'
+#snapper -c rclone-private create -t single -d backup -u important=yes
+#snappercopy2 rclone-tv /mnt/$hdddest-$crypt/backup/rclone.b
 
 # 5. umount
-output 4 'Step 9: Unmounting filesystem'
+output 4 'Step 7: Unmounting filesystem'
 
 sync
 umount /dev/mapper/$hdddest-$data
-umount /dev/mapper/$hdddest-$crypt-open
-cryptsetup close $hdddest-$crypt-open
+#umount /dev/mapper/$hdddest-$crypt-open
+#cryptsetup close $hdddest-$crypt-open
 
 # notifyd
 curl -XPOST -d '{

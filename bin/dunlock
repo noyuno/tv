@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
 
-cryptsetup open /dev/mapper/hddsg3-crypt0 hddsg3-crypt0-open
-mount -onoatime,compress=zstd /dev/mapper/hddsg3-crypt0-open /mnt/hddsg3-crypt0
+cryptsetup open /dev/mapper/ssdki3-crypt0 ssdki3-crypt0-open
+mount -onoatime /dev/mapper/ssdki3-crypt0-open /mnt/ssdki3-crypt0
+

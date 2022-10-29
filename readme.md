@@ -71,51 +71,6 @@ sudo apt remove ufw firewalld
 sudo apt install iptables-persistent
 ~~~
 
-`/etc/iptables/rules.v4`
-
-~~~
-*filter
-:INPUT DROP [0:0]
-#:INPUT ACCEPT [0:0]
-:FORWARD DROP [0:0]
-#:FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
-:TCP - [0:0]
-:UDP - [0:0]
-
--A INPUT -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
--A INPUT -i lo -j ACCEPT
--A INPUT -m conntrack --ctstate INVALID -j DROP
--A INPUT -p icmp -m icmp --icmp-type 8 -m conntrack --ctstate NEW -j ACCEPT
--A INPUT -p udp -m conntrack --ctstate NEW -j UDP
--A INPUT -p tcp --tcp-flags FIN,SYN,RST,ACK SYN -m conntrack --ctstate NEW -j TCP
-
--A INPUT -d 192.168.100.22 -p tcp --dport 8022 -j ACCEPT
--A INPUT -d 192.168.100.22 -p udp --dport 8022 -j ACCEPT
-
--A TCP -p tcp --dport 22 -j ACCEPT
--A UDP -p udp --dport 137:138 -j ACCEPT
--A TCP -p tcp --dport 139 -j ACCEPT
--A TCP -p tcp --dport 445 -j ACCEPT
-
--A TCP -p tcp --dport 9090 -j ACCEPT
--A UDP -p udp --dport 9090 -j ACCEPT
-
--A FORWARD -p tcp --dport 8022 -j ACCEPT
--A FORWARD -p udp --dport 8022 -j ACCEPT
-
-COMMIT
-
-*nat
-:POSTROUTING ACCEPT [0:0]
-# 内側から外側
--A POSTROUTING -s 192.168.100.0/24 -o enp5s0 -j MASQUERADE
-# 外側から内側
--A PREROUTING -i enp5s0 -d 192.168.100.22 -p tcp --dport 80 -j  DNAT --to-destination 192.168.100.22:8022
--A PREROUTING -i enp5s0 -d 192.168.100.22 -p udp --dport 80 -j  DNAT --to-destination 192.168.100.22:8022
-COMMIT
-~~~
-
 ### dns
 
 DNS:`/etc/systemd/resolved.conf`
@@ -135,7 +90,7 @@ Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/loca
 
 ## 8. 時刻の設定
 
-UTC非対応なので、JSTにする。
+EPGStationはUTC非対応なので、JSTにする。
 
 ~~~
 date
@@ -180,7 +135,7 @@ ls /dev/px4video*
 `/etc/modprobe.d/px4_drv.conf`
 
 ~~~
-options px4_drv max_urbs=4
+options px4_drv max_urbs=3
 ~~~
 
 ## 10. カードリーダー
@@ -294,6 +249,23 @@ set password for noyuno@localhost = PASSWORD('password');
 
 ## 15. セキュリティの設定
 
+~~~
+sudo firewall-cmd --list-all --zone public                                                                                                                                               130u
+public
+  target: default
+  icmp-block-inversion: no
+  interfaces:
+  sources:
+  services: cockpit dhcpv6-client grafana http minidlna rdp samba ssh vnc-server
+  ports: 81/tcp 81/udp 3000/tcp 9090/tcp 8200/tcp 9000/tcp 8024/tcp
+  protocols:
+  masquerade: no
+  forward-ports:
+  source-ports:
+  icmp-blocks:
+  rich rules:
+~~~
+
 ~~~sh
 sudo systemctl enable --now firewalld
 sudo firewall-cmd --zone=public --add-service=http --permanent
@@ -309,7 +281,7 @@ sudo firewall-cmd --list-all --zone=drop
 sudo reboot
 ~~~
 
-firewalldではnotifydを動かすためにマスカレードを追加する
+notifydを動かすためにマスカレードの設定を行う
 
 ## 16. ストレージ
 
@@ -385,7 +357,6 @@ cryptsetup benchmark
 LVMパーティション作成
 
 ~~~
-sudo pvcreate /dev/sdX1
 sudo vgcreate hddsg2 /dev/sdX1
 sudo lvcreate -L 4T /dev/mapper/hddsg2 -n plain0
 sudo lvcreate -L 1T /dev/mapper/hddsg2 -n crypt0
