@@ -1,0 +1,7 @@
+#!/bin/bash
+
+EXCLUDES="--exclude=.snapshots --exclude=.git --exclude=@Recently-Snapshot --exclude=@Recycle"
+rsync -e ssh -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES /mnt/ssdki3-crypt0/private/ 192.168.100.31:/share/private
+rsync -e ssh -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES /mnt/hddsg3-plain0/tv/ 192.168.100.31:/share/tv
+
+

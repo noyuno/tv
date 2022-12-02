@@ -85,3 +85,4 @@ fi
 # C-s
 stty stop undef &&:
 
+. "$HOME/.cargo/env"
