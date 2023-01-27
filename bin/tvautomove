@@ -2,8 +2,8 @@
 
 source /home/noyuno/tv/.env
 
-src=/mnt/hddsg3-plain0/tv/mp4/2022/00_アニメ/
-dst=/mnt/hddsg3-plain0/tv/mp4/2022/
+src=/mnt/hddsg3-plain0/tv/mp4/2023/00_アニメ/
+dst=/mnt/hddsg3-plain0/tv/mp4/2023/
 filenum=0
 movenum=0
 errornum=0
@@ -37,8 +37,10 @@ while read line; do
   done < <(echo "$keyword")
 done < <(find "$src" -maxdepth 1 -type f | sort)
 
+message="ファイルの移動を完了しました。($movenum/$filenum,error:$errornum)"
+echo "$message"
 curl -XPOST -d '{
     "token": "'$NOTIFYD_TOKEN'",
-    "message": "ファイルの移動を完了しました。('$movenum'/'$filenum' error:'$errornum')"
+    "message": "'$message'"
 }' localhost:5050
 
