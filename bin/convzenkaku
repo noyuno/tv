@@ -1,0 +1,30 @@
+#!/bin/bash -e
+
+source /home/noyuno/tv/.env
+
+src=/mnt/hddsg3-plain0/tv/mp4/
+max=10
+
+if [ ! -d "$src" ]; then
+  echo "directory $src not exists" >&2
+  exit 1
+fi
+
+filenum=0
+for ((depth=1; depth < $max; depth++)); do
+  while read line; do
+    dname=$(dirname "$line")
+    fname=$(basename "$line")
+    newfname=$(echo "$fname" | uconv -x "\p{latin} Fullwidth-Halfwidth; " | sed y/１２３４５６７８９０/1234567890/)
+    echo "debug: fname=$fname, newfname=$newfname"
+    if [ "$fname" != "$newfname" ]; then
+      filenum=$((filenum + 1))
+      echo "(depth=$depth, count=$filenum) move $line -> $dname/$newfname"
+      #mv -n "$line" "$dname/$newfilename"
+    fi
+  done < <(find "$src" -maxdepth $depth -mindepth $depth | sort)
+done
+
+echo "$filenum directories/files were renamed"
+
+

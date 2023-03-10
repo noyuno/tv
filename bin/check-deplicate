@@ -1,0 +1,52 @@
+#!/bin/bash -e
+
+src=/mnt/hddsg3-plain0/tv/mp4
+yearstart=2019
+yearend=2023
+
+processnum=0
+matchnum=0
+declare -A directories
+declare -A matches
+
+if [ ! -d "$src" ]; then
+  echo "directory $src not exists" >&2
+  exit 1
+fi
+
+for (( year=$yearstart; year <= $yearend; year++)) ; do
+  directories[$year]=$(find "$src/$year" -maxdepth 1 -type d | \
+    sort | sed '/^.$/d' | awk -F/ '{print $NF}'| \
+    sed 's/ .*$//' | sed 's/　.*//' | \
+    uconv -x "\p{latin} Fullwidth-Halfwidth" | \
+    sed 'y/１２３４５６７８９０/1234567890/')
+done
+
+for (( y1=$yearstart; y1 <= $yearend; y1++ )) ; do
+  for (( y2=$yearstart; y2 <= $yearend; y2++ )) ; do
+    if [ "$y1" == "$y2" ]; then
+      continue
+    fi
+    while read d1; do
+      e1="$d1"
+      while read d2; do
+        #echo "debug: d1=$d1, d2=$d2"
+        e2="$d2"
+        if [ "$e1" = "$e2" ]; then
+          #echo "debug: matched, y1=$y1, y2=$y2, d2=$d2"
+          matches[$e2]="${matches[$e2]}\n$y2"
+        fi
+      done < <(echo "${directories[$y2]}")
+    done < <(echo "${directories[$y1]}")
+  done
+done
+
+for m in "${!matches[@]}"; do
+  echo -e "$m:"
+  while IFS= read -r line; do
+    echo -e "  $line"
+  done < <(echo -e "${matches[$m]}" | sort -n | uniq | tail +2)
+done
+
+
+

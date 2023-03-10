@@ -1,24 +1,25 @@
 #!/bin/bash -ex
 
-src=/mnt/hddsg3-plain0/tv/ts
-dst=/mnt/hddsg3-plain0/tv/mp4/2021/00_アニメ
+src=/mnt/hddsg3-plain0/tv/mp4/Animation
+dst=/mnt/hddsg3-plain0/tv/mp4/Animation/mp4
 enc=/home/noyuno/tv/EPGStation/enc.sh
+ext='m2ts'
 
-find "$src" -name '*.ts' -type f | sort | while read input ; do
-    out=$(echo "$input" | sed 's|'"$src"'|'"$dst"'|' | sed 's|.ts$|.mp4|')
-    FFMPEG=ffmpeg \
-    INPUT=$input \
-    OUTPUT=$out \
-    $enc 1080p
+find "$src" -name "*.$ext" -type f | sort | while read input ; do
+    out=$(echo "$input" | sed 's|^'"$src"'|'"$dst"'|' | sed 's|.'"$ext"'$|.mp4|')
+    mkdir -p $(dirname "$out")
+    FFMPEG=ffmpeg INPUT=$input OUTPUT=$out $enc 1080p
     if [ -f "$out" ]; then
         if [ $(stat -c %s "$out") -gt 10000 ]; then
-            rm -f "$input"
+            #rm -f "$input"
+            echo "encode success (input=$input, output=$out)"
         else
-            echo "encode error: < 10000 bytes"
-            exit 1
+            echo "encode error (input=$input, output=$out, < 10000 bytes)"
+            #exit 1
         fi
     else
-        echo "encode error"
-        exit 1
+        echo "encode error (input=$input, output=$out, file did not created)"
+        #exit 1
     fi
 done
+
