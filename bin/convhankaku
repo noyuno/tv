@@ -2,7 +2,7 @@
 
 source /home/noyuno/tv/.env
 
-src=/mnt/hddsg3-plain0/tv/mp4/
+src=/mnt/hddsg3-plain0/tv/mp4/2023/00_アニメ
 max=10
 
 if [ ! -d "$src" ]; then
@@ -16,15 +16,20 @@ for ((depth=1; depth < $max; depth++)); do
     dname=$(dirname "$line")
     fname=$(basename "$line")
     newfname=$(echo "$fname" | uconv -x "\p{latin} Fullwidth-Halfwidth; " | sed y/１２３４５６７８９０/1234567890/)
-    echo "debug: fname=$fname, newfname=$newfname"
+    #echo "debug: fname=$fname, newfname=$newfname"
     if [ "$fname" != "$newfname" ]; then
       filenum=$((filenum + 1))
       echo "(depth=$depth, count=$filenum) move $line -> $dname/$newfname"
-      #mv -n "$line" "$dname/$newfilename"
+      mv -n "$line" "$dname/$newfname"
     fi
   done < <(find "$src" -maxdepth $depth -mindepth $depth | sort)
 done
 
-echo "$filenum directories/files were renamed"
+message="ファイル名の半角化を完了しました。($filenum)"
+echo "$message"
+curl -XPOST -d '{
+    "token": "'$NOTIFYD_TOKEN'",
+    "message": "'$message'"
+}' localhost:5050
 
 

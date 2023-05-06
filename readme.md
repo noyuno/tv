@@ -5,7 +5,7 @@
 1. AMD Ryzen 3 CPU
 2. PX4-Q3PX4 (DTV x4, BS|CS x4)
 3. カードリーダー
-4. Ubuntu 20.04 LTS
+4. Ubuntu 22.04 LTS
 
 ## 2. 仕様
 
@@ -17,16 +17,16 @@
 6. 死活管理は行わない。録画エラーが発生したらDiscordで報告
 7. LANのみ
 
-## 3. Rufus で書き込み
+## 3. balenaEtcher  で書き込み
 
-[Rufus](https://rufus.ie/)
+[balenaEtcher](https://www.balena.io/etcher)
 
 ## 4. インストーラを起動
 
 - language: english
 - keyboard: englist
-- install: docker, microkube
-- hostname: m1.lan
+- hostname: m1
+- repository: http://ftp.riken.go.jp/Linux/ubuntu/
 
 ~~~
 Filesystem                           Size  Used Avail Use% Mounted on
@@ -42,7 +42,7 @@ tmpfs                                594M  1.4M  593M   1% /run
 ~~~
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install zsh build-essential cmake pkg-config autoconf nodejs ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon npm mariadb-server samba firewalld smartmontools neovim ripgrep jq dump
+sudo apt -y install zsh build-essential cmake pkg-config autoconf ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon mariadb-server samba firewalld smartmontools ripgrep jq snapper htop tmux git nano
 ~~~
 
 ## 6. ネットワーク設定
@@ -58,17 +58,9 @@ network:
     enp5s0:
       addresses:
       - 192.168.100.22/24
-      - 192.168.100.23/24
       gateway4: 192.168.100.1
       nameservers: {}
   version: 2
-~~~
-
-### iptables
-
-~~~
-sudo apt remove ufw firewalld
-sudo apt install iptables-persistent
 ~~~
 
 ### dns
@@ -85,7 +77,6 @@ DNS=192.168.100.1 8.8.8.8 8.8.4.4
 sudo visudo
 
 Defaults timestamp_timeout = 30
-Defaults    secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/usr/local/sbin
 ~~~
 
 ## 8. 時刻の設定
@@ -94,7 +85,7 @@ EPGStationはUTC非対応なので、JSTにする。
 
 ~~~
 date
-timedatectl set-timezone Asia/Tokyo
+sudo timedatectl set-timezone Asia/Tokyo
 date
 ~~~
 
@@ -117,25 +108,15 @@ DKMSを使う場合
 sudo cp -a ./ /usr/src/px4_drv-0.2.1
 sudo dkms add px4_drv/0.2.1
 sudo dkms install px4_drv/0.2.1
-~~~
-
-DKMSを使わない場合
-
-~~~
-cd driver
-sudo make install
-lsmod | grep -e ^px4_drv
-ls /dev/px4video*
+sudo modprobe px4_drv
 ~~~
 
 ### 設定
 
 `usb_alloc_coherent() failed` 対策
 
-`/etc/modprobe.d/px4_drv.conf`
-
 ~~~
-options px4_drv max_urbs=3
+echo 'options px4_drv max_urbs=3' | sudo tee /etc/modprobe.d/px4_drv.conf
 ~~~
 
 ## 10. カードリーダー
@@ -155,8 +136,7 @@ cd pcsc-tools-1.5.5
 make
 sudo make install
 
-sudo systemctl enable pcscd
-sudo systemctl start pcscd
+sudo systemctl enable --now pcscd
 sudo systemctl status pcscd
 
 sudo pcsc_scan
@@ -190,7 +170,7 @@ sudo make install
 
 ~~~
 sudo recpt1 --b25 --strip BS09_0 10 bs11.ts
-sudo recpt1 --b25 --strip 18 10 18.ts
+sudo recpt1 --b25 --strip 16 10 16.ts
 ~~~
 
 in client, type
@@ -203,11 +183,20 @@ scp m1:bs11.ts .
 
 ### 14.1. インストール・設定
 
+Node.jsのバージョンは16にする。
+
+~~~
+curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt-get install -y nodejs
+~~~
+
 ~~~
 sudo npm install pm2 -g
-sudo pm2 install pm2-logrotate -g
+sudo pm2 install pm2-logrotate
 sudo npm install mirakurun -g --unsafe-perm --production
+sudo mkdir -p /usr/local/var/db/mirakurun
 echo [] | sudo tee /usr/local/var/db/mirakurun/programs.json
+sudo mkdir /usr/local/etc/mirakurun
 sudo chmod -R go+rw /usr/local/etc/mirakurun
 sudo cp tuners.yml /usr/local/etc/mirakurun/tuners.yml
 
@@ -273,6 +262,7 @@ sudo firewall-cmd --zone=public --add-port=81/tcp --permanent
 sudo firewall-cmd --zone=public --add-port=81/udp --permanent
 sudo firewall-cmd --zone=public --add-port=8889/tcp --permanent
 sudo firewall-cmd --zone=public --add-port=8889/udp --permanent
+sudo firewall-cmd --zone=public --add-port=5050/tcp --permanent # notifyd
 sudo firewall-cmd --permanent --zone=public --add-service=samba
 sudo firewall-cmd --add-source=192.168.100.1 --zone=drop --permanent
 sudo firewall-cmd --reload
@@ -291,6 +281,13 @@ snapper
 
 ~~~
 sudo snapper -c root create-config /
+sudo snapper -c root set-config ALLOW_GROUPS=noyuno ALLOW_USERS=noyuno SYNC_ACL=yes TIMELINE_LIMIT_DAILY=1 TIMELINE_LIMIT_HOURLY=1 TIMELINE_LIMIT_MONTHLY=1
+
+sudo snapper -c tv create-config /mnt/hddsg3-plain0/tv
+sudo snapper -c tv set-config ALLOW_GROUPS=noyuno ALLOW_USERS=noyuno SYNC_ACL=yes TIMELINE_LIMIT_DAILY=1 TIMELINE_LIMIT_HOURLY=1 TIMELINE_LIMIT_MONTHLY=1
+
+sudo snapper -c private create-config /mnt/ssdki3-crypt0/private
+sudo snapper -c private set-config ALLOW_GROUPS=noyuno ALLOW_USERS=noyuno SYNC_ACL=yes TIMELINE_LIMIT_DAILY=1 TIMELINE_LIMIT_HOURLY=1 TIMELINE_LIMIT_MONTHLY=1 
 ~~~
 
 ### 16.2. データ (現用 hddsg0)
@@ -345,47 +342,13 @@ fstabに追加
 /dev/mapper/hddsg0-plain0 /mnt/hddsg0-plain0 btrfs noatime 0 0
 ~~~
 
-### 16.3. データ (予備 hddsg2)
-
-~~~
-sudo gdisk /dev/sdX
-> o y
-> n 8e00
-cryptsetup benchmark
-~~~
-
-LVMパーティション作成
-
-~~~
-sudo vgcreate hddsg2 /dev/sdX1
-sudo lvcreate -L 4T /dev/mapper/hddsg2 -n plain0
-sudo lvcreate -L 1T /dev/mapper/hddsg2 -n crypt0
-sudo mkfs.btrfs /dev/mapper/hddsg2-plain0
-sudo cryptsetup luksFormat -c aes-xts-plain64 -s 512 /dev/mapper/hddsg2-crypt0
-sudo cryptsetup open /dev/mapper/hddsg2-crypt0 hddsg2-crypt0-data
-sudo mkfs.btrfs /dev/mapper/hddsg2-crypt0-data
-
-sudo mkdir /mnt/hddsg2-plain0
-sudo mount -onoatime /dev/mapper/hddsg2-plain0 /mnt/hddsg2-plain0
-sudo mkdir /mnt/hddsg2-crypt0
-sudo mount -onoatime,compress=zstd /dev/mapper/hddsg2-crypt0-data /mnt/hddsg2-crypt0
-~~~
-
-Btrfsサブボリューム作成
-
-~~~
-sudo btrfs subvolume create /mnt/hddsg2-plain0/tv
-sudo btrfs subvolume create /mnt/hddsg2-crypt0/private
-~~~
-
-
 ## 17. Samba
 
 ### 17.1. サーバ
 
 ~~~
 sudo cp disk/smb.conf /etc/samba/smb.conf
-sudo systemctl enable --now smb nmb
+sudo systemctl enable --now smbd nmbd
 
 sudo pdbedit -a noyuno
 sudo pdbedit -L
@@ -403,36 +366,23 @@ sudo pdbedit -L
 ### 18.1. バックアップ
 
 ~~~
-sudo ./disk/backup.sh
-~~~
-
-### 18.2. リストア
-
-rootはUSBbootして復元する必要がある。復元先のファイルシステムのルートディレクトリを`/mnt`にマウントする場合は次のとおりとなる。
-
-~~~
-pushd /mnt
-sudo tar xf /mnt/hddsg2-plain0/backup/root/XXX/snapshot/home/noyuno/backup/system/efi-vfat.tar.gz
-popd
-pushd /mnt/boot
-sudo restore -rf /mnt/hddsg2-plain0/backup/root/XXX/snapshot/home/noyuno/backup/system/boot-ext4dump.gz
-popd
-sudo btrfs copy /mnt/hddsg2-plain0/backup/root/XXX/snapshot /mnt
-~~~
-
-データ
-
-~~~
-sudo btrfs copy /mnt/hddsg2-plain0/tv/.snapshots/XXX/snapshot /mnt/hddsg0-plain0/tv
-sudo btrfs copy /mnt/hddsg2-crypt0/private/.snapshots/XXX/snapshot /mnt/hddsg0-crypt0/tv
+sudo nasbackup
 ~~~
 
 ## 19. EPGStation
 
+Node.jsのバージョンは16にする。
+
+~~~
+curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+sudo apt-get install -y nodejs
+~~~
+
 ~~~
 git clone https://github.com/l3tnun/EPGStation.git
 cd EPGStation
-npm install
+git checkout v2.6.20
+npm run all-install
 npm run build
 cd
 ~~~
@@ -461,45 +411,14 @@ sudo pm2 logs epgstation
 
 ## 20. discord (IFTTT編)
 
-### 20.A. IFTTT（非推奨）
-
-1. 右上の丸いボタンを押してCreateを押す。
-2. 「This」ボタンを押して「Webhooks」と入力してクリックする。
-3. 「Receive a web request」をクリック。
-4. 「Event Name」に「tv」と入力し、「Create trigger」をクリック。
-5. 「That」ボタンを押して「Webhooks」と入力してクリックする。
-6. 「Make a web request」を押す。
-7. 「URL」にDiscordのweb hook URLを入力する。MethodはPost。Content-Typeは「application/json」、Bodyに`{"content":"{{Value1}}"}`を入力する。
-
-**テスト**
-
-https://ifttt.com/maker_webhooks に移動。右上の「Documentation」をクリック。
-eventに「tv」と入力、value1に「test」と入力して「Test it」を押す。
-
-**設定**
-
-上記テストで表示されたキーを控える。
-
-`.env`に`IFTTTKEY=(キー)`を入力。
-
-### 20.B. Discord (notifyd編)
-
 ~~~sh
+cd notifyd
+pip3 install --user -r notifyd/requirements.txt
 nano .env # DISCORD_TOKENを入力
-docker-compose up notifyd
+sudo pm2 start notifyd/main.py --interpreter python3 --name notifyd --user noyuno
 curl localhost:5050
 > notifyd
 > hello
-~~~
-
-動かないときはファイアウォールを疑う
-
-~~~sh
-#sudo nmcli c m br-dd5bc31eebee connection.zone trusted
-#sudo firewall-cmd --change-interface=br-dd5bc31eebee --zone trusted --permanent
-#sudo iptables -I DOCKER -i eno1 -j DROP
-#echo 'iptables -I DOCKER -i eno1 -j DROP' | sudo tee -a  /etc/rc.d/rc.local
-#sudo chmod +x /etc/rc.d/rc.local
 ~~~
 
 ## 21. ComskipでCMの区切りにチャプターを付ける
@@ -591,7 +510,7 @@ sudo firewall-cmd --set-log-denied off
 sudo firewall-cmd --reload
 ~~~
 
-## 9. ストリーミングが読込中が頻繁に発生する
+## 9. ストリーミング配信時に読込中が頻繁に発生する
 
 iperfを入れて帯域幅計測
 

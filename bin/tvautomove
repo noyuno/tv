@@ -3,7 +3,9 @@
 source /home/noyuno/tv/.env
 
 src=/mnt/hddsg3-plain0/tv/mp4/2023/00_アニメ/
-dst=/mnt/hddsg3-plain0/tv/mp4/2023/
+dst=/mnt/hddsg3-plain0/tv/mp4/
+yearstart=2019
+yearend=2023
 filenum=0
 movenum=0
 errornum=0
@@ -13,28 +15,38 @@ if [ ! -d "$src" -o ! -d "$dst" ]; then
   exit 1
 fi
 
-keyword=$(find "$dst" -maxdepth 1 -type d | sort | sed '/^.$/d' | awk -F/ '{print $NF}')
+declare -A keywords
+for (( year=$yearstart; year <= $yearend; year++)); do
+    keywords[$year]=$(find "$dst/$year" -mindepth 1 -maxdepth 1 -type d | sort | sed '/^.$/d' | awk -F/ '{print $NF}')
+done
 
 while read line; do
   filenum=$((filenum + 1))
-  while read k; do
-    #echo "line=$line, k=$k"
-    if [ "$k" ]; then
-      fname=$(basename "$line")
-      if [[ "$fname" =~ "$k" ]]; then
-        d="$dst/$k/$fname"
-        if [ -e "$d" ]; then
-          errornum=$((errornum + 1))
-          echo "file $d already exists" >&1
-        else
-          movenum=$((movenum + 1))
-          mv -vn "$line" "$d"
+  fname=$(basename "$line")
+  #keywords loop
+  for (( year=$yearstart; year <= $yearend; year++ )); do
+    moved=0
+    while read k; do
+      #echo "line=$line, keywords[$year]=$k"
+      if [ "$k" ]; then
+        if [[ "$fname" =~ "$k" ]]; then
+          d="$dst/$year/$k/$fname"
+          if [ -e "$d" ]; then
+            errornum=$((errornum + 1))
+            echo "file $d already exists" >&1
+          else
+            movenum=$((movenum + 1))
+            mv -vn "$line" "$d"
+          fi
+          moved=1
+          break
         fi
       fi
-    #else
-    #  echo skip
+    done < <(echo "${keywords[$year]}")
+    if [ $moved == 1 ]; then
+        break
     fi
-  done < <(echo "$keyword")
+  done
 done < <(find "$src" -maxdepth 1 -type f | sort)
 
 message="ファイルの移動を完了しました。($movenum/$filenum,error:$errornum)"

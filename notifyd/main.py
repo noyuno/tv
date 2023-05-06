@@ -53,7 +53,7 @@ def main(logger):
     logger.debug('launch discord client')
     client = discordclient.DiscordClient(os.environ.get('DISCORD_CHANNEL_NAME'), sendqueue, logger, os.environ.get('RECEIVE'))
     client.run(os.environ.get('DISCORD_TOKEN'))
-
+    
 if __name__ == '__main__':
     logger, starttime = initlogger()
     logger.info('started notifyd at {0}'.format(starttime))

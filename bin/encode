@@ -1,9 +1,9 @@
 #!/bin/bash -ex
 
-src=/mnt/hddsg3-plain0/tv/mp4/Animation
-dst=/mnt/hddsg3-plain0/tv/mp4/Animation/mp4
+src=/mnt/hddsg3-plain0/tv/mp4/2019/m2ts
+dst=/mnt/hddsg3-plain0/tv/mp4/2019
 enc=/home/noyuno/tv/EPGStation/enc.sh
-ext='m2ts'
+ext='mkv'
 
 find "$src" -name "*.$ext" -type f | sort | while read input ; do
     out=$(echo "$input" | sed 's|^'"$src"'|'"$dst"'|' | sed 's|.'"$ext"'$|.mp4|')

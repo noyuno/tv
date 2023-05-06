@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+/home/noyuno/tv/bin/convhankaku
+/home/noyuno/tv/bin/tvautomove
+

@@ -1,8 +1,40 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 DEST=100.67.253.34
 EXCLUDES="--exclude=.snapshots --exclude=.git --exclude=@Recently-Snapshot --exclude=@Recycle"
-rsync -e ssh -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/ssdki3-crypt0/private/ $DEST:/share/private
-rsync -e ssh -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/hddsg3-plain0/tv/ $DEST:/share/tv
+
+read -sp 'SSH password: ' password
+
+# backup system
+rootdev=/dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624
+epgdb=/mnt/hddsg3-plain0/tv/backup/system/
+mkdir -p $epgdb
+pushd $_
+  gdisk -l $rootdev > gdisk
+  df -h > df
+  cp /etc/fstab fstab
+  pvdisplay > pvdisplay
+  vgdisplay > vgdisplay
+  lvdisplay > lvdisplay
+  firewall-cmd --list-all-zones > firewall-all-zones
+  #docker volume ls -qf dangling=true | xargs -r docker volume rm
+  sync
+  tar czf efi-vfat.tar.gz /boot/efi
+  dump -0 -z -f boot-ext4dump.gz $rootdev-part2
+  tar czpf home.tar.gz --warning=no-file-changed --exclude .cache /home/noyuno &&:
+popd
+
+# backup database
+pushd /home/noyuno/EPGStation
+  npm run backup $epgdb/database
+popd
+
+# rsync
+
+date +%y%m%d-%H%M | tee -a /mnt/ssdki3-crypt0/private/nasbackup-date.txt \
+                  | tee -a /mnt/hddsg3-plain0/tv/nasbackup-date.txt
+
+rsync --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/ssdki3-crypt0/private/ $DEST:/share/private &&:
+rsync  --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/hddsg3-plain0/tv/ $DEST:/share/tv &&:
 
 
