@@ -42,7 +42,7 @@ tmpfs                                594M  1.4M  593M   1% /run
 ~~~
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install zsh build-essential cmake pkg-config autoconf ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon mariadb-server samba firewalld smartmontools ripgrep jq snapper htop tmux git nano
+sudo apt -y install zsh build-essential cmake pkg-config autoconf ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon mariadb-server samba firewalld smartmontools ripgrep jq snapper htop tmux git nano dump
 ~~~
 
 ## 6. ネットワーク設定
@@ -361,10 +361,15 @@ sudo pdbedit -L
 - disk/admin.reg : 管理者として結合
 - disk/user.reg : 一般ユーザとして結合
 
-## 18. バックアップ・リストア
+## 18. バックアップ
 
-### 18.1. バックアップ
+Tailscaleをインストール
+~~~
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up
+~~~
 
+バックアップ
 ~~~
 sudo nasbackup
 ~~~

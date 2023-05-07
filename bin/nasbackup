@@ -6,7 +6,7 @@ EXCLUDES="--exclude=.snapshots --exclude=.git --exclude=@Recently-Snapshot --exc
 read -sp 'SSH password: ' password
 
 # backup system
-rootdev=/dev/disk/by-id/ata-SanDisk_SDSSDA240G_161306407624
+rootdev=/dev/disk/by-id/ata-KIOXIA-EXCERIA_SATA_SSD_50CB809CK501
 epgdb=/mnt/hddsg3-plain0/tv/backup/system/
 mkdir -p $epgdb
 pushd $_
@@ -17,10 +17,9 @@ pushd $_
   vgdisplay > vgdisplay
   lvdisplay > lvdisplay
   firewall-cmd --list-all-zones > firewall-all-zones
-  #docker volume ls -qf dangling=true | xargs -r docker volume rm
   sync
   tar czf efi-vfat.tar.gz /boot/efi
-  dump -0 -z -f boot-ext4dump.gz $rootdev-part2
+  #dump -0 -z -f boot-ext4dump.gz $rootdev-part1
   tar czpf home.tar.gz --warning=no-file-changed --exclude .cache /home/noyuno &&:
 popd
 
