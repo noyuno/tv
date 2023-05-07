@@ -42,7 +42,7 @@ tmpfs                                594M  1.4M  593M   1% /run
 ~~~
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install zsh build-essential cmake pkg-config autoconf ffmpeg unzip linux-headers-generic dkms pcscd libccid libpcsclite-dev libpcsclite1 libtool libavutil-dev libavformat-dev libavcodec-dev avahi-daemon mariadb-server samba firewalld smartmontools ripgrep jq snapper htop tmux git nano dump
+sudo apt -y install avahi-daemon autoconf build-essential cmake dkms dump ffmpeg firewalld git htop jq libavcodec-dev libavformat-dev libavutil-dev libccid libpcsclite-dev libpcsclite1 libtool linux-headers-generic mariadb-server nano pcscd pkg-config ripgrep samba smartmontools snapper sshpass tmux unzip zsh
 ~~~
 
 ## 6. ネットワーク設定

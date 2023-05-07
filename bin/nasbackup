@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 DEST=100.67.253.34
 EXCLUDES="--exclude=.snapshots --exclude=.git --exclude=@Recently-Snapshot --exclude=@Recycle"
