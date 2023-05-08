@@ -14,13 +14,18 @@ esac
 
 date +%Y%m%d-%HH%MM
 echo FFMPEG=$FFMPEG
-echo INPUT=$INPUT
-echo OUTPUT=$OUTPUT
+echo INPUT="$INPUT"
+echo OUTPUT="$OUTPUT"
 
-nice -n 10 "$FFMPEG" -y  -dual_mono_mode main -i "$INPUT" \
-    -movflags +faststart -map 0 -ignore_unknown -max_muxing_queue_size 1024 -sn \
+nice -n 10 "$FFMPEG" -y -dual_mono_mode main -i "$INPUT" \
+    -movflags +faststart -map 0:v -ignore_unknown -max_muxing_queue_size 1024 -sn \
     -vf "$vf" -preset veryfast -aspect 16:9 \
-    -c:v libx264 -crf "$crf" -coder 1 -c:a aac -ar 48000 -ab 192k -ac 2 "$OUTPUT" < /dev/null
+    -c:v libx264 -crf "$crf" -coder 1 -map 0:a -c:a aac -ar 48000 -ab 192k -ac 2 "$OUTPUT" < /dev/null
+
+if [ $(wc -c bs11.mp4|awk '{print $1}') -lt 1000000 ]; then
+  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードに失敗しました(<1Mbyte)' &&:
+  exit 1
+fi
 
 OUTPUT="$OUTPUT" bash /home/noyuno/tv/EPGStation/chapter.sh
 
