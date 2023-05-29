@@ -12,12 +12,12 @@ ffmpeg: '/usr/bin/ffmpeg'
 ffprobe: '/usr/bin/ffprobe'
 recorded:
   - name: recorded
-    path: '/mnt/hddsg3-plain0/tv'
+    path: '/mnt/hddts0-plain0/tv'
 recordedFormat: '%YEAR%%MONTH%%DAY%-%HOUR%%MIN%-%CHNAME%-%TITLE%'
-thumbnail: '/mnt/hddsg3-plain0/tv/thumbs'
+thumbnail: '/mnt/hddts0-plain0/tv/thumbs'
 thumbnailSize: '960x540'
 thumbnailPosition: 8
-uploadTempDir: '/mnt/hddsg3-plain0/tv/tmp'
+uploadTempDir: '/mnt/hddts0-plain0/tv/tmp'
 encodeProcessNum: 4
 concurrentEncodeNum: 1
 encode:
@@ -29,7 +29,7 @@ encode:
     cmd: '/bin/bash %ROOT%/config/enc.sh 720p'
     suffix: '.mp4'
     rate: 3.0
-streamFilePath: '/mnt/hddsg3-plain0/tv/tmp'
+streamFilePath: '/mnt/hddts0-plain0/tv/tmp'
 stream:
   live:
     ts:

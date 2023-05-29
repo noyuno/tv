@@ -1,13 +1,13 @@
 #!/bin/bash -e
 
-DEST=100.67.253.34
-EXCLUDES="--exclude=.snapshots --exclude=.git --exclude=@Recently-Snapshot --exclude=@Recycle"
+DEST=100.96.75.62
+EXCLUDES="--exclude=.snapshots --exclude=.snapshots.2 --exclude=ts --exclude=.git --exclude=@Recently-Snapshot --exclude=@Recycle"
 
 read -sp 'SSH password: ' password
 
 # backup system
 rootdev=/dev/disk/by-id/ata-KIOXIA-EXCERIA_SATA_SSD_50CB809CK501
-epgdb=/mnt/hddsg3-plain0/tv/backup/system/
+epgdb=/mnt/hddts0-plain0/tv/backup/system/
 mkdir -p $epgdb
 pushd $_
   gdisk -l $rootdev > gdisk
@@ -17,10 +17,9 @@ pushd $_
   vgdisplay > vgdisplay
   lvdisplay > lvdisplay
   firewall-cmd --list-all-zones > firewall-all-zones
-  sync
-  tar czf efi-vfat.tar.gz /boot/efi
-  #dump -0 -z -f boot-ext4dump.gz $rootdev-part1
-  tar czpf home.tar.gz --warning=no-file-changed --exclude .cache /home/noyuno &&:
+  #tar czf efi-vfat.tar.gz /boot/efi
+  ##dump -0 -z -f boot-ext4dump.gz $rootdev-part1
+  #tar czpf home.tar.gz --warning=no-file-changed --exclude .cache /home/noyuno &&:
 popd
 
 # backup database
@@ -31,9 +30,10 @@ popd
 # rsync
 
 date +%y%m%d-%H%M | tee -a /mnt/ssdki3-crypt0/private/nasbackup-date.txt \
-                  | tee -a /mnt/hddsg3-plain0/tv/nasbackup-date.txt
+                  | tee -a /mnt/hddts0-plain0/tv/nasbackup-date.txt
 
 rsync --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/ssdki3-crypt0/private/ $DEST:/share/private &&:
-rsync  --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/hddsg3-plain0/tv/ $DEST:/share/tv &&:
+rsync  --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /home/noyuno/ $DEST:/share/tv1/backup/home/noyuno &&:
+rsync  --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/hddts0-plain0/tv/ $DEST:/share/tv1 &&:
 
 

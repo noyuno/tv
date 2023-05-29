@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-src=/mnt/hddsg3-plain0/tv/mp4
+src=/mnt/hddts0-plain0/tv/mp4
 yearstart=2019
 yearend=2023
 

@@ -42,7 +42,7 @@ tmpfs                                594M  1.4M  593M   1% /run
 ~~~
 sudo apt update
 sudo apt -y upgrade
-sudo apt -y install avahi-daemon autoconf build-essential cmake dkms dump ffmpeg firewalld git htop jq libavcodec-dev libavformat-dev libavutil-dev libccid libpcsclite-dev libpcsclite1 libtool linux-headers-generic mariadb-server nano pcscd pkg-config ripgrep samba smartmontools snapper sshpass tmux unzip zsh
+sudo apt -y install avahi-daemon autoconf build-essential cmake dkms dump ffmpeg firewalld git htop jq libavcodec-dev libavformat-dev libavutil-dev libccid libpcsclite-dev libpcsclite1 libtool linux-headers-generic mariadb-server nano pcscd pkg-config ripgrep samba smartmontools snapper sshpass tmux unzip zsh icu-devtools
 ~~~
 
 ## 6. ネットワーク設定
@@ -283,7 +283,7 @@ snapper
 sudo snapper -c root create-config /
 sudo snapper -c root set-config ALLOW_GROUPS=noyuno ALLOW_USERS=noyuno SYNC_ACL=yes TIMELINE_LIMIT_DAILY=1 TIMELINE_LIMIT_HOURLY=1 TIMELINE_LIMIT_MONTHLY=1
 
-sudo snapper -c tv create-config /mnt/hddsg3-plain0/tv
+sudo snapper -c tv create-config /mnt/hddts0-plain0/tv
 sudo snapper -c tv set-config ALLOW_GROUPS=noyuno ALLOW_USERS=noyuno SYNC_ACL=yes TIMELINE_LIMIT_DAILY=1 TIMELINE_LIMIT_HOURLY=1 TIMELINE_LIMIT_MONTHLY=1
 
 sudo snapper -c private create-config /mnt/ssdki3-crypt0/private

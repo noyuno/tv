@@ -2,8 +2,8 @@
 
 source /home/noyuno/tv/.env
 
-src=/mnt/hddsg3-plain0/tv/mp4/2023/00_アニメ/
-dst=/mnt/hddsg3-plain0/tv/mp4/
+src=/mnt/hddts0-plain0/tv/mp4/2023/00_アニメ/
+dst=/mnt/hddts0-plain0/tv/mp4/
 yearstart=2019
 yearend=2023
 filenum=0
@@ -36,6 +36,9 @@ while read line; do
             echo "file $d already exists" >&1
           else
             movenum=$((movenum + 1))
+            # update database
+            #mysql -unoyuno -p"$DATABASE_PASSWD" epgstation \
+            #  -e'update filePath='"'$dbdest'"' from video_file where filePath='"'$dbsource'"';'
             mv -vn "$line" "$d"
           fi
           moved=1

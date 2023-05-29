@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 
-src=/mnt/hddsg3-plain0/tv/mp4/2019/m2ts
-dst=/mnt/hddsg3-plain0/tv/mp4/2019
+src=/mnt/hddts0-plain0/tv/mp4/2019/m2ts
+dst=/mnt/hddts0-plain0/tv/mp4/2019
 enc=/home/noyuno/tv/EPGStation/enc.sh
 ext='mkv'
 

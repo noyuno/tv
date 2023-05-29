@@ -2,7 +2,7 @@
 
 source /home/noyuno/tv/.env
 
-src=/mnt/hddsg3-plain0/tv/mp4/2023/00_アニメ
+src=/mnt/hddts0-plain0/tv/mp4/2023/00_アニメ
 max=10
 
 if [ ! -d "$src" ]; then
