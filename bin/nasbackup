@@ -32,8 +32,11 @@ popd
 date +%y%m%d-%H%M | tee -a /mnt/ssdki3-crypt0/private/nasbackup-date.txt \
                   | tee -a /mnt/hddts0-plain0/tv/nasbackup-date.txt
 
+mkdir -p /mnt/hddts0-plain0/tv/backup/home/noyuno
+rsync -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /home/noyuno/ /mnt/hddts0-plain0/tv/backup/home/noyuno &&:
+
 rsync --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/ssdki3-crypt0/private/ $DEST:/share/private &&:
-rsync  --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /home/noyuno/ $DEST:/share/tv1/backup/home/noyuno &&:
+#rsync  --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /home/noyuno/ $DEST:/share/tv1/backup/home/noyuno &&:
 rsync  --rsh="/usr/bin/sshpass -p $password ssh -o StrictHostKeyChecking=no -l noyuno" -aH --info=progress2 --no-inc-recursive --delete $EXCLUDES $* /mnt/hddts0-plain0/tv/ $DEST:/share/tv1 &&:
 
 
