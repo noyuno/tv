@@ -1,0 +1,15 @@
+#!/bin/bash -xe
+
+source ~/tv/.env
+MESSAGE=$(journalctl -p3 --since="$(date -d '24 hour ago' '+%Y-%m-%d %H:%M:%S')" | \
+  grep -v smbd |grep -v nmbd)
+
+#MESSAGE=test
+
+if [ "$MESSAGE" != "" ]; then
+  curl -XPOST -d '{
+    "token": "'"$NOTIFYD_TOKEN"'",
+    "message":"journalctl error log:\n'"$MESSAGE"'" }' localhost:5050
+fi
+
+
