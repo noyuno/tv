@@ -30,6 +30,7 @@ EXCLUDES="--exclude=.snapshots --exclude=.snapshots.2 --exclude=ts --exclude=.gi
 echo 1: backup system
 rootdev=/dev/disk/by-id/ata-KIOXIA-EXCERIA_SATA_SSD_50CB809CK501
 epgdb=/mnt/hddts0-plain0/tv/backup/system/
+sshcommand="ssh"
 mkdir -p $epgdb
 pushd $_ >/dev/null
   gdisk -l $rootdev > gdisk
@@ -65,8 +66,8 @@ find /mnt/hddts0-plain0/tv/backup/system -not -path "*/.snapshots" -not -path "*
 
 echo 5: copy to nas
 
-sudo -u $USER rsync --rsh="ssh" -aH --no-inc-recursive --delete $EXCLUDES $* /mnt/ssdki3-crypt0/private/ $DEST:/share/private &&:
-sudo -u $USER rsync  --rsh="ssh" -aH --no-inc-recursive --delete $EXCLUDES $* /mnt/hddts0-plain0/tv/ $DEST:/share/tv1 &&:
+sudo -u $USER rsync --rsh="$sshcommand" -aH --no-inc-recursive --delete $EXCLUDES $* /mnt/ssdki3-crypt0/private/ $DEST:/share/private &&:
+sudo -u $USER rsync  --rsh="$sshcommand" -aH --no-inc-recursive --delete $EXCLUDES $* /mnt/hddts0-plain0/tv/ $DEST:/share/tv1 &&:
 ) 2>&1 | tee /tmp/nasbackup.log &&:
 
 SUCCESS_FLAG=1
