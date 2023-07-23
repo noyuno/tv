@@ -1,0 +1,54 @@
+#!/bin/bash
+
+. ~/tv/.env
+src=/mnt/hddts0-plain0/tv
+subsrc=mp4
+if [ ! -d "$src" ]; then
+  echo "directory $src not exists" >&2
+  exit 1
+fi
+
+max=10
+filenum=0
+for ((depth=1; depth < $max; depth++)); do
+  while read line; do
+    dname=$(echo "$line" | sed -e "s|^$src/||" | xargs -0 dirname)
+    fname=$(basename "$line")
+    date=$(echo "$fname" | awk -F- '{print $1}')
+    time=$(echo "$fname" | awk -F- '{print $2}')
+    chh=$(echo "$fname" | awk -F- '{print $3}')
+    chd=$(echo "$chh" | uconv -x "\p{latin} Halfwidth-Fullwidth ;" | \
+      sed y/1234567890/１２３４５６７８９０/)
+#+---------------------+------------+------+-----+---------+----------------+
+#| Field               | Type       | Null | Key | Default | Extra          |
+#+---------------------+------------+------+-----+---------+----------------+
+#| id                  | int(11)    | NO   | PRI | NULL    | auto_increment |
+#| parentDirectoryName | text       | NO   |     | NULL    |                |
+#| filePath            | text       | NO   |     | NULL    |                |
+#| type                | text       | NO   |     | NULL    |                |
+#| name                | text       | NO   |     | NULL    |                |
+#| size                | bigint(20) | NO   |     | 0       |                |
+#| recordedId          | int(11)    | NO   | MUL | NULL    |                |
+#+---------------------+------------+------+-----+---------+----------------+
+    sql="select * from video_file where filePath regexp '/$date-$time-$chd-';"
+    ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+    # debug
+    echo -e "line=$line\nsql=$sql\nret=$ret"
+
+    if [ "$ret" ]; then
+      filenum=$((filenum + 1))
+      sql="update video_file set filePath = '$dname/$fname' where filePath regexp '/$date-$time-$chd-';"
+      ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+      echo -e "\e[1;34mfilenum=$filenum\nsql=$sql\e[m"
+      sql="select * from video_file where filePath = '$dname/$fname';"
+      ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+      echo -e "\e[1;32msql=$sql\nret=$ret\n\e[m"
+    else
+      echo ""
+    fi
+    
+  done < <(find "$src/$subsrc" -maxdepth $depth -mindepth $depth \
+    -not -path "*/.snapshots/*" -not -type l \
+    -type f -name "*.mp4" | sort)
+done
+

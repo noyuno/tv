@@ -2,8 +2,11 @@
 
 source /home/noyuno/tv/.env
 
-src=/mnt/hddts0-plain0/tv/mp4/2023/00_アニメ
+tvroot=/mnt/hddts0-plain0/tv
+subtvroot=mp4
+src=$tvroot/$subtvroot/2023/00_アニメ
 max=10
+user=noyuno
 
 if [ ! -d "$src" ]; then
   echo "directory $src not exists" >&2
@@ -15,14 +18,36 @@ for ((depth=1; depth < $max; depth++)); do
   while read line; do
     dname=$(dirname "$line")
     fname=$(basename "$line")
-    newfname=$(echo "$fname" | uconv -x "\p{latin} Fullwidth-Halfwidth; " | sed y/１２３４５６７８９０/1234567890/)
+    newfname=$(echo "$fname" | uconv -x "\p{latin} Fullwidth-Halfwidth; " | \
+      sed y/１２３４５６７８９０’/1234567890'/)
     #echo "debug: fname=$fname, newfname=$newfname"
     if [ "$fname" != "$newfname" ]; then
       filenum=$((filenum + 1))
       echo "(depth=$depth, count=$filenum) move $line -> $dname/$newfname"
       mv -n "$line" "$dname/$newfname"
+      
+      # update database
+      ddname=$(echo "$dname" | sed -e "s|^$tvroot/||")
+      date=$(echo "$newfname" | awk -F- '{print $1}')
+      time=$(echo "$newfname" | awk -F- '{print $2}')
+      ch=$(echo "$newfname" | awk -F- '{print $3}')
+      sql="select * from video_file where filePath regexp '/$date-$time-$ch';"
+      ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+      echo "sql=$sql, ret=$ret"
+      if [ "$ret" ]; then
+        sql="update video_file set filePath = '$ddname/$newfname' where filePath regexp '$date-$time-$ch';"
+        ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+        echo -e "\e[1;34msql=$sql\e[m"
+        sql="select * from video_file where filePath = '$ddname/$newfname';"
+        ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+        echo -e "\e[1;32msql=$sql\nret=$ret\e[m\n"
+      else
+        echo "mysql : not found"
+      fi
+      
+      echo ""
     fi
-  done < <(find "$src" -maxdepth $depth -mindepth $depth | sort)
+  done < <(find "$src" -maxdepth $depth -mindepth $depth -newermt 2023-07-23 | sort)
 done
 
 message="ファイル名の半角化を完了しました。($filenum)"

@@ -1,9 +1,10 @@
 #!/bin/bash -e
 
 source /home/noyuno/tv/.env
-
-src=/mnt/hddts0-plain0/tv/mp4/2023/00_アニメ/
-dst=/mnt/hddts0-plain0/tv/mp4/
+user=noyuno
+tvroot=/mnt/hddts0-plain0/tv
+dst=$tvroot/mp4
+src=$dst/2023/00_アニメ/
 yearstart=2019
 yearend=2023
 filenum=0
@@ -36,12 +37,28 @@ while read line; do
             echo "file $d already exists" >&1
           else
             movenum=$((movenum + 1))
-            # update database
-            #mysql -unoyuno -p"$DATABASE_PASSWD" epgstation \
-            #  -e'update filePath='"'$dbdest'"' from video_file where filePath='"'$dbsource'"';'
-            mv -vn "$line" "$d"
+
+            #update database
+            dsrc=$(echo "$line" | sed -e "s|^$tvroot/||")
+            ddst=$(echo "$d" | sed -e "s|^$tvroot/||")
+            date=$(echo "$fname" | awk -F- '{print $1}')
+            time=$(echo "$fname" | awk -F- '{print $2}')
+            ch=$(echo "$fname" | awk -F- '{print $3}')
+            sql="select * from video_file where filePath regexp '/$date-$time-$ch';"
+            ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+            echo "sql=$sql, ret=$ret"
+            if [ "$ret" ]; then
+              sql="update video_file set filePath = '$ddst' where filePath regexp '/$date-$time-$ch';"
+              ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+              echo -e "\e[1;34msql=$sql\e[m"
+              sql="select * from video_file where filePath = '$ddst';"
+              ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+              echo -e "\e[1;32msql=$sql\nret=$ret\e[m\n"
+            fi
           fi
           moved=1
+          mv -vn "$line" "$d"
+
           break
         fi
       fi
