@@ -19,7 +19,7 @@ for ((depth=1; depth < $max; depth++)); do
     dname=$(dirname "$line")
     fname=$(basename "$line")
     newfname=$(echo "$fname" | uconv -x "\p{latin} Fullwidth-Halfwidth; " | \
-      sed y/１２３４５６７８９０’/1234567890'/)
+      sed y/１２３４５６７８９０\’\'/1234567890--/)
     #echo "debug: fname=$fname, newfname=$newfname"
     if [ "$fname" != "$newfname" ]; then
       filenum=$((filenum + 1))
@@ -31,23 +31,24 @@ for ((depth=1; depth < $max; depth++)); do
       date=$(echo "$newfname" | awk -F- '{print $1}')
       time=$(echo "$newfname" | awk -F- '{print $2}')
       ch=$(echo "$newfname" | awk -F- '{print $3}')
-      sql="select * from video_file where filePath regexp '/$date-$time-$ch';"
-      ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
-      echo "sql=$sql, ret=$ret"
-      if [ "$ret" ]; then
-        sql="update video_file set filePath = '$ddname/$newfname' where filePath regexp '$date-$time-$ch';"
+      if [ "$date" -a "$time" -a "$ch" ]; then
+        sql="select * from video_file where filePath regexp '/$date-$time-$ch';"
         ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
-        echo -e "\e[1;34msql=$sql\e[m"
-        sql="select * from video_file where filePath = '$ddname/$newfname';"
-        ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
-        echo -e "\e[1;32msql=$sql\nret=$ret\e[m\n"
-      else
-        echo "mysql : not found"
+        echo "sql=$sql, ret=$ret"
+        if [ "$ret" ]; then
+          sql="update video_file set filePath = '$ddname/$newfname' where filePath regexp '$date-$time-$ch';"
+          ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+          echo -e "\e[1;34msql=$sql\e[m"
+          sql="select * from video_file where filePath = '$ddname/$newfname';"
+          ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+          echo -e "\e[1;32msql=$sql\nret=$ret\e[m\n"
+        else
+          echo "mysql : not found"
+        fi
+        echo ""
       fi
-      
-      echo ""
     fi
-  done < <(find "$src" -maxdepth $depth -mindepth $depth -newermt 2023-07-23 | sort)
+  done < <(find "$src" -maxdepth $depth -mindepth $depth | sort)
 done
 
 message="ファイル名の半角化を完了しました。($filenum)"

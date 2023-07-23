@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 source ~/tv/.env
 MESSAGE=$(journalctl -p3 --since="$(date -d '24 hour ago' '+%Y-%m-%d %H:%M:%S')" | \

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 . ~/tv/.env
 src=/mnt/hddts0-plain0/tv
@@ -10,15 +10,19 @@ fi
 
 max=10
 filenum=0
+output=/mnt/hddts0-plain0/tv/updatedb-2.sql
+echo "" > "$output"
+
 for ((depth=1; depth < $max; depth++)); do
-  while read line; do
+  while read -u 3 line; do
     dname=$(echo "$line" | sed -e "s|^$src/||" | xargs -0 dirname)
     fname=$(basename "$line")
     date=$(echo "$fname" | awk -F- '{print $1}')
     time=$(echo "$fname" | awk -F- '{print $2}')
     chh=$(echo "$fname" | awk -F- '{print $3}')
-    chd=$(echo "$chh" | uconv -x "\p{latin} Halfwidth-Fullwidth ;" | \
-      sed y/1234567890/１２３４５６７８９０/)
+#    chd=$(echo "$chh" | uconv -x "\p{latin} Halfwidth-Fullwidth ;" | \
+#      sed y/1234567890/１２３４５６７８９０/)
+    chd="$chh"
 #+---------------------+------------+------+-----+---------+----------------+
 #| Field               | Type       | Null | Key | Default | Extra          |
 #+---------------------+------------+------+-----+---------+----------------+
@@ -30,24 +34,37 @@ for ((depth=1; depth < $max; depth++)); do
 #| size                | bigint(20) | NO   |     | 0       |                |
 #| recordedId          | int(11)    | NO   | MUL | NULL    |                |
 #+---------------------+------------+------+-----+---------+----------------+
-    sql="select * from video_file where filePath regexp '/$date-$time-$chd-';"
-    ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
-    # debug
-    echo -e "line=$line\nsql=$sql\nret=$ret"
-
-    if [ "$ret" ]; then
-      filenum=$((filenum + 1))
-      sql="update video_file set filePath = '$dname/$fname' where filePath regexp '/$date-$time-$chd-';"
+    if [ "$date" -a "$time" -a "$chd" ]; then
+      
+      sql="select * from video_file where filePath regexp '/$date-$time-$chd-';"
       ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
-      echo -e "\e[1;34mfilenum=$filenum\nsql=$sql\e[m"
-      sql="select * from video_file where filePath = '$dname/$fname';"
-      ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
-      echo -e "\e[1;32msql=$sql\nret=$ret\n\e[m"
-    else
-      echo ""
+      # debug
+      echo -e "line=$line\nsql=$sql\nret=$ret"
+  
+  #    if [ "$ret" ]; then
+  #      echo -n "continue? [Y/n]:"
+  #      read ans
+  #      case $ans in
+  #        "" | {Yy]*) ;;
+  #        * ) ret="" ;;
+  #      esac
+  #    fi
+      if [ "$ret" ]; then
+        filenum=$((filenum + 1))
+        sql="update video_file set filePath = '$dname/$fname' where filePath regexp '/$date-$time-$chd-';"
+        
+        echo "$ret" | sed 's|^|-- |g' |tee -a "$output"
+        echo -e "$sql\n" |tee -a "$output"
+        #ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+        #echo -e "\e[1;34mfilenum=$filenum\nsql=$sql\e[m"
+        #sql="select * from video_file where filePath = '$dname/$fname';"
+        #ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
+        #echo -e "\e[1;32msql=$sql\nret=$ret\n\e[m"
+      else
+        echo ""
+      fi
     fi
-    
-  done < <(find "$src/$subsrc" -maxdepth $depth -mindepth $depth \
+  done 3< <(find "$src/$subsrc" -maxdepth $depth -mindepth $depth \
     -not -path "*/.snapshots/*" -not -type l \
     -type f -name "*.mp4" | sort)
 done
