@@ -30,7 +30,7 @@ for ((depth=1; depth < $max; depth++)); do
       ddname=$(echo "$dname" | sed -e "s|^$tvroot/||")
       date=$(echo "$newfname" | awk -F- '{print $1}')
       time=$(echo "$newfname" | awk -F- '{print $2}')
-      ch=$(echo "$newfname" | awk -F- '{print $3}')
+      ch=$(echo "$fname" | awk -F- '{print $3}')
       if [ "$date" -a "$time" -a "$ch" ]; then
         sql="select * from video_file where filePath regexp '/$date-$time-$ch';"
         ret=$(mysql -u"$user" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")

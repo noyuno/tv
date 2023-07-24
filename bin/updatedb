@@ -51,8 +51,6 @@ for ((depth=1; depth < $max; depth++)); do
         sql="select * from video_file where filePath = '$dname/$fname';"
         ret=$(mysql -u"$USER" -p"$EPGSTATION_DB_PASS" epgstation -Ns -e "$sql")
         echo -e "\e[1;32msql=$sql\nret=$ret\n\e[m"
-      else
-        echo ""
       fi
     fi
   done 3< <(find "$src/$subsrc" -maxdepth $depth -mindepth $depth \
