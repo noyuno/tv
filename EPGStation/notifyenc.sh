@@ -17,9 +17,9 @@ if [ ! "$name" ]; then
     name="（番組名なし）"
 fi
 
-output=$OUTPUT
-if [ ! "$output" ]; then
-    output="（ファイルなし）"
+url=http://192.168.1.22/#/recorded/detail/$RECORDEDID
+if [ ! "$RECORDEDID" ]; then
+    url="（RECORDEDIDなし）"
 fi
 
 
@@ -28,7 +28,7 @@ curl -XPOST -sd '{
     "title": "'"$title"'",
     "fields": [
         { "name": "番組名", "value": "'"$name"'", "inline": false },
-        { "name": "ファイル", "value": "'"$output"'", "inline": false }
+        { "name": "URL", "value": "'"$url"'", "inline": false }
     ]
 }' localhost:5050
 
