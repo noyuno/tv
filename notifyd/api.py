@@ -11,17 +11,20 @@ def makeAPIHandler(sendqueue, logger, token):
         def __init__(self, *args, **kwargs):
             super(APIHandler, self).__init__(*args, **kwargs)
 
+        def header(self):
+            self.send_header('content-type', 'text')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+
         def do_GET(self):
             parsed_path = urlparse(self.path).path
             if parsed_path == "/":
                 self.send_response(200)
-                self.send_header('content-type', 'text')
-                self.end_headers()
+                self.header()
                 self.wfile.write('notifyd\nhello'.encode('utf-8'))
             else:
                 self.send_response(404)
-                self.send_header('content-type', 'text')
-                self.end_headers()
+                self.header()
                 self.wfile.write('notifyd\n404 not found'.encode('utf-8'))
 
         def do_POST(self):
@@ -40,8 +43,7 @@ def makeAPIHandler(sendqueue, logger, token):
                 self.logger.exception('APIHandler.do_POST()', stack_info=True)
 
             self.send_response(res['status'])
-            self.send_header('content-type', 'application/json')
-            self.end_headers()
+            self.header()
             self.wfile.write(json.dumps(res).encode('utf-8'))
     ret = APIHandler
     ret.sendqueue = sendqueue

@@ -1,5 +1,5 @@
 * {
-  font-size: 24px;
+  font-size: 22px;
   background-color: black;
   color: white;
 }
@@ -52,3 +52,33 @@ table {
   border-radius: 5px;
   font-weight: bold;
 }
+
+
+#message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+}
+
+.message-success {
+  background-color: rgb(59, 124, 59)!important
+}
+
+.message-error {
+  background-color: rgb(190, 80, 80)!important
+}
+
+#close-button {
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+
