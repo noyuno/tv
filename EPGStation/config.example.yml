@@ -79,3 +79,5 @@ recordingPrepRecFailedCommand: '/home/noyuno/tv/EPGStation/notify.sh :x:録画�
 #recordingFinishCommand: '/home/noyuno/tv/EPGStation/notify.sh :white_circle:録画を終了しました'
 recordingFailedCommand: '/home/noyuno/tv/EPGStation/notify.sh :x:録画が失敗しました'
 
+isAllowAllCORS: true
+
