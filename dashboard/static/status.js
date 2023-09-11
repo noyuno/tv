@@ -1,4 +1,4 @@
-window.onload = () => {
+window.addEventListener('load', () => {
 
   const ping = (num, server, service, url) => {
     var ret = false;
@@ -112,4 +112,4 @@ window.onload = () => {
   }, 1000);
   setInterval(run, 60 * 1000);
   
-}
+});
