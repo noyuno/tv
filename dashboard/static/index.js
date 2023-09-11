@@ -9,9 +9,10 @@ window.onload = () => {
         const status = req.status;
         if ((status == 200)) {
           addRow(num, server, service, url, 'ok');
+          sendNotifyd2(num, server, service, url, true);
         } else {
           addRow(num, server, service, url, 'bad');
-          sendNotifyd2(num, server, service, url);
+          sendNotifyd2(num, server, service, url, false);
         }
       }
     };
@@ -48,18 +49,17 @@ window.onload = () => {
     }
   };
 
-  const sendHistory = [];
+  const noResponse = {};
 
-  const sendNotifyd2 = (num, server, service, url) => {
-    for (var i = 0; i < sendHistory.length; i++) {
-      if (sendHistory[i]['num'] == num && 
-          sendHistory[i]['datetime'] > (Date.now() - 1000 * 60 * 30)) {
-        return;
-      }
+  const sendNotifyd2 = (num, server, service, url, state) => {
+    if (state && noResponse.hasOwnProperty(num) && noResponse[num]) {
+      sendNotifyd(server + '/' + service + 'が復帰しました。 ' + url)
+      noResponse[num] = 0;
     }
-
-    sendNotifyd(server + '/' + service + 'の応答がありません。 ' + url)
-    sendHistory.push({ 'num': num, 'datetime': (Date.now()) });
+    if (!state && (!noResponse.hasOwnProperty(num) || !noResponse[num])) {
+      sendNotifyd(server + '/' + service + 'の応答がありません。 ' + url)
+      noResponse[num] = 1;
+    }
   };
 
   const message = (mode, mes) => {
@@ -99,9 +99,6 @@ window.onload = () => {
     ping(4, 'pi1', 'dashboard', 'http://192.168.1.33:3000');
     ping(5, 'pi1', 'notifyd', 'http://192.168.1.33:5050');
     ping(6, 'tailscale', 'tailscale','http://tailscale.com',);
-
-    //debug
-    message('success', 'test');
   };
 
   document.querySelector('#close-button').onclick = () => {
@@ -109,7 +106,7 @@ window.onload = () => {
   };
 
   run();
-  sendNotifyd('pi1によるシステム監視を開始しました。');
+  sendNotifyd('p1によるシステム監視を開始しました。');
   setInterval(() => {
     document.querySelector("#header-datetime").innerHTML = new Date().toLocaleDateString("SV") + " " + new Date().toLocaleTimeString("SV");
   }, 1000);
