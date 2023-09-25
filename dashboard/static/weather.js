@@ -20,6 +20,7 @@ window.addEventListener('load', () => {
           const tokyo = data[1].timeSeries[0].areas[0];
           const tokyo2 = data[1].timeSeries[1].areas[0];
           const tableId = '#weather-table tbody';
+          document.querySelector(tableId).deleteRow(-1);
           var t = document.querySelector(tableId).insertRow(-1);
           for (var i = 0; i < data[1].timeSeries[0].timeDefines.length; i++) {
             const op = { month: '2-digit', day: '2-digit'};
