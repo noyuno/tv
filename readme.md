@@ -264,6 +264,7 @@ sudo firewall-cmd --zone=public --add-port=8889/tcp --permanent
 sudo firewall-cmd --zone=public --add-port=8889/udp --permanent
 sudo firewall-cmd --zone=public --add-port=5050/tcp --permanent # notifyd
 sudo firewall-cmd --zone=public --add-port=40772/tcp --permanent # mirakurun
+sudo firewall-cmd --zone=public --add-port=8123/tcp --permanent # private unlock check
 sudo firewall-cmd --permanent --zone=public --add-service=samba
 sudo firewall-cmd --add-source=192.168.100.1 --zone=drop --permanent
 sudo firewall-cmd --reload
