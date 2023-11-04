@@ -3,24 +3,28 @@
     - BS
     - CS
   command: /usr/local/bin/recpt1 --b25 --device /dev/px4video0 <channel> - -
+  isDisabled: true
 
 - name: PX4-S2
   types:
     - BS
     - CS
   command: /usr/local/bin/recpt1 --b25 --device /dev/px4video1 <channel> - -
+  isDisabled: true
 
 - name: PX4-S3
   types:
     - BS
     - CS
   command: /usr/local/bin/recpt1 --b25 --device /dev/px4video4 <channel> - -
+  isDisabled: true
 
 - name: PX4-S4
   types:
     - BS
     - CS
   command: /usr/local/bin/recpt1 --b25 --device /dev/px4video5 <channel> - -
+  isDisabled: true
 
 - name: PX4-T1
   types:

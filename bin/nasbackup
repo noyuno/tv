@@ -13,7 +13,7 @@ finally() {
   if [ $SUCCESS_FLAG = 0 ]; then
     MESSAGE="NASバックアップが失敗しました。"
   fi
-  OUTPUT=$(cat /tmp/nasbackup.log | sed -z 's/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g")
+  OUTPUT=$(cat /tmp/nasbackup.log | sed -z 's/\n/\\n/g' | sed 's/"/\\"/g' | sed "s/'/\\'/g" | tr -d '[:cntrl:]')
   curl -XPOST -d '{
     "message": "'"$MESSAGE"'\n'"$OUTPUT"'",
     "token": "'"$NOTIFYD_TOKEN"'"
