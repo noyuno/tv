@@ -54,7 +54,7 @@ table {
   text-align: center;
 }
 
-.status-ok {
+.status-OK {
   background-color: rgb(59, 124, 59);
   color: white;
   padding: 3px 20px 3px 20px;
@@ -62,7 +62,7 @@ table {
   font-weight: bold;
 }
 
-.status-bad {
+.status-BAD {
   background-color: rgb(190, 80, 80);
   color: white;
   padding: 3px 20px 3px 20px;

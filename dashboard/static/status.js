@@ -8,10 +8,10 @@ window.addEventListener('load', () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;
         if ((status == 200)) {
-          addRow(num, server, service, url, 'ok');
+          addRow(num, server, service, url, 'OK');
           sendNotifyd2(num, server, service, url, true);
         } else {
-          addRow(num, server, service, url, 'bad');
+          addRow(num, server, service, url, 'BAD');
           sendNotifyd2(num, server, service, url, false);
         }
       }
@@ -98,7 +98,6 @@ window.addEventListener('load', () => {
     ping(3, 'nas1', 'nas', 'http://100.96.75.62:8080');
     ping(4, 'pi1', 'dashboard', 'http://192.168.1.33:3000');
     ping(5, 'pi1', 'notifyd', 'http://192.168.1.33:5050');
-    ping(6, 'tailscale', 'tailscale','http://tailscale.com',);
   };
 
   document.querySelector('#close-button').onclick = () => {
