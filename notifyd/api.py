@@ -22,6 +22,15 @@ def makeAPIHandler(sendqueue, logger, token):
                 self.send_response(200)
                 self.header()
                 self.wfile.write('notifyd\nhello'.encode('utf-8'))
+            if parsed_path == "/crypt":
+                if os.path.exists("/mnt/ssdki3-crypt0/private"):
+                    self.send_response(200)
+                    self.header()
+                    self.wfile.write('200\nnotifyd\nunlocked'.encode('utf-8'))
+                else:
+                    self.send_response(503)
+                    self.header()
+                    self.wfile.write('503\nnotifyd\nlocked'.encode('utf-8'))
             else:
                 self.send_response(404)
                 self.header()

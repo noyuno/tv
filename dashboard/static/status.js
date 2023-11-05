@@ -95,7 +95,7 @@ window.addEventListener('load', () => {
     document.querySelector('#status-table tbody').innerHTML="";
     ping(1, 'm1', 'epgstation', 'http://192.168.1.22');
     ping(2, 'm1', 'notifyd', 'http://192.168.1.22:5050');
-    ping(3, 'm1', '(crypt) private', 'http://192.168.1.22:8123');
+    ping(3, 'm1', 'crypt', 'http://192.168.1.22:5050/crypt');
     ping(4, 'nas1', 'nas', 'http://100.96.75.62:8080');
     ping(5, 'pi1', 'dashboard', 'http://192.168.1.33:3000');
     ping(6, 'pi1', 'notifyd', 'http://192.168.1.33:5050');
