@@ -5,8 +5,7 @@ user=noyuno
 tvroot=/mnt/hddts0-plain0/tv
 dst=$tvroot/mp4
 src=$dst/2023/00_アニメ/
-yearstart=2019
-yearend=2023
+years=("delete" "2019" "2020" "2021" "2022" "2023" "2024")
 filenum=0
 movenum=0
 errornum=0
@@ -17,7 +16,7 @@ if [ ! -d "$src" -o ! -d "$dst" ]; then
 fi
 
 declare -A keywords
-for (( year=$yearstart; year <= $yearend; year++)); do
+for year in "${years[@]}"; do
     keywords[$year]=$(find "$dst/$year" -mindepth 1 -maxdepth 1 -type d | sort | sed '/^.$/d' | awk -F/ '{print $NF}')
 done
 
@@ -25,7 +24,7 @@ while read line; do
   filenum=$((filenum + 1))
   fname=$(basename "$line")
   #keywords loop
-  for (( year=$yearstart; year <= $yearend; year++ )); do
+  for year in "${years[@]}"; do
     moved=0
     while read k; do
       #echo "line=$line, keywords[$year]=$k"
