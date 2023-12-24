@@ -1,8 +1,7 @@
 #!/bin/bash -e
 
 src=/mnt/hddts0-plain0/tv/mp4
-yearstart=2019
-yearend=2023
+years=("delete" "2019" "2020" "2021" "2022" "2023" "2024")
 
 processnum=0
 matchnum=0
@@ -14,7 +13,7 @@ if [ ! -d "$src" ]; then
   exit 1
 fi
 
-for (( year=$yearstart; year <= $yearend; year++)) ; do
+for year in "${years[@]}" ; do
   directories[$year]=$(find "$src/$year" -maxdepth 1 -type d | \
     sort | sed '/^.$/d' | awk -F/ '{print $NF}'| \
     sed 's/ .*$//' | sed 's/　.*//' | \
@@ -22,11 +21,14 @@ for (( year=$yearstart; year <= $yearend; year++)) ; do
     sed 'y/１２３４５６７８９０/1234567890/')
 done
 
-for (( y1=$yearstart; y1 <= $yearend; y1++ )) ; do
-  for (( y2=$yearstart; y2 <= $yearend; y2++ )) ; do
+yearstart=0
+yearend=0
+for y1 in "${years[@]}" ; do
+  for y2 in "${years[@]}" ; do
     if [ "$y1" == "$y2" ]; then
       continue
     fi
+    #echo "y1=$y1, y2=$y2"
     while read d1; do
       e1="$d1"
       while read d2; do
