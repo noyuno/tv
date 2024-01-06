@@ -8,37 +8,107 @@
   <body>
     <div id="header">
       <span id="title">Dashboard</span>
+      <span id="current-page"></span>
+      <span id="keyboard-help">0:スマートホーム</span>
       <span id="header-datetime"></span>
     </div>
     <div id="message">
         <div id="message-text"></div>
         <button id="close-button">閉じる</button>
     </div>
-    <div id="main-content">
-      <div id="status-block" class="block">
-        <span class="block-title">Server status</span>
-        <table id="status-table">
+
+    <div id="page-1">
+      <div id="main-content">
+        <div id="status-block" class="block">
+          <span class="block-title">Server status</span>
+          <table id="status-table">
+            <thead>
+              <tr>
+                <th>server</th>
+                <th>service</th>
+                <th>url</th>
+                <th>status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="weather-block" class="block">
+          <span class="block-title">天気</span>
+          <table id="weather-table">
+            <thead>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="page-2">
+      <div id="recording-block" class="block">
+        <span class="block-title">録画中</span>
+        <table id="recording-table">
           <thead>
             <tr>
-              <th>server</th>
-              <th>service</th>
-              <th>url</th>
-              <th>status</th>
+              <th>時刻</th>
+              <th>チャンネル</th>
+              <th>番組名</th>
             </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
-      <div id="weather-block" class="block">
-        <span class="block-title">天気</span>
-        <table id="weather-table">
+
+      <div id="recorded-block" class="block">
+        <span class="block-title">録画済み</span>
+        <table id="recorded-table">
           <thead>
+            <tr>
+              <th>時刻</th>
+              <th>チャンネル</th>
+              <th>番組名</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div id="reserve-block" class="block">
+        <span class="block-title">録画予約</span>
+        <table id="reserve-table">
+          <thead>
+            <tr>
+              <th>時刻</th>
+              <th>チャンネル</th>
+              <th>番組名</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>
       </div>
     </div>
-    <script src="status.js"></script>
-    <script src="weather.js"></script>
+
+    <div id="page-3">
+      <div id="train-block" class="block">
+        <span class="block-title">時刻表（平日）</span>
+        <table id="train-table">
+          <thead>
+            <tr>
+              <th>時</th>
+              <th>分</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="common.js" type="module"></script>
+    <script src="status.js" type="module"></script>
+    <script src="weather.js" type="module"></script>
+    <script src="smarthome.js" type="module"></script>
+    <script src="epg.js" type="module"></script>
+    <script src="train.js" type="module"></script>
   </body>
 </html>

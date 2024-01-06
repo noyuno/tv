@@ -1,3 +1,5 @@
+import {sendNotifyd, message } from './common.js';
+
 window.addEventListener('load', () => {
 
   const ping = (num, server, service, url) => {
@@ -16,7 +18,7 @@ window.addEventListener('load', () => {
         }
       }
     };
-    req.timeout = 3000;
+    req.timeout = 5000;
     try {
       req.send();
     } catch (error) {
@@ -25,29 +27,6 @@ window.addEventListener('load', () => {
     }
 
   }
-
-  const sendNotifyd = (mes) => {
-    const req = new XMLHttpRequest();
-    req.open("POST", 'http://192.168.1.33:5050');
-    req.onreadystatechange = () => {
-      if (req.readyState === XMLHttpRequest.DONE) {
-        if ((req.status == 200)) {
-          message('success', 'sent to discord: ' + mes);
-        } else {
-          message('error', 'cannot send to discord: ' + mes);
-        }
-      }
-    };
-    req.timeout = 3000;
-    try {
-      const data = JSON.stringify({ 'token': 'token', 'message': mes });
-      console.log(data);
-      req.send(data);
-    } catch (error) {
-      console.log(error);
-      message('error', error);
-    }
-  };
 
   const noResponse = {};
 
@@ -60,16 +39,6 @@ window.addEventListener('load', () => {
       sendNotifyd(server + '/' + service + 'の応答がありません。 ' + url)
       noResponse[num] = 1;
     }
-  };
-
-  const message = (mode, mes) => {
-    document.querySelector('#message-text').textContent = mes;
-    document.querySelector('#message-text').setAttribute('class', 'message-' + mode);
-    document.querySelector('#message').setAttribute('class', 'message-' + mode);
-    document.querySelector('#message').style.display = 'block';
-    setTimeout(() => {
-      document.querySelector('#message').style.display = 'none';
-    }, 10000);
   };
 
   const addRow = (num, server, service, url, status) => {
@@ -107,9 +76,7 @@ window.addEventListener('load', () => {
 
   run();
   sendNotifyd('p1によるシステム監視を開始しました。');
-  setInterval(() => {
-    document.querySelector("#header-datetime").innerHTML = new Date().toLocaleDateString("SV") + " " + new Date().toLocaleTimeString("SV");
-  }, 1000);
+
   setInterval(run, 60 * 1000);
   
 });

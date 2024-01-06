@@ -2,10 +2,16 @@
   font-size: 22px;
   background-color: black;
   color: white;
+  user-select: none;
 }
 
 #title {
   font-weight: bold;
+}
+#current-page, #keyboard-help {
+  font-weight: bold;
+  border: solid 2px;
+  border-radius: 5px;
 }
 
 #header-datetime {
@@ -32,12 +38,26 @@
 }
 
 #status-block {
-  background-color: rgb(118, 135, 151);
+  background-color: rgb(167, 175, 92);
 
 }
 
 #weather-block {
   background-color: rgb(123, 151, 118);
+}
+
+#recorded-block, #recording-block, #reserve-block {
+  background-color: rgb(118, 135, 151);
+}
+#recording-block {
+  background-color: rgb(139, 189, 235);
+}
+#reserve-block {
+  background-color: rgb(118, 135, 151);
+}
+
+#train-block {
+  background-color: rgb(160, 112, 106);
 }
 
 th, td {
