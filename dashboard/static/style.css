@@ -1,5 +1,5 @@
 * {
-  font-size: 22px;
+  font-size: 24px;
   background-color: black;
   color: white;
   user-select: none;
@@ -8,7 +8,7 @@
 #title {
   font-weight: bold;
 }
-#current-page, #keyboard-help {
+#current-page, #page-pause, #keyboard-help {
   font-weight: bold;
   border: solid 2px;
   border-radius: 5px;

@@ -49,6 +49,7 @@ export function sendNotifyd (mes)  {
 var currentPage = 1;
 var maxPage = 3;
 var changedSelf = 0;
+var pause = false;
 
 export function setPage(p) {
   document.querySelector('#current-page').innerHTML = `${p}/${maxPage}ページ`
@@ -72,12 +73,24 @@ document.querySelector('#current-page').addEventListener('click', ((e) => {
   changedSelf = 1;
   nextPage();
 }))
+document.querySelector('#page-pause').addEventListener('click', ((e) => {
+  if (pause) {
+    pause = false;
+    document.querySelector('#page-pause').style.backgroundColor = '';
+  } else {
+    pause = true;
+    document.querySelector('#page-pause').style.backgroundColor = 'red';
+
+  }
+}))
 
 setInterval(() => { 
   if (changedSelf == 1) {
     changedSelf = 0;
     return;
   }
+  if (pause)
+    return;
   nextPage();
 }, 1000 * 10);
 setPage(1);
