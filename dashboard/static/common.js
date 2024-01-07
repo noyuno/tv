@@ -69,19 +69,22 @@ export function nextPage() {
   setPage(currentPage);
 }
 
-document.querySelector('#current-page').addEventListener('click', ((e) => {
-  changedSelf = 1;
-  nextPage();
-}))
-document.querySelector('#page-pause').addEventListener('click', ((e) => {
+export function pausePage() {
   if (pause) {
     pause = false;
     document.querySelector('#page-pause').style.backgroundColor = '';
   } else {
     pause = true;
     document.querySelector('#page-pause').style.backgroundColor = 'red';
-
   }
+}
+
+document.querySelector('#current-page').addEventListener('click', ((e) => {
+  changedSelf = 1;
+  nextPage();
+}))
+document.querySelector('#page-pause').addEventListener('click', ((e) => {
+  pausePage();
 }))
 
 setInterval(() => { 

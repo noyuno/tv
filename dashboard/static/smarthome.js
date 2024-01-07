@@ -1,4 +1,4 @@
-import {sendNotifyd, message } from './common.js';
+import {sendNotifyd, message, nextPage, pausePage } from './common.js';
 
 window.addEventListener('load', () => {
 
@@ -43,10 +43,14 @@ window.addEventListener('load', () => {
       send('就寝', 'scene');
     if (event.code == 'Digit0' || event.code == 'Numpad0')
       showhelp();
+    if (event.code == 'Period' || event.code == 'NumpadDecimal')
+      nextPage();
+    if (event.code == 'Minus' || event.code == 'NumpadSubtract')
+      pausePage();
   });
 
   function showhelp() {
-    message('success', '1:プラグミニ turnOn<br>2:プラグミニ turnOff<br>4:帰宅<br>5:外出<br>6:就寝')
+    message('success', 'ヘルプ<br><br>.:次のページ<br>-:遷移停止<br>1:プラグミニ turnOn<br>2:プラグミニ turnOff<br>4:帰宅<br>5:外出<br>6:就寝')
   }
     
   document.querySelector('#keyboard-help').addEventListener('click', ((e) => {
@@ -84,9 +88,8 @@ window.addEventListener('load', () => {
     tr.setAttribute('data-num', num);
     tr.insertCell(0).appendChild(document.createTextNode(device));
     var s = `電源:${data.body.power}`
-    if (data.body.voltage) s+= `, 電圧:${data.body.voltage}V`
     if (data.body.weight) s+= `, 消費電力:${data.body.weight}W`
-    if (data.body.brightness) s+= `, 明るさ:${data.body.brightness}W`
+    if (data.body.brightness) s+= `, 明るさ:${data.body.brightness}%`
 
     tr.insertCell(1).appendChild(document.createTextNode(s));
   };

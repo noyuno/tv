@@ -51,7 +51,7 @@ window.addEventListener('load', () => {
     for (let row of rows) {
       const tableId = '#schedule-table tbody';
       var tr = document.querySelector(tableId).insertRow();
-      tr.insertCell(0).appendChild(document.createTextNode(row[0].toLocaleDateString("SV", {})));
+      tr.insertCell(0).appendChild(document.createTextNode(row[0].toLocaleDateString("JA", {month: '2-digit', day: '2-digit', weekday: 'short'})));
       tr.insertCell(1).appendChild(document.createTextNode(row[1]));
     }
   };

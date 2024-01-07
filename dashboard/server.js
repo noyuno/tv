@@ -116,8 +116,8 @@ async function main() {
 
   sbDevices = await switchBotDevices();
   sbScenes = await switchBotScenes();
-  console.log(sbDevices);
-  console.log(sbScenes);
+  //console.log(sbDevices);
+  //console.log(sbScenes);
 
   app.use(express.json());
   app.use(express.static(path.join(__dirname, 'static')));
@@ -224,7 +224,7 @@ async function main() {
           } else {
             res.status(400).json({ error: `API status code ${s.status}` });
           }
-          process.stdout.write(d);
+          //process.stdout.write(d);
         });
       });
       q.on('error', error => {
