@@ -1,8 +1,12 @@
 * {
   font-size: 24px;
+
+  user-select: none;
+}
+
+body, table, button {
   background-color: black;
   color: white;
-  user-select: none;
 }
 
 #header {
@@ -12,13 +16,28 @@
 #title {
   font-weight: bold;
 }
+
+#current-page-container {
+  position: relative;
+}
+
+#current-page-progressbar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  background-color: rgb(133, 129, 124);
+}
+
 #current-page, #page-pause, #keyboard-help {
   font-weight: bold;
   border: solid 2px;
   border-radius: 5px;
   padding-left: 10px;
   padding-right: 10px;
+  position: relative;
 }
+
 
 #header-datetime {
   float: right;

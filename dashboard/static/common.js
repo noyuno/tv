@@ -1,20 +1,13 @@
 
-/*window.addEventHandler('load', () => {
-  var screen = 0;
-  var screens = ['status-block', 'weather-block' ];
-  const nextScreen = () => {
-    document.querySelector('#' + screens[screen]).style.display = 'none';
-
-  };
-});
-*/
+var messageTimeout;
 
 export function message(mode, mes) {
   document.querySelector('#message-text').innerHTML = mes;
   document.querySelector('#message-text').setAttribute('class', 'message-' + mode);
   document.querySelector('#message').setAttribute('class', 'message-' + mode);
   document.querySelector('#message').style.display = 'block';
-  setTimeout(() => {
+  clearTimeout(messageTimeout);
+  messageTimeout = setTimeout(() => {
     document.querySelector('#message').style.display = 'none';
   }, 1000 * 10);
 
@@ -29,9 +22,9 @@ export function sendNotifyd (mes)  {
   req.onreadystatechange = () => {
     if (req.readyState === XMLHttpRequest.DONE) {
       if ((req.status == 200)) {
-        message('success', 'sent to discord: ' + mes);
+        message('success', 'Discord: ' + mes);
       } else {
-        message('error', 'cannot send to discord: ' + mes);
+        message('error', 'Discordに送信できません: ' + mes);
       }
     }
   };
@@ -48,10 +41,12 @@ export function sendNotifyd (mes)  {
 
 var currentPage = 1;
 var maxPage = 4;
-var changedSelf = 0;
 var pause = false;
+var pageInterval;
+var pageProgress = 0;
 
 export function setPage(p) {
+  setPageInterval();
   document.querySelector('#current-page').innerHTML = `${p}/${maxPage}ページ`
   for (let a = 1 ; a <= maxPage; a++) {
     if (a == p) {
@@ -71,32 +66,46 @@ export function nextPage() {
 
 export function pausePage() {
   if (pause) {
-    pause = false;
+    setPageInterval();
     document.querySelector('#page-pause').style.backgroundColor = '';
   } else {
-    pause = true;
-    document.querySelector('#page-pause').style.backgroundColor = 'red';
+    stopPageInterval();
+    document.querySelector('#page-pause').style.backgroundColor = 'rgb(190, 80, 80)';
   }
+  pause = !pause;
 }
 
 document.querySelector('#current-page').addEventListener('click', ((e) => {
-  changedSelf = 1;
   nextPage();
+  setPageInterval();
 }))
 document.querySelector('#page-pause').addEventListener('click', ((e) => {
   pausePage();
 }))
 
-setInterval(() => { 
-  if (changedSelf == 1) {
-    changedSelf = 0;
-    return;
-  }
-  if (pause)
-    return;
-  nextPage();
-}, 1000 * 10);
+const stopPageInterval = function () {
+  clearInterval(pageInterval);
+  pageProgress = 0;
+  document.querySelector('#current-page-progressbar').style.width = '0%'
+};
+
+const setPageInterval = function () {
+  stopPageInterval();
+  pageProgress = 0;
+  pageInterval = setInterval(() => { 
+    if (++pageProgress >= 10) {
+      pageProgress = 0;
+      document.querySelector('#current-page-progressbar').style.width = '0%'
+      nextPage();
+    } else {
+      document.querySelector('#current-page-progressbar').style.width = `${pageProgress * 10}%`
+    }
+  }, 1000);
+};
+
+
 setPage(1);
+setPageInterval();
 
 
 setInterval(() => {

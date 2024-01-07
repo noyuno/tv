@@ -85,3 +85,5 @@ fi
 # C-s
 stty stop undef &&:
 
+export LESS="-iRMXS"
+
