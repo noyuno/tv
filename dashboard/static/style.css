@@ -38,26 +38,33 @@
 }
 
 #status-block {
-  background-color: rgb(167, 175, 92);
+  background-color: rgb(138, 145, 69);
+
+}
+
+
+#smarthome-block {
+  background-color: rgb(128, 62, 62);
 
 }
 
 #weather-block {
-  background-color: rgb(123, 151, 118);
+  background-color: rgb(73, 104, 68);
 }
 
-#recorded-block, #recording-block, #reserve-block {
-  background-color: rgb(118, 135, 151);
+#recorded-block, #reserve-block {
+  background-color: rgb(58, 88, 117);
 }
 #recording-block {
-  background-color: rgb(139, 189, 235);
-}
-#reserve-block {
-  background-color: rgb(118, 135, 151);
+  background-color: rgb(113, 152, 189);
 }
 
 #train-block {
-  background-color: rgb(160, 112, 106);
+  background-color: rgb(168, 127, 66);
+}
+
+#schedule-block {
+  background-color: rgb(121, 68, 120);
 }
 
 th, td {
@@ -93,7 +100,7 @@ table {
 
 #message {
     position: fixed;
-    top: 20px;
+    top: 40px;
     right: 20px;
     background-color: #333;
     color: #fff;

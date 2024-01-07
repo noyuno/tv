@@ -47,7 +47,7 @@ export function sendNotifyd (mes)  {
 };
 
 var currentPage = 1;
-var maxPage = 3;
+var maxPage = 4;
 var changedSelf = 0;
 var pause = false;
 

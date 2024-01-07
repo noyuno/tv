@@ -17,9 +17,9 @@
         <div id="message-text"></div>
         <button id="close-button">閉じる</button>
     </div>
+    <div id="main-content">
 
-    <div id="page-1">
-      <div id="main-content">
+      <div id="page-1">
         <div id="status-block" class="block">
           <span class="block-title">Server status</span>
           <table id="status-table">
@@ -34,72 +34,100 @@
             <tbody></tbody>
           </table>
         </div>
-      </div>
-    </div>
-
-    <div id="page-2">
-      <div id="recording-block" class="block">
-        <span class="block-title">録画中</span>
-        <table id="recording-table">
-          <thead>
-            <tr>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <div id="recorded-block" class="block">
-        <span class="block-title">録画済み</span>
-        <table id="recorded-table">
-          <thead>
-            <tr>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+        <div id="smarthome-block" class="block">
+          <span class="block-title">スマートホーム</span>
+          <table id="smarthome-table">
+            <thead>
+              <tr>
+                <th>デバイス</th>
+                <th>状態</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
       </div>
 
-      <div id="reserve-block" class="block">
-        <span class="block-title">録画予約</span>
-        <table id="reserve-table">
-          <thead>
-            <tr>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+      <div id="page-2">
+        <div id="recording-block" class="block">
+          <span class="block-title">録画中</span>
+          <table id="recording-table">
+            <thead>
+              <tr>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
-    <div id="page-3">
-      <div id="weather-block" class="block">
-        <span class="block-title">天気</span>
-        <table id="weather-table">
-          <thead>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div id="train-block" class="block">
-        <span class="block-title">時刻表（平日）</span>
-        <table id="train-table">
-          <thead>
-            <tr>
-              <th>時</th>
-              <th>分</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
+        <div id="recorded-block" class="block">
+          <span class="block-title">録画済み</span>
+          <table id="recorded-table">
+            <thead>
+              <tr>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
+        <div id="reserve-block" class="block">
+          <span class="block-title">録画予約</span>
+          <table id="reserve-table">
+            <thead>
+              <tr>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="page-3">
+        <div id="weather-block" class="block">
+          <span class="block-title">天気</span>
+          <table id="weather-table">
+            <thead>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div id="train-block" class="block">
+          <span class="block-title">時刻表（平日）</span>
+          <table id="train-table">
+            <thead>
+              <tr>
+                <th>時</th>
+                <th>分</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="page-4">
+        <div id="schedule-block" class="block">
+          <span class="block-title">予定</span>
+          <table id="schedule-table">
+            <thead>
+              <tr>
+                <th>日時</th>
+                <th>内容</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </div> <!-- main-content -->
+    <script src="ical.min.js" type="module"></script>
     <script src="common.js" type="module"></script>
     <script src="status.js" type="module"></script>
     <script src="weather.js" type="module"></script>
     <script src="smarthome.js" type="module"></script>
     <script src="epg.js" type="module"></script>
     <script src="train.js" type="module"></script>
+    <script src="schedule.js" type="module"></script>
   </body>
 </html>

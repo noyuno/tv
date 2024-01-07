@@ -66,7 +66,7 @@ function switchBotDevices() {
     });
     req.on('error', error => {
       console.error(error);
-      reject(err);
+      reject(error);
     });
     req.end();
   });
@@ -86,7 +86,7 @@ function switchBotScenes() {
     });
     req.on('error', error => {
       console.error(error);
-      reject(err);
+      reject(error);
     });
     req.end();
   });
@@ -179,7 +179,7 @@ async function main() {
       }
       const q = https.request(options, s => {
         s.on('data', d => {
-          process.stdout.write(d);
+          //process.stdout.write(d);
         });
         if (s.statusCode === 200) {
           res.status(200).json({ message: 'command success' });
@@ -199,6 +199,64 @@ async function main() {
     } catch (error) {
       console.error(`Error: ${error.message}`);
       res.status(400).json({ error: 'API error' });
+    }
+
+  });
+
+  app.get('/switchbot-status', async (req, res) => {
+    if (!req.query.deviceName) {
+      return res.status(400).json({ error: 'Parameter missing.' });
+    }
+    try {
+      // get device id
+      const id = findDevice(req.query.deviceName)
+      if (id == '') {
+        res.status(400).json({ error: 'id not found' });
+        return;
+      }
+      const options = switchBotCredential();
+      options.path = `/v1.1/devices/${id}/status`
+      
+      const q = https.request(options, s => {
+        s.on('data', d => {
+          if (s.statusCode === 200) {
+            res.status(200).json(JSON.parse(d));
+          } else {
+            res.status(400).json({ error: `API status code ${s.status}` });
+          }
+          process.stdout.write(d);
+        });
+      });
+      q.on('error', error => {
+        console.error(error);
+      });
+      //q.write();
+      q.end();
+    } catch (error) {
+      console.error(`Error: ${error.message}`);
+      res.status(400).json({ error: 'API error' });
+    }
+
+  });
+
+  app.get('/calendar', async (req, res) => {
+    const targetURL = process.env.ICAL_URL;
+
+    if (!targetURL) {
+      return res.status(400).json({ error: 'URL parameter is required.' });
+    }
+
+    try {
+      const response = await axios.get(targetURL);
+
+      if (response.status === 200) {
+        res.status(200).json({ message: 'success', data: response.data});
+      } else {
+        res.status(400).json({ error: `HTTP status code ${response.status}` });
+      }
+    } catch (error) {
+      console.error(`Error: ${error.message}`);
+      res.status(400).json({ error: 'URL is unreachable or timed out.' });
     }
 
   });
