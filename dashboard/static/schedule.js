@@ -10,6 +10,7 @@ window.addEventListener('load', () => {
   };
 
   const getjson = () => {
+    document.querySelector('#schedule-table tbody').innerHTML="";
     const req = new XMLHttpRequest();
     req.open("GET", 'http://192.168.1.33:3000/calendar');
     req.onreadystatechange = () => {
@@ -47,7 +48,6 @@ window.addEventListener('load', () => {
   }
 
   const addRow = (rows) => {
-
     for (let row of rows) {
       const tableId = '#schedule-table tbody';
       var tr = document.querySelector(tableId).insertRow();
