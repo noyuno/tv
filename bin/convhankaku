@@ -4,7 +4,7 @@ source /home/noyuno/tv/.env
 
 tvroot=/mnt/hddts0-plain0/tv
 subtvroot=mp4
-src=$tvroot/$subtvroot/2023/00_アニメ
+src=$tvroot/$subtvroot/2024/00_アニメ
 max=10
 user=noyuno
 

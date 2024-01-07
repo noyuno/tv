@@ -4,7 +4,7 @@ source /home/noyuno/tv/.env
 user=noyuno
 tvroot=/mnt/hddts0-plain0/tv
 dst=$tvroot/mp4
-src=$dst/2023/00_アニメ/
+src=$dst/2024/00_アニメ/
 years=("delete" "2019" "2020" "2021" "2022" "2023" "2024")
 filenum=0
 movenum=0
