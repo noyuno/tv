@@ -58,6 +58,6 @@ window.addEventListener('load', () => {
 
 
   getjson();
-  setInterval(getjson, 60 * 60 * 1000); // 1hr
+  setInterval(getjson, 10 * 60 * 1000); // 10min
   
 });
