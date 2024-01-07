@@ -9,6 +9,18 @@ body, table, button {
   color: white;
 }
 
+#dim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: none;
+  pointer-events: none;
+}
+
 #header {
   margin: 2px;
 }

@@ -57,13 +57,15 @@ window.addEventListener('load', () => {
     showhelp();
   }))
 
-  const status = (num, device) => {
+  const status = (num, device, callback = null) => {
     var ret = false;
     const req = new XMLHttpRequest();
     req.open("GET", 'http://192.168.1.33:3000/switchbot-status?deviceName=' + device);
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         addRow(num, device, JSON.parse(req.responseText));
+        if (typeof callback == 'function')
+          callback(JSON.parse(req.responseText));
       }
     };
     req.timeout = 5000;
@@ -94,9 +96,11 @@ window.addEventListener('load', () => {
     tr.insertCell(1).appendChild(document.createTextNode(s));
   };
 
-  const run = () => {
+  const run = (data) => {
     document.querySelector('#smarthome-table tbody').innerHTML="";
-    status(1, 'シーリングライト');
+    status(1, 'シーリングライト', (data) => {
+      document.querySelector('#dim').style.display = (data.body.power == 'on') ? 'none' : 'block';
+    });
     status(2, 'プラグミニ');
   };
 
