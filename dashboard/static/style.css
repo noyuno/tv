@@ -107,7 +107,15 @@ body, table, button {
 #schedule-block {
   background-color: rgb(121, 68, 120);
 }
-
+#memo-block {
+  background-color: rgb(224, 133, 80);
+}
+.schedule-sat {
+  color:rgb(163, 161, 242)
+}
+.schedule-sun {
+  color:rgb(197, 75, 100)
+}
 th, td {
   border: solid 1px;
   padding: 5px;
@@ -116,6 +124,7 @@ th, td {
 
 table {
   border-collapse: collapse;
+  margin: 2px;
 }
 
 #weather-table {

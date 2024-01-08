@@ -40,13 +40,14 @@ export function sendNotifyd (mes)  {
 };
 
 var currentPage = 1;
-var maxPage = 4;
+var maxPage = 5;
 var pause = false;
 var pageInterval;
 var pageProgress = 0;
 
 export function setPage(p) {
-  setPageInterval();
+  if (!pause)
+    setPageInterval();
   document.querySelector('#current-page').innerHTML = `${p}/${maxPage}ページ`
   for (let a = 1 ; a <= maxPage; a++) {
     if (a == p) {
@@ -77,7 +78,7 @@ export function pausePage() {
 
 document.querySelector('#current-page').addEventListener('click', ((e) => {
   nextPage();
-  setPageInterval();
+  //setPageInterval();
 }))
 document.querySelector('#page-pause').addEventListener('click', ((e) => {
   pausePage();

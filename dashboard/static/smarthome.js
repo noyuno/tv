@@ -10,9 +10,9 @@ window.addEventListener('load', () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;
         if ((status == 200)) {
-          message('success', `${deviceName} を ${command} にしました`)
+          message('success', `${deviceName}(${command})`)
         } else {
-          message('error', `${deviceName} を ${command} にできませんでした (${status} ${JSON.parse(req.responseText).error})`)
+          message('error', `失敗：${deviceName}(${command}) (${status} ${JSON.parse(req.responseText).error})`)
         }
       }
     };

@@ -7,9 +7,21 @@ const port = 3000;
 const crypto = require('crypto');
 const https = require('https');
 const fs = require('fs');
+const  bodyParser = require( 'body-parser');
 
 // switchbot
 require('dotenv').config();
+
+const touchFileSync = (fileName) => {
+  try {
+    const time = new Date();
+    fs.utimesSync(fileName, time, time);
+  } catch {
+    fs.closeSync(fs.openSync(fileName, 'w'));
+  }
+};
+const memoFile = './data/memo.txt'
+touchFileSync(memoFile)
 
 function switchBotCredential(postBodyLength = 0) {
   const token = process.env.SWITCHBOT_TOKEN;
@@ -120,6 +132,12 @@ async function main() {
   //console.log(sbScenes);
 
   app.use(express.json());
+  app.use(bodyParser.json());
+  app.use(
+    bodyParser.urlencoded({
+      extended: true,
+    }),
+  );
   app.use(express.static(path.join(__dirname, 'static')));
 
   app.get('/check', async (req, res) => {
@@ -259,6 +277,16 @@ async function main() {
       res.status(400).json({ error: 'URL is unreachable or timed out.' });
     }
 
+  });
+
+  app.get('/memo', async (req, res) => {
+    return res.status(200).json({ message: 'success', data: String(fs.readFileSync(memoFile))});
+  });
+
+  app.post('/memo', async (req, res) => {
+    const j = JSON.parse(JSON.stringify(req.body));
+    fs.writeFileSync(memoFile, j.data)
+    return res.status(200).json({message: 'success'});
   });
 
   app.listen(port, () => {

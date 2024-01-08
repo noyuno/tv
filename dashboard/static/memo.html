@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <meta charset="utf-8" />
+  <head>
+    <title>Memo</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      #memo-textarea {
+        background-color: black;
+        color:white;
+        width: 100%;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dim"></div>
+    <div id="header">
+      <span id="title">Memo</span>
+      <span id="header-datetime"></span>
+    </div>
+
+    <div id="main-content">
+      <textarea id="memo-textarea"></textarea>
+    </div> <!-- main-content -->
+    <script>
+      
+      window.addEventListener('load', () => {
+
+        var messageTimer;
+        const message = function (t) {
+          clearTimeout(messageTimer);
+          document.querySelector('#header-datetime').textContent = t;
+          messageTimer = setTimeout(() =>{
+            document.querySelector('#header-datetime').textContent = '';
+          }, 10);
+        };
+
+        const receive = () => {
+          document.querySelector('#memo-textarea').textContent="";
+          const req = new XMLHttpRequest();
+          req.open("GET", 'http://192.168.1.33:3000/memo');
+          req.onreadystatechange = () => {
+            if (req.readyState === XMLHttpRequest.DONE) {
+              const status = req.status;
+              if ((status == 200)) {
+                const data = JSON.parse(req.responseText);
+                supressInput(data.data);
+              } else {
+                message('メモを取得できませんでした。');
+              }
+            }
+          };
+          req.timeout = 5000;
+          try {
+            req.send();
+          } catch (error) {
+            console.log(error);
+            message('メモを取得できませんでした。');
+          }
+
+        }
+
+
+        const supressInput = function (data) {
+          document.querySelector('#memo-textarea').value = data;
+        };
+
+        const send = function () {
+          const req = new XMLHttpRequest();
+          req.open("POST", 'http://192.168.1.33:3000/memo');
+          req.setRequestHeader('Content-Type', 'application/json');
+          req.onreadystatechange = () => {
+            if (req.readyState === XMLHttpRequest.DONE) {
+              const status = req.status;
+              if ((status == 200)) {
+                const data = JSON.parse(req.responseText);
+              } else {
+                message('メモを送信できませんでした。');
+              }
+            }
+          };
+          req.timeout = 5000;
+          try {
+            const t = document.querySelector('#memo-textarea').value;
+            const j = JSON.stringify({
+              "data": t
+            })
+            console.log(j);
+            req.send(j);
+          } catch (error) {
+            console.log(error);
+            message('メモを送信できませんでした。');
+          }
+
+        };
+
+        document.querySelector('#memo-textarea').addEventListener('input', (e) => {
+          send();
+        });
+
+        receive();
+
+
+      });
+
+    </script>
+  </body>
+</html>

@@ -1,13 +1,6 @@
+import { message } from './common.js';
+
 window.addEventListener('load', () => {
-  const message = (mode, mes) => {
-    document.querySelector('#message-text').textContent = mes;
-    document.querySelector('#message-text').setAttribute('class', 'message-' + mode);
-    document.querySelector('#message').setAttribute('class', 'message-' + mode);
-    document.querySelector('#message').style.display = 'block';
-    setTimeout(() => {
-      document.querySelector('#message').style.display = 'none';
-    }, 10000);
-  };
 
   const getjson = () => {
     document.querySelector('#schedule-table tbody').innerHTML="";
@@ -31,13 +24,13 @@ window.addEventListener('load', () => {
               rows.push([new Date(dtstart), summary]);
           }
           rows.sort((a, b) => { return a[0] > b[0] ? 1: -1; });
-          addRow(rows.slice(0,13));
+          addRow(rows.slice(0,14));
         } else {
           message('error', '予定を取得できませんでした' + req.status);
         }
       }
     };
-    req.timeout = 3000;
+    req.timeout = 5000;
     try {
       req.send();
     } catch (error) {
@@ -51,7 +44,14 @@ window.addEventListener('load', () => {
     for (let row of rows) {
       const tableId = '#schedule-table tbody';
       var tr = document.querySelector(tableId).insertRow();
-      tr.insertCell(0).appendChild(document.createTextNode(row[0].toLocaleDateString("JA", {month: '2-digit', day: '2-digit', weekday: 'short'})));
+      const date = row[0].toLocaleDateString("JA", {month: '2-digit', day: '2-digit', weekday: 'short'})
+      const datenode = document.createElement('span');
+      datenode.textContent = date;
+      if (date.includes('土'))
+        datenode.setAttribute('class', 'schedule-sat');
+      if (date.includes('日'))
+        datenode.setAttribute('class', 'schedule-sun');
+      tr.insertCell(0).appendChild(datenode);
       tr.insertCell(1).appendChild(document.createTextNode(row[1]));
     }
   };
