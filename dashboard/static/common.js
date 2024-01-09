@@ -110,6 +110,18 @@ setPageInterval();
 
 
 setInterval(() => {
-  document.querySelector("#header-datetime").innerHTML = new Date().toLocaleDateString("SV") + " " + new Date().toLocaleTimeString("SV");
+  document.querySelector("#header-datetime").innerHTML = '';
+  const datenode = document.createElement('span');
+  datenode.textContent = (new Date().toLocaleDateString("JA", {month: '2-digit', day: '2-digit', weekday: 'short'})) + ' ';
+  if (datenode.textContent.includes('土'))
+    datenode.setAttribute('class', 'schedule-sat');
+  if (datenode.textContent.includes('日'))
+    datenode.setAttribute('class', 'schedule-sun');
+  document.querySelector("#header-datetime").appendChild(datenode);
+
+  const timenode = document.createElement('span');
+  timenode.textContent = new Date().toLocaleTimeString("SV");
+  document.querySelector("#header-datetime").appendChild(timenode);
+
 }, 1000);
 

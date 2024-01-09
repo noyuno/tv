@@ -33,24 +33,29 @@ window.addEventListener('load', () => {
       return;
     if (event.code == 'Digit1' || event.code == 'Numpad1')
       send('プラグミニ', 'turnOn');
-    if (event.code == 'Digit2' || event.code == 'Numpad2')
+    else if (event.code == 'Digit2' || event.code == 'Numpad2')
       send('プラグミニ', 'turnOff');
-    if (event.code == 'Digit4' || event.code == 'Numpad4')
+    else if (event.code == 'Digit3' || event.code == 'Numpad3')
+      send('シーリングライト', 'toggle');
+    else if (event.code == 'Digit4' || event.code == 'Numpad4')
       send('帰宅', 'scene');
-    if (event.code == 'Digit5' || event.code == 'Numpad5')
+    else if (event.code == 'Digit5' || event.code == 'Numpad5')
       send('外出', 'scene');
-    if (event.code == 'Digit6' || event.code == 'Numpad6')
+    else if (event.code == 'Digit6' || event.code == 'Numpad6')
       send('就寝', 'scene');
-    if (event.code == 'Digit0' || event.code == 'Numpad0')
+    else if (event.code == 'Digit0' || event.code == 'Numpad0')
       showhelp();
-    if (event.code == 'Period' || event.code == 'NumpadDecimal')
+    else if (event.code == 'Period' || event.code == 'NumpadDecimal')
       nextPage();
-    if (event.code == 'Minus' || event.code == 'NumpadSubtract')
+    else if (event.code == 'Minus' || event.code == 'NumpadSubtract')
       pausePage();
+    else
+      return;
+    display(1);
   });
 
   function showhelp() {
-    message('success', 'ヘルプ<br><br>.:次のページ<br>-:遷移停止<br>1:プラグミニ turnOn<br>2:プラグミニ turnOff<br>4:帰宅<br>5:外出<br>6:就寝')
+    message('success', 'ヘルプ<br><br>.:次のページ<br>-:遷移停止<br>1:プラグミニ turnOn<br>2:プラグミニ turnOff<br>3:シーリングライト toggle<br>4:帰宅<br>5:外出<br>6:就寝')
   }
     
   document.querySelector('#keyboard-help').addEventListener('click', ((e) => {
@@ -96,10 +101,32 @@ window.addEventListener('load', () => {
     tr.insertCell(1).appendChild(document.createTextNode(s));
   };
 
+  const display = (param) => {
+    const req = new XMLHttpRequest();
+    req.open("GET", 'http://192.168.1.33:3000/display?power=' + param);
+    req.onreadystatechange = () => {
+      if (req.readyState === XMLHttpRequest.DONE) {
+        const status = req.status;
+        if ((status == 200)) {
+        } else {
+          message('error', `失敗：${status}<br>${stdout}<br>${stderr}`)
+        }
+      }
+    };
+    req.timeout = 5000;
+    try {
+      req.send();
+    } catch (error) {
+      console.log(error);
+      message('error', error);
+    }
+  }
+
   const run = (data) => {
     document.querySelector('#smarthome-table tbody').innerHTML="";
     status(1, 'シーリングライト', (data) => {
-      document.querySelector('#dim').style.display = (data.body.power == 'on') ? 'none' : 'block';
+      //document.querySelector('#dim').style.display = (data.body.power == 'on') ? 'none' : 'block';
+      display((data.body.power == 'on') ? '1' : '0');
     });
     status(2, 'プラグミニ');
   };

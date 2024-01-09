@@ -1,6 +1,5 @@
 const express = require('express');
 const axios = require('axios');
-const { exec } = require('child_process');
 const path = require('path');
 const app = express();
 const port = 3000;
@@ -8,6 +7,8 @@ const crypto = require('crypto');
 const https = require('https');
 const fs = require('fs');
 const  bodyParser = require( 'body-parser');
+const util = require('node:util');
+const exec = util.promisify(require('node:child_process').exec);
 
 // switchbot
 require('dotenv').config();
@@ -287,6 +288,19 @@ async function main() {
     const j = JSON.parse(JSON.stringify(req.body));
     fs.writeFileSync(memoFile, j.data)
     return res.status(200).json({message: 'success'});
+  });
+
+  app.get('/display', async (req, res) => {
+    if (!req.query.power) {
+      return res.status(400).json({ error: 'Parameter missing.' });
+    }
+    const param = (req.query.power == '1') ? 1 : 0;      
+    const { stdout, stderr } = await exec(`vcgencmd display_power ${param}`);
+    if (stderr) {
+      return res.status(200).json({message: 'error', stdout: stdout, stderr: stderr});
+    } else {
+      return res.status(200).json({message: 'success', stdout: stdout, stderr: stderr});
+    }
   });
 
   app.listen(port, () => {

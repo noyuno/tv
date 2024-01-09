@@ -24,7 +24,7 @@ window.addEventListener('load', () => {
               rows.push([new Date(dtstart), summary]);
           }
           rows.sort((a, b) => { return a[0] > b[0] ? 1: -1; });
-          addRow(rows.slice(0,14));
+          addRow(rows.slice(0,13));
         } else {
           message('error', '予定を取得できませんでした' + req.status);
         }

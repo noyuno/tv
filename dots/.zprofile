@@ -98,7 +98,7 @@ export WIKI_LANG="ja"
 
 export GPG_TTY=$(tty)
 
-export LESS="-x4"
+export LESS="-x4R"
 export QT_QPA_PLATFORMTHEME='gtk2'
 
 # AUR helper command

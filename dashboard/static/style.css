@@ -1,6 +1,6 @@
 * {
   font-size: 24px;
-
+  font-family: "Noto Sans JP";
   user-select: none;
 }
 
@@ -47,7 +47,7 @@ body, table, button {
 
 #current-page, #page-pause, #keyboard-help {
   font-weight: bold;
-  border: solid 2px;
+  border: solid 3px;
   border-radius: 5px;
   padding-left: 10px;
   padding-right: 10px;
@@ -117,7 +117,7 @@ body, table, button {
   color:rgb(197, 75, 100)
 }
 th, td {
-  border: solid 1px;
+  border: solid 2px;
   padding: 5px;
   font-weight: normal;
 }
@@ -126,6 +126,7 @@ table {
   border-collapse: collapse;
   margin: 2px;
 }
+
 
 #weather-table {
   text-align: center;

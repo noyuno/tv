@@ -26,10 +26,16 @@ window.addEventListener('load', () => {
           document.querySelector(tableId).deleteRow(-1);
           var t = document.querySelector(tableId).insertRow(-1);
           for (var i = 0; i < data[1].timeSeries[0].timeDefines.length; i++) {
-            const op = { month: '2-digit', day: '2-digit'};
+            const op = { month: '2-digit', day: '2-digit', weekday: 'short'};
             const formatter = new Intl.DateTimeFormat('ja-JP', op);
             const ft = formatter.format(new Date(data[1].timeSeries[0].timeDefines[i]));
-            t.insertCell(i).appendChild(document.createTextNode(ft));
+            const datenode = document.createElement('span');
+            datenode.textContent = ft;
+            if (ft.includes('土'))
+              datenode.setAttribute('class', 'schedule-sat');
+            if (ft.includes('日'))
+              datenode.setAttribute('class', 'schedule-sun');
+            t.insertCell(i).appendChild(datenode);
           }
           var tr = document.querySelector(tableId).insertRow(-1);
           for (var i = 0; i < tokyo.weatherCodes.length; i++) {
