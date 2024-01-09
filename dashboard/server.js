@@ -113,6 +113,11 @@ function findDevice(name) {
       return a['deviceId'];
     }
   }
+  for(let a of sbDevices['body']['infraredRemoteList']) {
+    if (a['deviceName'] == name) {
+      return a['deviceId'];
+    }
+  }
   return '';
 }
 

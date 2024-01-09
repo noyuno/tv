@@ -43,6 +43,8 @@ window.addEventListener('load', () => {
       send('外出', 'scene');
     else if (event.code == 'Digit6' || event.code == 'Numpad6')
       send('就寝', 'scene');
+    else if (event.code == 'Digit7' || event.code == 'Numpad7')
+      send('SBテレビ', 'turnOn');
     else if (event.code == 'Digit0' || event.code == 'Numpad0')
       showhelp();
     else if (event.code == 'Period' || event.code == 'NumpadDecimal')
@@ -55,7 +57,7 @@ window.addEventListener('load', () => {
   });
 
   function showhelp() {
-    message('success', 'ヘルプ<br><br>.:次のページ<br>-:遷移停止<br>1:プラグミニ turnOn<br>2:プラグミニ turnOff<br>3:シーリングライト toggle<br>4:帰宅<br>5:外出<br>6:就寝')
+    message('success', 'ヘルプ<br><br>.:次のページ<br>-:遷移停止<br>1:プラグミニ turnOn<br>2:プラグミニ turnOff<br>3:シーリングライト toggle<br>4:帰宅<br>5:外出<br>6:就寝<br>7:SBテレビ')
   }
     
   document.querySelector('#keyboard-help').addEventListener('click', ((e) => {
