@@ -222,7 +222,7 @@ async function main() {
 
     } catch (error) {
       console.error(`Error: ${error.message}`);
-      res.status(400).json({ error: 'API error' });
+      res.status(400).json({ error: `API error: ${error.message}` });
     }
 
   });
@@ -258,7 +258,7 @@ async function main() {
       q.end();
     } catch (error) {
       console.error(`Error: ${error.message}`);
-      res.status(400).json({ error: 'API error' });
+      res.status(400).json({ error: `API error: ${error.message}` });
     }
 
   });
