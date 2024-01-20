@@ -32,32 +32,30 @@ window.addEventListener('load', () => {
     if (event.isComposing || event.keyCode === 229)
       return;
     if (event.code == 'Digit1' || event.code == 'Numpad1')
-      send('プラグミニ', 'turnOn');
+      send('SBテレビ', 'turnOn');
     else if (event.code == 'Digit2' || event.code == 'Numpad2')
-      send('プラグミニ', 'turnOff');
-    else if (event.code == 'Digit3' || event.code == 'Numpad3')
       send('シーリングライト', 'toggle');
+    else if (event.code == 'Digit3' || event.code == 'Numpad3')
+      send('プラグミニ', 'toggle');
     else if (event.code == 'Digit4' || event.code == 'Numpad4')
       send('帰宅', 'scene');
     else if (event.code == 'Digit5' || event.code == 'Numpad5')
       send('外出', 'scene');
     else if (event.code == 'Digit6' || event.code == 'Numpad6')
       send('就寝', 'scene');
-    else if (event.code == 'Digit7' || event.code == 'Numpad7')
-      send('SBテレビ', 'turnOn');
     else if (event.code == 'Digit0' || event.code == 'Numpad0')
-      showhelp();
-    else if (event.code == 'Period' || event.code == 'NumpadDecimal')
       nextPage();
-    else if (event.code == 'Minus' || event.code == 'NumpadSubtract')
+    else if (event.code == 'Period' || event.code == 'NumpadDecimal')
       pausePage();
+    else if (event.code == 'Minus' || event.code == 'NumpadSubtract')
+      showhelp();
     else
       return;
     display(1);
   });
 
   function showhelp() {
-    message('success', 'ヘルプ<br><br>.:次のページ<br>-:遷移停止<br>1:プラグミニ turnOn<br>2:プラグミニ turnOff<br>3:シーリングライト toggle<br>4:帰宅<br>5:外出<br>6:就寝<br>7:SBテレビ')
+    message('success', 'ヘルプ<br><br>0:次のページ<br>.:遷移停止<br>1:SBテレビ<br>2:シーリングライト toggle<br>3:プラグミニ toggle<br>4:帰宅<br>5:外出<br>6:就寝')
   }
     
   document.querySelector('#keyboard-help').addEventListener('click', ((e) => {

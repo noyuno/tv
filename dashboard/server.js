@@ -9,6 +9,7 @@ const fs = require('fs');
 const  bodyParser = require( 'body-parser');
 const util = require('node:util');
 const exec = util.promisify(require('node:child_process').exec);
+require('date-utils');
 
 // switchbot
 require('dotenv').config();
@@ -309,8 +310,21 @@ async function main() {
   });
 
   app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`${new Date()} Server is running on port ${port}`);
   });
 
+
+  setInterval(async () => {
+    try {
+      const response = await axios.get('http://192.168.1.33:3000');
+      if (response.status !== 200) {
+        console.error(`setInterval(): server not response! ${response.status}`);
+        process.exit(1);
+      }
+    } catch (error) {
+      console.error(`setInterval(): server not response! ${error}`);
+      process.exit(0);
+    }
+  }, 10 * 1000)
 }
 main();
