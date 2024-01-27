@@ -20,7 +20,9 @@ window.addEventListener('load', () => {
               if (item[0] == 'dtstart') dtstart = item[3];
               if (item[0] == 'summary') summary = item[3];
             }
-            if (new Date(dtstart) > new Date())
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (new Date(dtstart) >= today)
               rows.push([new Date(dtstart), summary]);
           }
           rows.sort((a, b) => { return a[0] > b[0] ? 1: -1; });
