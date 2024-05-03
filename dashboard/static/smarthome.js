@@ -1,11 +1,11 @@
-import {sendNotifyd, message, nextPage, pausePage } from './common.js';
+import {sendNotifyd, message, nextPage, pausePage, hostp1 } from './common.js';
 
 window.addEventListener('load', () => {
 
   const send = (deviceName, command) => {
     var ret = false;
     const req = new XMLHttpRequest();
-    req.open("GET", 'http://192.168.1.33:3000/switchbot-command?deviceName=' + encodeURI(deviceName) + '&command=' + command);
+    req.open("GET", 'http://' + hostp1 + ':3000/switchbot-command?deviceName=' + encodeURI(deviceName) + '&command=' + command);
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;
@@ -65,7 +65,7 @@ window.addEventListener('load', () => {
   const status = (num, device, callback = null) => {
     var ret = false;
     const req = new XMLHttpRequest();
-    req.open("GET", 'http://192.168.1.33:3000/switchbot-status?deviceName=' + device);
+    req.open("GET", 'http://' + hostp1 + ':3000/switchbot-status?deviceName=' + device);
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         addRow(num, device, JSON.parse(req.responseText));
@@ -103,7 +103,7 @@ window.addEventListener('load', () => {
 
   const display = (param) => {
     const req = new XMLHttpRequest();
-    req.open("GET", 'http://192.168.1.33:3000/display?power=' + param);
+    req.open("GET", 'http://' + hostp1 + ':3000/display?power=' + param);
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;

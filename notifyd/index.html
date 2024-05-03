@@ -1,47 +1,103 @@
 <!DOCTYPE html>
 <head>
   <meta charset="utf-8">
-  <title>notifyd</title>
+  <title>Top page</title>
+  <style>
+    * {
+      font-size: 18px;
+      font-family: "Noto Sans JP";
+      user-select: none;
+    }
+    body {
+      background-color: black;
+      color: white;
+    }
+    #header {
+        margin: 2px;
+    }
+    #title {
+      font-weight: bold;
+    }
+    #main-content {
+      display: block;
+      flex-flow: column;
+    }
+    .block {
+      padding: 8px;
+      margin: 8px;
+      border-radius: 5px;
+      width: fit-content;
+      display: inline-table;
+    }
+    #tailscale {
+      background-color: rgb(58, 88, 117);
+    }
+    #internal {
+      background-color: rgb(138, 145, 69);
+    }
+    .block-title {
+      background-color: inherit;
+      font-weight: bold;
+    }
+    a {
+      color:white;
+      text-decoration: none;
+      border: solid 1px white;
+      border-radius: 8px;
+      margin: 10px 0px;
+      padding: 0px 5px;
+      display: block;
+    }
+  </style>
 </head>
 <body>
-  <div>
-    <h1>notifyd</h1>
+  <div id="header">
+    <span id="title">Top page</h1>
   </div>
-  <div>
-    <h2>via Tailscale</h2>
-    <h3>Tailscale</h3>
-    <a href="https://login.tailscale.com/admin/machines">console</a>
-    <h3>m1 (100.89.236.67)</h3>
-    <a href="http://100.89.236.67:80">:80 EPGStation</a>
-    <a href="http://100.89.236.67:40772">:40772 Mirakurun</a>
-    <a href="http://100.89.236.67:2342">:2342 PhotoPrism</a>
-    <a href="http://100.89.236.67:3000">:3000 Grafana</a>
-    <a href="http://100.89.236.67:9090">:9090 Prometheus</a>
-    <a href="http://100.89.236.67:5050">:5050 notifyd</a>
-    <a href="http://100.89.236.67:8581">:8581 Homebridge</a>
-    <a href="https://100.89.236.67:9443">:9443 Portainer</a>
-    <a href="http://100.89.236.67:8200">:8200 MiniDLNA</a>
+  <div id="main-content">
 
-    <h3>nas1 (100.91.236.26)</h3>
-    <a href="http://100.91.236.26:8080">:8080 QNAP control</a>
+    <div id="tailscale" class="block">
+      <span class="block-title">via Tailscale</span>
 
-    <h3>p1 (100.106.22.49)</h3>
-    <a href="http://100.106.22.49:3000/?tailscale=1">:3000 Dashboard</a>
+      <h3>Tailscale</h3>
+      <a href="https://login.tailscale.com/admin/machines">console</a>
+      <h3>m1 (100.89.236.67)</h3>
+      <a href="http://100.89.236.67:80">:80 EPGStation</a>
+      <a href="http://100.89.236.67:40772">:40772 Mirakurun</a>
+      <a href="http://100.89.236.67:2342">:2342 PhotoPrism</a>
+      <a href="http://100.89.236.67:3000">:3000 Grafana</a>
+      <a href="http://100.89.236.67:9090">:9090 Prometheus</a>
+      <a href="http://100.89.236.67:5050">:5050 notifyd</a>
+      <a href="http://100.89.236.67:8581">:8581 Homebridge</a>
+      <a href="https://100.89.236.67:9443">:9443 Portainer</a>
+      <a href="http://100.89.236.67:8200">:8200 MiniDLNA</a>
+
+      <h3>nas1 (100.91.236.26)</h3>
+      <a href="http://100.91.236.26:8080">:8080 QNAP control</a>
+
+      <h3>p1 (100.106.22.49)</h3>
+      <a href="http://100.106.22.49:3000/?tailscale=1">:3000 Dashboard</a>
+      <a href="http://100.106.22.49:5050">:5050 notifyd</a>
+    </div>
+
+    <div id="internal" class="block">
+      <span class="block-title">Internal</span>
+
+      <h3>m1 (192.168.1.22)</h3>
+      <a href="http://192.168.1.22">:80 EPGStation</a>
+      <a href="http://192.168.1.22:40772">:40772 Mirakurun</a>
+      <a href="http://192.168.1.22:2342">:2342 PhotoPrism</a>
+      <a href="http://192.168.1.22:3000">:3000 Grafana</a>
+      <a href="http://192.168.1.22:9090">:9090 Prometheus</a>
+      <a href="http://192.168.1.22:5050">:5050 notifyd</a>
+      <a href="http://192.168.1.22:8581">:8581 Homebridge</a>
+      <a href="https://192.168.1.22:9443">:9443 Portainer</a>
+      <a href="http://192.168.1.22:8200">:8200 MiniDLNA</a>
+
+      <h3>p1 (192.168.1.33)</h3>
+      <a href="http://192.168.1.33:3000">:3000 Dashboard</a>
+      <a href="http://192.168.1.33:5050">:5050 notifyd</a>
+    </div>
   </div>
-  <div>
-    <h2>Internal</h2>
-    <h3>m1 (192.168.1.22)</h3>
-    <a href="http://192.168.1.22">:80 EPGStation</a>
-    <a href="http://192.168.1.22:40772">:40772 Mirakurun</a>
-    <a href="http://192.168.1.22:2342">:2342 PhotoPrism</a>
-    <a href="http://192.168.1.22:3000">:3000 Grafana</a>
-    <a href="http://192.168.1.22:9090">:9090 Prometheus</a>
-    <a href="http://192.168.1.22:5050">:5050 notifyd</a>
-    <a href="http://192.168.1.22:8581">:8581 Homebridge</a>
-    <a href="https://192.168.1.22:9443">:9443 Portainer</a>
-    <a href="http://192.168.1.22:8200">:8200 MiniDLNA</a>
 
-    <h3>p1 (192.168.1.33)</h3>
-    <a href="http://192.168.1.33:3000">:3000 Dashboard</a>
-  </div>
 </body>

@@ -1,11 +1,11 @@
-import { message } from './common.js';
+import { message, hostp1 } from './common.js';
 
 window.addEventListener('load', () => {
 
   const getjson = () => {
     document.querySelector('#memo-table tbody').innerHTML="";
     const req = new XMLHttpRequest();
-    req.open("GET", 'http://192.168.1.33:3000/memo');
+    req.open("GET", 'http://' + hostp1 + ':3000/memo');
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;

@@ -1,11 +1,11 @@
-import {sendNotifyd, message } from './common.js';
+import {sendNotifyd, message, hostp1 } from './common.js';
 
 window.addEventListener('load', () => {
 
   const ping = (num, server, service, url) => {
     var ret = false;
     const req = new XMLHttpRequest();
-    req.open("GET", 'http://192.168.1.33:3000/check?url=' + url);
+    req.open("GET", 'http://' + hostp1 + ':3000/check?url=' + url);
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;

@@ -75,6 +75,7 @@ function switchBotDevices() {
     const req = https.request(options, s => {
       s.on('data', d => {
         const ret = JSON.parse(d);
+        console.log(ret);
         resolve(ret);
       });
     });
@@ -95,6 +96,7 @@ function switchBotScenes() {
     const req = https.request(options, s => {
       s.on('data', d => {
         const ret = JSON.parse(d);
+        console.log(ret);
         resolve(ret);
       });
     });

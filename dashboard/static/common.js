@@ -1,6 +1,9 @@
 
 var messageTimeout;
 
+export var hostp1 = new URL(window.location.href).searchParams.get('tailscale') ? '100.106.22.49' : '192.168.1.33';
+export var hostm1 = new URL(window.location.href).searchParams.get('tailscale') ? '100.89.236.67' : '192.168.1.22';
+
 export function message(mode, mes) {
   document.querySelector('#message-text').innerHTML = mes;
   document.querySelector('#message-text').setAttribute('class', 'message-' + mode);
@@ -18,7 +21,7 @@ export function message(mode, mes) {
 
 export function sendNotifyd (mes)  {
   const req = new XMLHttpRequest();
-  req.open("POST", 'http://192.168.1.33:5050');
+  req.open("POST", 'http://' + hostp1 + ':5050');
   req.onreadystatechange = () => {
     if (req.readyState === XMLHttpRequest.DONE) {
       if ((req.status == 200)) {

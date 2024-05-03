@@ -1,4 +1,4 @@
-import {sendNotifyd, message } from './common.js';
+import {sendNotifyd, message, hostm1 } from './common.js';
 
 function toHalfWidth(str) {
   // 全角英数字を半角に変換
@@ -54,7 +54,7 @@ window.addEventListener('load', () => {
   const getChannel = () => {
     var ret = false;
     const req = new XMLHttpRequest();
-    req.open("GET", 'http://192.168.1.22/api/channels');
+    req.open("GET", 'http://' + hostm1 + '/api/channels');
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;
@@ -113,15 +113,15 @@ window.addEventListener('load', () => {
   }
 
   const getRecording = () => {
-    getEpg('http://192.168.1.22/api/recording?isHalfWidth=true&offset=0&limit=6', 'recording', 'records')
+    getEpg('http://' + hostm1 + '/api/recording?isHalfWidth=true&offset=0&limit=6', 'recording', 'records')
   }
 
   const getRecorded = () => {
-    getEpg('http://192.168.1.22/api/recorded?isHalfWidth=true&offset=0&limit=4', 'recorded', 'records')
+    getEpg('http://' + hostm1 + '/api/recorded?isHalfWidth=true&offset=0&limit=4', 'recorded', 'records')
   }
 
   const getReserve = () => {
-    getEpg('http://192.168.1.22/api/reserves?isHalfWidth=true&offset=0&limit=4', 'reserve', 'reserves')
+    getEpg('http://' + hostm1 + '/api/reserves?isHalfWidth=true&offset=0&limit=4', 'reserve', 'reserves')
 
   }
 
