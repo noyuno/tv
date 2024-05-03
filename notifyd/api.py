@@ -21,7 +21,9 @@ def makeAPIHandler(sendqueue, logger, token):
             if parsed_path == "/":
                 self.send_response(200)
                 self.header()
-                self.wfile.write('notifyd\nhello'.encode('utf-8'))
+                with open('index.html', mode='r') as f:
+                    self.wfile.write(f.read().encode('utf-8'))
+                #self.wfile.write('notifyd\nhello'.encode('utf-8'))
                 return
                 
             if parsed_path == "/crypt":
