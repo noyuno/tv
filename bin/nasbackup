@@ -22,7 +22,7 @@ finally() {
 
 trap finally EXIT
 
-DEST=100.91.236.26
+DEST=nas1
 EXCLUDES="--exclude=.snapshots --exclude=.snapshots.2 --exclude=ts --exclude=delete --exclude=youtube --exclude=.git --exclude=@Recently-Snapshot --exclude=@Recycle"
 
 #read -sp 'SSH password: ' password
