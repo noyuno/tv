@@ -192,7 +192,7 @@ async function main() {
       } else {
         body = JSON.stringify({
           "command": req.query.command,
-          "parameter": "default",
+          "parameter": req.query.parameter,
           "commandType": "command"
         });
         // get device id
