@@ -137,8 +137,17 @@ async function main() {
 
   sbDevices = await switchBotDevices();
   sbScenes = await switchBotScenes();
-  //console.log(sbDevices);
-  //console.log(sbScenes);
+  console.log(sbDevices);
+  console.log(sbScenes);
+
+  if (sbDevices['body']['deviceList'] == undefined) {
+    console.error(`Error: sbDevices['body']['deviceList'] == undefined. Exiting`);
+    process.exit(1);
+  }
+  if (sbDevices['body']['infraredRemoteList'] == undefined) {
+    console.error(`Error: sbDevices['body']['deviceList'] == undefined. Exiting`);
+    process.exit(1);
+  }
 
   app.use(express.json());
   app.use(bodyParser.json());
