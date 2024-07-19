@@ -24,7 +24,7 @@ nice -n 10 "$FFMPEG" -y -dual_mono_mode main -i "$INPUT" \
     "$OUTPUT" < /dev/null &&:
 
 if [ $(wc -c "$OUTPUT" |awk '{print $1}') -lt 1000000 ]; then
-  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':x: エンコードに失敗しました(<1Mbyte)' &&:
+  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':x: エンコードに失敗(<1Mbyte): '"$NAME" &&:
   exit 1
 fi
 
@@ -34,8 +34,8 @@ dirname "$OUTPUT" | xargs chmod 777
 chmod 777 "$OUTPUT"
 
 if [ "$OUTPUT" ]; then
-  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: エンコードが完了しました' &&:
+  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':coffee: '"$NAME" &&:
 else
-  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':x: エンコードに失敗しました(chapter)' &&:
+  bash /home/noyuno/tv/EPGStation/notifyenc.sh ':x: エンコードに失敗(chapter): '"$NAME" &&:
 fi
 ) | tee -a /home/noyuno/EPGStation/logs/enc.sh.log

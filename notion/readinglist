@@ -1,0 +1,8 @@
+#!/bin/bash -e
+
+source ~/tv/.env
+
+curl -H 'Authorization: Bearer '"$NOTION_INTEGRATION_TOKEN"'' 'https://api.notion.com/v1/databases/1da4307f9f1349c983f38d39d7540863' -H "Notion-Version: 2022-06-28" | jq .
+
+# pages  https://www.notion.so/noyuno/b1db7661388c4101afa0d4aba3d4f6b9?pvs=4
+# databases https://www.notion.so/noyuno/1da4307f9f1349c983f38d39d7540863?v=e12530bc07ee483596292599207f00e6&pvs=4

@@ -17,7 +17,7 @@ if [ ! "$name" ]; then
     name="（番組名なし）"
 fi
 
-url=http://192.168.1.22/#/recorded/detail/$RECORDEDID
+url=http://m1/#/recorded/detail/$RECORDEDID
 if [ ! "$RECORDEDID" ]; then
     url="（RECORDEDIDなし）"
 fi
@@ -27,7 +27,6 @@ curl -XPOST -sd '{
     "token": "'"$NOTIFYD_TOKEN"'",
     "title": "'"$title"'",
     "fields": [
-        { "name": "番組名", "value": "'"$name"'", "inline": false },
         { "name": "URL", "value": "'"$url"'", "inline": false }
     ]
 }' localhost:5050
