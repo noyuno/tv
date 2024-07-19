@@ -2,15 +2,15 @@ import {sendNotifyd, message, nextPage, pausePage, hostp1 } from './common.js';
 
 window.addEventListener('load', () => {
 
-  const send = (deviceName, command) => {
+  const send = (deviceName, command, parameter = 'default') => {
     var ret = false;
     const req = new XMLHttpRequest();
-    req.open("GET", 'http://' + hostp1 + ':3000/switchbot-command?deviceName=' + encodeURI(deviceName) + '&command=' + command);
+    req.open("GET", `http://${hostp1}:3000/switchbot-command?deviceName=${encodeURI(deviceName)}&command=${command}&parameter=${parameter}`);
     req.onreadystatechange = () => {
       if (req.readyState === XMLHttpRequest.DONE) {
         const status = req.status;
         if ((status == 200)) {
-          message('success', `${deviceName}(${command})`)
+          message('success', `${deviceName}(${command};${parameter})`)
         } else {
           message('error', `失敗：${deviceName}(${command}) (${status} ${JSON.parse(req.responseText).error})`)
         }
@@ -43,6 +43,10 @@ window.addEventListener('load', () => {
       send('外出', 'scene');
     else if (event.code == 'Digit6' || event.code == 'Numpad6')
       send('就寝', 'scene');
+    else if (event.code == 'Digit7' || event.code == 'Numpad7')
+      send('エアコン', 'setAll', '27,2,1,on');
+    else if (event.code == 'Digit8' || event.code == 'Numpad8')
+      send('エアコン', 'setAll', '27,2,1,off');
     else if (event.code == 'Digit0' || event.code == 'Numpad0')
       nextPage();
     else if (event.code == 'Period' || event.code == 'NumpadDecimal')
@@ -55,7 +59,7 @@ window.addEventListener('load', () => {
   });
 
   function showhelp() {
-    message('success', 'ヘルプ<br><br>0:次のページ<br>.:遷移停止<br>1:SBテレビ<br>2:シーリングライト toggle<br>3:プラグミニ toggle<br>4:帰宅<br>5:外出<br>6:就寝')
+    message('success', 'ヘルプ<br><br>0:次のページ<br>.:遷移停止<br>1:SBテレビ<br>2:シーリングライト toggle<br>3:プラグミニ toggle<br>4:帰宅<br>5:外出<br>6:就寝<br>7:エアコン27℃<br>8:エアコンオフ')
   }
     
   document.querySelector('#keyboard-help').addEventListener('click', ((e) => {
