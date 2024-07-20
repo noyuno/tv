@@ -3,5 +3,5 @@
 /home/noyuno/tv/bin/convhankaku
 /home/noyuno/tv/bin/tvautomove
 /home/noyuno/tv/bin/send-journallog
-#node /home/noyuno/tv/notion/epgndescription.js
+node /home/noyuno/tv/notion/epgndescription.js
 

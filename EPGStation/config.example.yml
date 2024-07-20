@@ -74,10 +74,15 @@ stream:
                       -hls_segment_filename %streamFileDir%/stream%streamNum%-%09d.ts -hls_flags delete_segments -c:a
                       copy -c:v copy -flags
                       +loop-global_header %OUTPUT%'
-recordingPrepRecFailedCommand: '/home/noyuno/tv/EPGStation/notify.sh :x:録画準備が失敗しました'
+recordingPrepRecFailedCommand: '/home/noyuno/tv/EPGStation/notify.sh :x: 録画準備失敗'
 # recordingStartCommand: '/home/noyuno/tv/EPGStation/notify.sh :record_button:録画を開始しました'
 #recordingFinishCommand: '/home/noyuno/tv/EPGStation/notify.sh :white_circle:録画を終了しました'
-recordingFailedCommand: '/home/noyuno/tv/EPGStation/notify.sh :x:録画が失敗しました'
+recordingFailedCommand: '/home/noyuno/tv/EPGStation/notify.sh :x: 録画失敗'
 
 isAllowAllCORS: true
 
+apiServers:
+    - http://localhost
+    - http://192.168.1.22
+    - http://m1
+    - http://100.89.236.67
