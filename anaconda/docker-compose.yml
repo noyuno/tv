@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  anaconda:
+    image: noyuno-anaconda
+    restart: always
+    ports:
+      - "8888:8888"
+    volumes:
+      - /home/noyuno/anaconda/root_jupyter:/root/.jupyter
+      - /home/noyuno/anaconda/workspace:/workspace
+    

@@ -3,8 +3,18 @@ const { Client } = require("@notionhq/client");
 const notion = new Client({ auth: process.env.NOTION_INTEGRATION_TOKEN });
 const rldbid = '1da4307f9f1349c983f38d39d7540863';
 const endpoint = 'https://www.notion.so/';
-const request = require("request-promise-native");
+//const request = require("request-promise-native");
 const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));
+
+async function notify(message) {
+  const ret = (await fetch('http://localhost:5050', {
+    method: 'POST',
+    body: JSON.stringify({
+      token: process.env.NOTIFYD_TOKEN,
+      message: message
+    }),
+  }));
+}
 
 async function gettitle(rldbp) {
   
@@ -37,40 +47,6 @@ async function updateProperties(rldbp) {
     }
   }));
 }
-
-//////////////////////////////
-
-async function createEpgBlock(rldbp) {
-  var epgblockid = undefined;
-
-  const blocks_children = (await notion.blocks.children.list({
-    block_id: rldbp.id
-  })).results;
-  //console.log('blocks.children : ');
-  //console.log(blocks_children);
-  
-  for (const block of blocks_children) {
-    //console.log(block.heading_1)
-    if (block.type == 'heading_1' && block.heading_1.rich_text.length > 0 && block.heading_1.rich_text[0].plain_text == 'EPGStation') {
-      epgblockid = block.id;
-      break;
-    }
-  }
-
-  if (epgblockid) {
-    //console.log('epgblockid found : ' + epgblockid);
-  } else {
-    //console.log('epgblockid not found.');
-    epgblockid = (await notion.blocks.children.append({
-      block_id: rldbp.id,
-      children: [ { 'heading_1': { 'rich_text': [ { 'text': { 'content': 'EPGStation' } } ] } } ]
-    })).results[0].id;
-    //console.log('epgblockid created : ' + epgblockid);
-  }
-  return epgblockid;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,45 +93,65 @@ function stringngram(a, b) {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 async function getepg(name, rldbpid, channel) {
-  const blocks = (await notion.blocks.children.list({
-    block_id: rldbpid
-  })).results;
+  var next_cursor = undefined;
+  var blocks = [];
+  
+  do {
+    const ret = (await notion.blocks.children.list({
+      block_id: rldbpid,
+      start_cursor: next_cursor
+    }));
+    next_cursor = ret.next_cursor;
+    blocks = blocks.concat(ret.results)
+  } while (next_cursor);
 
+  if (!blocks) {
+    console.error(`getepg(): cannot retrieve blocks. name=${name}, block_id=${rldbpid}, channel=${channel}`)
+    return null;
+  }
 
+  //const epg = JSON.parse(await request.get('http://m1/api/recorded?isHalfWidth=true&offset=0&limit=100&keyword=' + encodeURIComponent(name)));
+  const epg = (await (await 
+    fetch('http://m1/api/recorded?isHalfWidth=true&offset=0&limit=100&keyword=' + 
+      encodeURIComponent(name))).json());
 
-  const epg = JSON.parse(await request.get('http://m1/api/recorded?isHalfWidth=true&offset=0&limit=100&keyword=' + encodeURIComponent(name)));
   //console.log(epg);
   epg.records.sort((a, b) => {
     return new Date(a.startAt).getTime() - new Date(b.startAt).getTime();
   });
-  //console.log(epg.records);
 
   var lastid = undefined;
   var description = '';
   var rawextended = {}
-  for (const record of epg.records) {
-    var { pblockid, endid } = searchRecord(record, blocks);
+  var num = 0;
+  var bn = 0;
 
-    if (pblockid) {
-      //console.log('already exists, skipping. pblockid = ' + pblockid);
-      continue;
-    }
-    if (lastid) {
-      //console.log(`not found. creating. lastid = ${lastid}`);
-      endid = lastid;
+
+  for (var en = 0; en < epg.records.length; en++) {
+    var existsid, endid, bn;
+    if (en == 0) {
+      [ existsid, endid, bn ] = await walkBlock(epg.records[en].id, blocks, rldbpid);
     } else {
-      //console.log(`not found. creating. endid = ${endid}`);
+      [ existsid, endid, bn ] = await nextBlock(epg.records[en].id, blocks, bn);
     }
-
-    lastid = await generate(record, description, rawextended, channel, lastid, rldbpid, endid);
-
+    if (existsid) {
+      //console.log('already exists, skipping. pblockid = ' + pblockid);
+      //continue;
+    } else {
+      num++;
+      if (lastid) {
+        //console.log(`not found. creating. lastid = ${lastid}`);
+        endid = lastid;
+      } else {
+        //console.log(`not found. creating. endid = ${endid}`);
+      }
+      lastid = await generate(epg.records[en], description, rawextended, channel, lastid, rldbpid, endid);
+    }
     // 番組内容は、前回の内容と比較するためすべて変数に格納する。
-    description = record.description;
-    rawextended = record.rawExtended;
-
-
-
+    description = epg.records[en].description;
+    rawextended = epg.records[en].rawExtended;
   }
+  return num;
 }
 
 async function generate(record, description, rawextended, channel, lastid, rldbpid, endid) {
@@ -200,7 +196,7 @@ async function generate(record, description, rawextended, channel, lastid, rldbp
   if (record.videoFiles && record.videoFiles[0]) {
     link = `http://m1/#/recorded/detail/${record.id}`;
   }
-  console.log(`## ${record.name} [${record.id}]\r\n  paragraph 時刻: ${date}、チャンネル: ${cha}\r\n  bookmark ${link}\r\n  paragraph ${text.replace(/^/g, '    ')}`);
+  //console.log(`## ${record.name} [${record.id}]\r\n  paragraph 時刻: ${date}、チャンネル: ${cha}\r\n  bookmark ${link}\r\n  paragraph ${text.replace(/^/g, '    ')}`);
   //await sleep(5000);
   lastid = (await notion.blocks.children.append({
     block_id: rldbpid,
@@ -215,52 +211,95 @@ async function generate(record, description, rawextended, channel, lastid, rldbp
   return lastid;
 }
 
-function searchRecord(record, blocks) {
-  var pblockid = undefined;
+async function walkBlock(epgid, blocks, rldbpid) {
+  var existsid = undefined;
   // 末尾
   var endid = undefined;
   // 既に存在？
   var epgstation_area = undefined;
-  //console.log(`searching [${record.id}] (name=${record.name})`);
-  for (const block of blocks) {
-    //console.log(`block.type=${block.type}`);
+  //console.log(`searching [${epgid}]`);
+  var bn = 0;
+  for ( ; bn < blocks.length; bn++) {
+    //console.log(`blocks[${bn}].type=${blocks[bn].type}`);
     if (epgstation_area) {
       // in EPGStation area
-      if (block.type == 'heading_2' && block.heading_2.rich_text.length > 0) {
-        //console.log(`block.heading_2.rich_text[0].plain_text=${block.heading_2.rich_text[0].plain_text}`);
-        if (block.heading_2.rich_text[0].plain_text.includes(`[${record.id}]`)) {
+      if (blocks[bn].type == 'heading_2' && blocks[bn].heading_2.rich_text.length > 0) {
+        //console.log(`blocks[bn].heading_2.rich_text[0].plain_text=${blocks[bn].heading_2.rich_text[0].plain_text}`);
+        if (blocks[bn].heading_2.rich_text[0].plain_text.includes(`[${epgid}]`)) {
           // already exists
-          //console.log(`already exists [${record.id}]`);
-          pblockid = block.id;
+          //console.log(`already exists [${epgid}]`);
+          existsid = blocks[bn].id;
           break;
         }
       }
-      if (block.type == 'heading_1') {
+      if (blocks[bn].type == 'heading_1') {
         // EPGStation area end
-        //lastid = block.id;
         //console.log('EPGStation area end');
         break;
       }
-      endid = block.id;
+      endid = blocks[bn].id;
     } else {
       // before EPGStation area
-      if (block.type == 'heading_1' && block.heading_1.rich_text.length > 0 && block.heading_1.rich_text[0].plain_text == 'EPGStation') {
+      if (blocks[bn].type == 'heading_1' && blocks[bn].heading_1.rich_text.length > 0 && blocks[bn].heading_1.rich_text[0].plain_text == 'EPGStation') {
         // EPGStation area start
         //console.log('EPGStation area start');
         epgstation_area = true;
-        endid = block.id;
+        endid = blocks[bn].id;
         continue;
       }
     }
   }
-  return { pblockid, endid };
+
+  //console.log(`walkBlock() end: epgstation_area=${epgstation_area}, existsid=${existsid}, endid=${endid}, bn=${bn}`)
+  if (epgstation_area == undefined) {
+    //console.log(blocks.slice(-1));
+    const block_id = (blocks.length == 0) ? rldbpid : blocks.slice(-1)[0].id;
+    endid = (await notion.blocks.children.append({
+      block_id: block_id,
+      children: [{ 'heading_1': { 'rich_text': [{ 'text': { 'content': 'EPGStation' } }] } }]
+    })).results[0].id;
+    //console.log(`h1 EPGStation id=${endid}, (parent=${block_id})`);
+  }
+
+  return [ existsid, endid, bn++ ];
 }
 
+
+async function nextBlock(epgid, blocks, bn) {
+  var existsid = undefined;
+  // 末尾
+  var endid = undefined;
+
+  //console.log(`searching [${epgid}]`);
+  for ( ; bn < blocks.length; bn++) {
+    //console.log(`blocks[${bn}].type=${blocks[bn].type}`);
+    if (blocks[bn].type == 'heading_1') {
+      // EPGStation area end
+      //console.log('EPGStation area end');
+      break;
+    }
+    if (blocks[bn].type == 'heading_2' && blocks[bn].heading_2.rich_text.length > 0) {
+      //console.log(`block.heading_2.rich_text[0].plain_text=${blocks[bn].heading_2.rich_text[0].plain_text}`);
+      if (blocks[bn].heading_2.rich_text[0].plain_text.includes(`[${epgid}]`)) {
+        // already exists
+        //console.log(`already exists [${epgid}]`);
+        existsid = blocks[bn].id;
+        break;
+      }
+    }
+    endid = blocks[bn].id;
+  }
+
+  //console.log(`nextBlock() end. existsid=${existsid}, endid=${endid}, bn=${bn}`)
+
+  return [ existsid, endid, bn ];
+}
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 async function main() {
   try {
     var next_cursor = undefined;
+    var notifydtext = '';
     do {
       const rldb = await notion.databases.query({
         database_id: rldbid,
@@ -269,20 +308,45 @@ async function main() {
       next_cursor = rldb.next_cursor;
       //console.log('rldb : ');
       //console.log(rldb);
-      const channel = JSON.parse(await request.get('http://m1/api/channels'));
+      //const channel = JSON.parse(await request.get('http://m1/api/channels'));
+      var channel = (await (await fetch('http://m1/api/channels')).json())
+      channel.push(
+        {'id': 400211, 'halfWidthName': 'BS11' },
+        {'id': 400181, 'halfWidthName': 'BSフジ' },
+        {'id': 400161, 'halfWidthName': 'BS-TBS' },
+        {'id': 400141, 'halfWidthName': 'BS日テレ' },
+      )
       //console.log(channel)
 
       for (const rldbp of rldb.results) {
         console.log(`# ${rldbp.properties['タイトル'].title[0].plain_text}`);
         (await updateProperties(rldbp));
-        (await createEpgBlock(rldbp));
-        (await getepg((await gettitle(rldbp)), rldbp.id, channel));
+        //(await createEpgBlock(rldbp));
+        const n = (await getepg((await gettitle(rldbp)), rldbp.id, channel));
+        if (n) {
+          notifydtext += `${rldbp.properties['タイトル'].title[0].plain_text} (話数${n})\r\n`
+        }
         //(await sleep(5000));
       }
     } while (next_cursor);
-
+    if (notifydtext) {
+      const t = `Notionへの同期完了\r\n${notifydtext}`;
+      console.log(t)
+      notify(t);
+    } else {
+      const t = `Notionは既に同期済み`;
+      console.log(t)
+      notify(t);
+    }
   } catch (error) {
+    const t = `Notion同期中にエラー\r\n${notifydtext}\r\n${error}`;
+    console.error(t)
     console.error(error);
+    try {
+      notify(t);
+    } catch (err2) {
+      console.error(err2);
+    }
   }
 }
 
