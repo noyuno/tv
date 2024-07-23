@@ -1,7 +1,14 @@
 #!/bin/bash -e
 
-/home/noyuno/tv/bin/convhankaku
-/home/noyuno/tv/bin/tvautomove
-/home/noyuno/tv/bin/send-journallog
-node /home/noyuno/tv/notion/epgndescription.js
+pushd /home/noyuno/tv
+./bin/convhankaku
+./bin/tvautomove
+
+mkdir -p ./logs/notion
+/home/noyuno/.config/nvm/versions/node/v20.12.2/bin/node ./notion/epgndescription.js |& \
+  tee -a ./logs/notion/$(date '+%Y%m%d-%H%M').log
+
+./bin/send-journallog
+
+popd
 
