@@ -4,11 +4,11 @@
 case "$1" in
   "720p")
     vf="bwdif=0:-1:1,scale=-2:720"
-    crf=25
+    crf=24
     ;;
   *)
     vf="bwdif=0:-1:1"
-    crf=23
+    crf=22
     ;;
 esac
 
