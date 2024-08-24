@@ -96,7 +96,7 @@ window.addEventListener('load', () => {
             const timeopt = { hour: "2-digit", minute: "2-digit" };
             tr.insertCell(0).appendChild(document.createTextNode(new Date(record.startAt).toLocaleDateString("SV", dateopt).substring(5) + ' ' + new Date(record.startAt).toLocaleTimeString("SV",timeopt) + '～' +  new Date(record.endAt).toLocaleTimeString("SV",timeopt)));
             tr.insertCell(1).appendChild(document.createTextNode(toHalfWidth(channels[record.channelId])));
-            tr.insertCell(2).appendChild(document.createTextNode(substringDisplayWidth(record.name, 0, 48)));
+            tr.insertCell(2).appendChild(document.createTextNode(substringDisplayWidth(record.name, 0, 46)));
           }
         } else {
           message('録画情報を取得できませんでした', 'error');
