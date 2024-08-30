@@ -299,7 +299,8 @@ async function nextBlock(epgid, blocks, bn) {
 async function main() {
   try {
     var next_cursor = undefined;
-    var notifydtext = '';
+    var successtext = '';
+    var failuretext = '';
     do {
       const rldb = await notion.databases.query({
         database_id: rldbid,
@@ -319,27 +320,40 @@ async function main() {
       //console.log(channel)
 
       for (const rldbp of rldb.results) {
-        console.log(`# ${rldbp.properties['タイトル'].title[0].plain_text}`);
-        (await updateProperties(rldbp));
-        //(await createEpgBlock(rldbp));
-        const n = (await getepg((await gettitle(rldbp)), rldbp.id, channel));
-        if (n) {
-          notifydtext += `${rldbp.properties['タイトル'].title[0].plain_text} (話数${n})\r\n`
+        try {
+          console.log(`# ${rldbp.properties['タイトル'].title[0].plain_text}`);
+          (await updateProperties(rldbp));
+          //(await createEpgBlock(rldbp));
+          const n = (await getepg((await gettitle(rldbp)), rldbp.id, channel));
+          if (n) {
+            successtext += `${rldbp.properties['タイトル'].title[0].plain_text} (話数${n})\r\n`
+          }
+        } catch (error) {
+          const f = `${rldbp.properties['タイトル'].title[0].plain_text} (${error})\r\n`;
+          console.log(f);
+          failuretext += f;
         }
         //(await sleep(5000));
       }
     } while (next_cursor);
-    if (notifydtext) {
-      const t = `Notionへの同期完了\r\n${notifydtext}`;
+
+    if (failuretext) {
+      const t = `Notion同期中にエラー\r\n${error}\r\n同期失敗:\r\n${failuretext}`;
       console.log(t)
       notify(t);
-    } else {
+    }
+    if (successtext) {
+      const t = `Notionへの同期完了\r\n${successtext}`;
+      console.log(t)
+      notify(t);
+    }
+    if (failuretext == '' && successtext == '') {
       const t = `Notionは既に同期済み`;
       console.log(t)
       notify(t);
     }
   } catch (error) {
-    const t = `Notion同期中にエラー\r\n${notifydtext}\r\n${error}`;
+    const t = `Notion同期中にエラー（全般）\r\n${error}`;
     console.error(t)
     console.error(error);
     try {
