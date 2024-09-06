@@ -1,0 +1,224 @@
+* {
+  font-family: "Noto Sans JP", sans-serif;
+  user-select: none;
+  font-size: large;
+}
+
+body {
+  /* overflow: hidden; */
+}
+
+body, table, button {
+  background-color: black;
+  color: white;
+}
+
+#dim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: none;
+  pointer-events: none;
+}
+
+#header {
+  margin: 2px;
+  height: 30px;
+}
+
+#title {
+  font-weight: bold;
+}
+
+#current-page-container {
+  position: relative;
+}
+
+#current-page-progressbar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100px;
+  background-color: rgb(133, 129, 124);
+}
+
+.header-button {
+  font-weight: bold;
+  border: solid 3px;
+  border-radius: 5px;
+  padding-left: 10px;
+  padding-right: 10px;
+  position: relative;
+}
+
+
+
+#header-button-group {
+  float: right;
+}
+
+#main-content {
+  display: flex;
+  flex-flow: column;
+
+}
+
+.block {
+  padding: 8px;
+  margin: 8px;  
+  border-radius: 5px;
+  /*width: fit-content;*/
+  /*display: inline-block;*/
+}
+
+.block-title {
+  background-color: inherit;
+  font-weight: bold;
+}
+
+#thumbnail-block {
+  background-color: rgb(138, 145, 69);
+
+}
+
+
+#smarthome-block {
+  background-color: rgb(128, 62, 62);
+
+}
+
+#weather-block {
+  background-color: rgb(73, 104, 68);
+}
+
+#encode-block, #reserve-block {
+  background-color: rgb(58, 88, 117);
+}
+#recording-block {
+  background-color: rgb(113, 152, 189);
+}
+
+#train-block {
+  background-color: rgb(168, 127, 66);
+}
+
+#schedule-block {
+  background-color: rgb(121, 68, 120);
+}
+#memo-block {
+  background-color: rgb(224, 133, 80);
+}
+.schedule-sat {
+  color:rgb(163, 161, 242)
+}
+.schedule-sun {
+  color:rgb(197, 75, 100)
+}
+th, td {
+  border: solid 2px;
+  padding: 5px;
+  font-weight: normal;
+  word-break: break-all;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 2px;
+}
+
+
+#weather-table {
+  text-align: center;
+}
+
+.status-完了 {
+  background-color: rgb(59, 124, 59);
+  color: white;
+  padding: 3px 20px 3px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.status-失敗 {
+  background-color: rgb(190, 80, 80);
+  color: white;
+  padding: 3px 20px 3px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+
+#message {
+    position: fixed;
+    top: 40px;
+    right: 20px;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+    display: none;
+}
+
+.message-success {
+  background-color: rgb(59, 124, 59)!important
+}
+
+.message-error {
+  background-color: rgb(190, 80, 80)!important
+}
+
+#close-button {
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+
+progress[value] {
+  appearance: none;
+  color: green;
+  border: 1px solid black;
+  border-radius: 2px;
+  height: 20px;
+  width: 80px;
+}
+
+textarea {
+  background-color: black;
+  color: #fff;
+  display: flex;
+  width: calc(100% - 150px);
+  overflow-wrap: anywhere;
+}
+
+.formitem {
+  display: flex;
+}
+
+label {
+  width: 150px;
+}
+
+.thumbnail-base {
+  display: flex;
+}
+
+.thumbnail {
+  /* width: 100%; */
+  padding: 10px;
+}
+
+.thumbnail > a > img {
+  width: calc(100% - 0px);
+}
+
+
+.detail > p {
+  word-break: break-all;
+}
