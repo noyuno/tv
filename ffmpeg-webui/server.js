@@ -41,19 +41,6 @@ function sendStatus() {
     c.send(JSON.stringify(r));
   }
 }
-/*
-const cleanup = () => {
-  processes.map((proc) => {
-    console.log(proc);
-    proc.kill();
-  })
-};
-process.on('SIGINT', cleanup)
-process.on('SIGTERM', cleanup)
-process.on('SIGQUIT', cleanup)
-//process.on('uncaughtException', cleanup)
-app.on('quit', cleanup) // これがなければ子孫は生き残ってしまう
-*/
 
 ///////////////////////////////////////////////////////////////
 // storage
@@ -76,83 +63,94 @@ var uploadId = 0;
 
 ///////////////////////////////////////////////////////////////
 
-// エンコード処理のキュー（同時に2つまで実行）
+// エンコード処理のキュー（同時に1つまで実行）
 const queue = async.queue((task, callback) => {
   const { uid, name, outputfname, filePath, outputFilePath, ffmpegArgs, logStream, res } = task;
-  var callback_called = false;
-  const call_callback = () => {
-    if (!callback_called) {
-      callback_called = true;
-      callback();
-    }
-  }
-
+  Promise.resolve()
+  .then(() => {
+    return new Promise((resolve, reject) => {
+      const t = ffmpeg(filePath)
+        .screenshots({
+          count: 1,
+          timestamps: [10],
+          filename: `${outputfname}.png`,
+          folder: path.dirname(outputFilePath),
+          size: '443x?'
+        })
+        .on('end', () => {
+          resolve(t);
+        });
+    });
+  })
+  .then(t => {
+    return new Promise((resolve, reject) => {
+      // ffmpegでエンコードを実行
+      const f = ffmpeg(filePath);
       
-  const t = ffmpeg(filePath)
-    .screenshots({
-      count: 1,
-      timestamps: [10],
-      filename: `${outputfname}.png`,
-      folder: path.dirname(outputFilePath),
-      size: '443x?'
-    });
+      processes.push({
+        uploadid: uid,
+        start:  new Date().getTime(),
+        name: name,
+        status: '順番待ち',
+        progress: 0,
+        url: `/download?filename=${outputfname}`,
+        thumbnail: `/download?filename=${outputfname}.png`,
+        ffmpegcommand: f,
+        inputsize: fs.statSync(filePath).size
+      });
+      
+      f.input(path.join(path.dirname(outputFilePath), `${outputfname}.png`))
+        .output(outputFilePath)
+        .withOutputOptions(ffmpegArgs.split(' '))
+        .on('start', (commandLine) => {
+          logStream.write(`start: ${commandLine}\n`);
+          updateStatus(uid, 'start');
+          updateStatus(uid, 'start', new Date().getTime());
+        })
+        .on('codecData', function(data) {
+          console.log('Input is ' + data.audio + ' audio ' + 'with ' + data.video + ' video')
+        })
+        .on('progress', function(progress) {
+            //console.log('Processing: ' + progress.percent + '% done');
+            updateStatus(uid, 'status', 'エンコード中');
+            updateStatus(uid, 'progress', progress.percent);
+        })
+        .on('stderr', (stderrLine) => {
+          logStream.write(`stderr: ${stderrLine}\n`);
+        })
+        .on('end', (stdout, stderr) => {
+          logStream.write(`stderr: ${stderr}\n`)
+          logStream.write(`stdout: ${stdout}\n`)
 
-  // ffmpegでエンコードを実行
-  const f = ffmpeg(filePath);
-  
-  processes.push({
-    uploadid: uid,
-    start:  new Date().getTime(),
-    name: name,
-    status: '順番待ち',
-    progress: 0,
-    url: `/download?filename=${outputfname}`,
-    thumbnail: `/download?filename=${outputfname}.png`,
-    ffmpegcommand: f,
-    inputsize: fs.statSync(filePath).size
+          // エンコード完了後、ダウンロードリンクを返す
+          //res.send(`<a href="/download/${path.basename(outputFilePath)}">エンコードされた動画をダウンロード</a>`);
+          // call_callback();
+          updateStatus(uid, 'outputsize', fs.statSync(outputFilePath).size)
+          updateStatus(uid, 'progress', 100);
+          updateStatus(uid, 'status', '完了');
+          resolve({t, f});
+        })
+        .on('error', (err) => {
+          console.error(err);
+          // res.status(500).send('エンコード中にエラーが発生しました。');
+          // call_callback();
+          updateStatus(uid, 'status', '失敗');
+          reject(err);
+        })
+        .run();
+        //console.log(f);
+
+    }); //Promise
+  }) // then
+  .catch((error) => {
+    // todo
+  })
+  .finally(() => {
+    logStream.end(); // ログファイルを閉じる
+    callback();
   });
-  
-  f.output(outputFilePath)
-    .withOutputOptions(ffmpegArgs.split(' '))
-    .on('start', (commandLine) => {
-      logStream.write(`start: ${commandLine}\n`);
-      updateStatus(uid, 'start');
-      updateStatus(uid, 'start', new Date().getTime());
-    })
-    .on('codecData', function(data) {
-      console.log('Input is ' + data.audio + ' audio ' + 'with ' + data.video + ' video')
-    })
-    .on('progress', function(progress) {
-        //console.log('Processing: ' + progress.percent + '% done');
-        updateStatus(uid, 'status', 'エンコード中');
-        updateStatus(uid, 'progress', progress.percent);
-    })
-    .on('stderr', (stderrLine) => {
-      logStream.write(`stderr: ${stderrLine}\n`);
-    })
-    .on('end', (stdout, stderr) => {
-      logStream.write(`stderr: ${stderr}\n`)
-      logStream.write(`stdout: ${stdout}\n`)
-      logStream.end(); // ログファイルを閉じる
-      updateStatus(uid, 'outputsize', fs.statSync(outputFilePath).size)
-      updateStatus(uid, 'progress', 100);
-      updateStatus(uid, 'status', '完了');
-      // エンコード完了後、ダウンロードリンクを返す
-      //res.send(`<a href="/download/${path.basename(outputFilePath)}">エンコードされた動画をダウンロード</a>`);
-      call_callback();
-    })
-    .on('error', (err) => {
-      console.error(err);
-      logStream.end(); // エラー発生時もログファイルを閉じる
-      // res.status(500).send('エンコード中にエラーが発生しました。');
-      updateStatus(uid, 'status', '失敗');
-      call_callback();
-    });
-    f.run();
-    //console.log(f);
 
-
-}, 1); // 同時に2つのタスクを実行
+}, 1); // 同時に1つのタスクを実行
 
 function generateStatus() {
   const r = [];
@@ -188,12 +186,14 @@ async function main() {
 
   app.get('/status', async (req, res) => {
     // return ffmpeg process status
+    console.log('access: /status');
     res.json(generateStatus());
   });
 
   app.ws('/wsstatus', (ws, req) => {
     ws.on('message', function (msg) {
-      console.log(processes);
+      //console.log(processes);
+      console.log('access: /wsstatus');
       wsClients.push(ws);
       sendStatus();
     })
@@ -201,6 +201,7 @@ async function main() {
   })
 
   app.get('/uploadid', async(req, res) => {
+    console.log('access: /uploadid');
     res.json({ status: 'success', uploadid: ++uploadId });
   });
 

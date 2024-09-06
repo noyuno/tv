@@ -1,6 +1,6 @@
 import {sendNotifyd, message, convertBytes } from './common.js';
 
-const ffmpegargs = '-y -movflags +faststart -map 0:v -ignore_unknown -max_muxing_queue_size 1024 -sn -preset veryfast -c:v libx264 -crf 22 -coder 1 -map 0:a -c:a copy';
+const ffmpegargs = '-y -movflags +faststart -map 0:v -ignore_unknown -max_muxing_queue_size 1024 -sn -preset veryfast -c:v libx264 -crf 22 -coder 1 -map 0:a -c:a copy -map 1 -c:v:1 png -disposition:v:1 attached_pic';
 
 window.addEventListener('load', async () => {
   document.querySelector('#ffmpegargs').value = ffmpegargs;
@@ -47,12 +47,12 @@ window.addEventListener('load', async () => {
     a.appendChild(img);
 
     const name = document.createElement('p');
-    name.textContent = p.name;
+    name.textContent = `#${p.uploadid}: ${p.name}`;
 
     var status = null;
     if (p.status == '完了') {
       status = document.createElement('p');
-      status.textContent = `変換前${convertBytes(p.inputsize)}, 変換後:${convertBytes(p.outputsize)}, 圧縮率:${Math.floor(1.0 - p.outputsize / p.inputsize * 100)}%`;
+      status.textContent = `変換前${convertBytes(p.inputsize)}, 変換後:${convertBytes(p.outputsize)}, 圧縮率:${Math.floor((1.0 - p.outputsize / p.inputsize) * 100)}%`;
     } else if (p.status == 'エンコード中') {
       status = document.createElement('progress');
       status.max = 100;
