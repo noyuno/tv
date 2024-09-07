@@ -1,6 +1,6 @@
-import {sendNotifyd, message, convertBytes } from './common.js';
+import {sendNotifyd, message, convertBytes, secToHMS } from './common.js';
 
-const ffmpegargs = '-y -movflags +faststart -map 0:v -ignore_unknown -max_muxing_queue_size 1024 -sn -preset veryfast -c:v libx264 -crf 22 -coder 1 -map 0:a -c:a copy -map 1 -c:v:1 png -disposition:v:1 attached_pic';
+const ffmpegargs = '-y -movflags +faststart -map 0:v -ignore_unknown -max_muxing_queue_size 1024 -sn -preset veryfast -c:v libx264 -crf 22 -coder 1 -map 0:a -c:a copy';
 
 window.addEventListener('load', async () => {
   document.querySelector('#ffmpegargs').value = ffmpegargs;
@@ -17,22 +17,43 @@ window.addEventListener('load', async () => {
     tr.setAttribute('data-uploadid', uploadid);
 
     tr.insertCell(0).appendChild(document.createTextNode(uploadid));
-    tr.insertCell(1).appendChild(document.createTextNode(time));
-    tr.insertCell(2).appendChild(document.createTextNode(name));
+    tr.insertCell(1).appendChild(document.createTextNode(name));
 
 
     if (status == 'アップロード中') {
       const p =document.createElement('progress');
       p.value = progress
       p.max = 100
-      tr.insertCell(3).appendChild(p);
+      tr.insertCell(2).appendChild(p);
     } else {
       const s = document.createElement('span');
       s.textContent = status;
       s.setAttribute('class', 'status-' + status);
-      tr.insertCell(3).appendChild(s);
+      tr.insertCell(2).appendChild(s);
     }
 
+  };
+
+  const createStatus = (p) => {
+    var status = document.createElement('p');;
+    if (p.status == '完了') {
+      status.textContent = `変換前:${convertBytes(p.inputsize)}, 変換後:${convertBytes(p.outputsize)}, 圧縮率:${Math.floor((1.0 - p.outputsize / p.inputsize) * 100)}%`;
+    } else if (p.status == 'エンコード中' && p.progress >= 0 && p.progress <= 100) {
+      const progress = document.createElement('progress');
+      progress.max = 100;
+      progress.value = p.progress;
+      status.append(progress);
+    } else {
+      status.textContent = p.status;
+    }
+    status.setAttribute('data-name', 'status');
+    return status;
+  }
+  
+  const updateStatus = (p, exists) => {
+    document.querySelector(`#thumbnail-top div div[data-uploadid="${p.uploadid}"] div p[data-name="status"]`).remove();
+    const status = createStatus(p);
+    document.querySelector(`#thumbnail-top div div[data-uploadid="${p.uploadid}"] div p[data-name="duration"]`).after(status);
   };
 
   const addThumbnail = (p, thumbnailBase) => {
@@ -47,26 +68,22 @@ window.addEventListener('load', async () => {
     a.appendChild(img);
 
     const name = document.createElement('p');
+    name.setAttribute('data-name', 'name')
     name.textContent = `#${p.uploadid}: ${p.name}`;
 
-    var status = null;
-    if (p.status == '完了') {
-      status = document.createElement('p');
-      status.textContent = `変換前${convertBytes(p.inputsize)}, 変換後:${convertBytes(p.outputsize)}, 圧縮率:${Math.floor((1.0 - p.outputsize / p.inputsize) * 100)}%`;
-    } else if (p.status == 'エンコード中') {
-      status = document.createElement('progress');
-      status.max = 100;
-      status.value = p.progress;
-    } else {
-      status = document.createElement('p');
-      status.textContent = p.status;
-    }
+    const status = createStatus(p);
+
+    const duration = document.createElement('p');
+    duration.setAttribute('data-name', 'duration')
+    duration.innerText = `${secToHMS(Math.floor(p.duration))}`;
     const detail = document.createElement('div');
     detail.setAttribute('class', 'detail')
     detail.appendChild(name);
+    detail.appendChild(duration);
     detail.appendChild(status);
     const thumbnail = document.createElement('div');
     thumbnail.setAttribute('class', 'thumbnail');
+    thumbnail.setAttribute('data-uploadid', p.uploadid);
     thumbnail.appendChild(a);
     thumbnail.appendChild(detail);
     
@@ -111,17 +128,19 @@ window.addEventListener('load', async () => {
       const req = new XMLHttpRequest();
       req.open('POST', '/upload', true);
 
+      document.querySelector('#upload-table').setAttribute('style', 'display: block');
+
+      const qStatus = `#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(3)`;
       req.upload.onprogress = function (event) {
           if (event.lengthComputable) {
               const percentComplete = (event.loaded / event.total) * 100;
-              document.querySelector(`#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(4) progress`).value = percentComplete;
+              document.querySelector(`#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(3) progress`).value = percentComplete;
           }
       };
       req.onload = function () {
           if (req.status === 200) {
-            // document.querySelector(`#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(4)`).innerText = '完了';
           } else {
-            document.querySelector(`#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(4)`).innerText = '失敗';
+            document.querySelector(qStatus).innerText = '失敗';
           }
       };
       req.onreadystatechange = () => {
@@ -129,15 +148,15 @@ window.addEventListener('load', async () => {
           const status = req.status;
           if (status === 0 || (status >= 200 && status < 400)) {
             // リクエストが正常に終了した
-            // document.querySelector(`#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(4)`).innerText = '成功';
+            document.querySelector(qStatus).innerText = '完了'
           } else {
-            document.querySelector(`#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(4)`).innerText = '失敗';
+            document.querySelector(qStatus).innerText = '失敗';
             console.log(`uploading failure, status=${status}`)
           }
         }
       };
       req.onerror = function () {
-        document.querySelector(`#upload-table tbody tr[data-uploadid="${uploadid}"] td:nth-child(4)`).innerText = '失敗';
+        document.querySelector(qStatus).innerText = '失敗';
       };
       req.send(formData);
       addUploadRow(uploadid, new Date().toLocaleTimeString("SV"), file.name, 'アップロード中', 0, '-');
@@ -153,18 +172,18 @@ window.addEventListener('load', async () => {
   const ws = new WebSocket('ws://m1:5000/wsstatus');
   ws.onmessage = (e) => {
     console.log(e.data);
-    // document.querySelector('#status-table tbody').innerHTML="";
-    document.querySelector('#thumbnail-top').innerHTML="";
+    // document.querySelector('#thumbnail-top').innerHTML="";
     var count = 0;
-    var thumbnailBase = null;
+    const thumbnailBase = document.createElement('div');
+    thumbnailBase.setAttribute('class', 'thumbnail-base');
+    document.querySelector('#thumbnail-top').appendChild(thumbnailBase);
     for (const p of JSON.parse(e.data)) {
-      //addStatusRow(p.uploadid, p.start, p.name, p.status, p.progress, p.url);
-      if (count % 2 == 0) {
-        thumbnailBase = document.createElement('div');
-        thumbnailBase.setAttribute('class', 'thumbnail-base');
-        document.querySelector('#thumbnail-top').appendChild(thumbnailBase);
+      const exists = document.querySelector(`#thumbnail-top div div[data-uploadid="${p.uploadid}"]`);
+      if (exists) {
+        updateStatus(p, exists)
+      } else {
+        addThumbnail(p, thumbnailBase);
       }
-      addThumbnail(p, thumbnailBase);
 
       count++;
     }
@@ -206,7 +225,7 @@ window.addEventListener('load', async () => {
         .then((response) => response.json())
         .then((data) => {
           message('success', 'すべて削除しました。再読み込みします。');
-          location.reload();
+          setTimeout(() => location.reload(), 1 * 1000)
           return;
         }));
     } catch(error) {

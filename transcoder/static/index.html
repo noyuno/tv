@@ -4,13 +4,13 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
   <head>
-    <title>Ffmpeg Web UI</title>
+    <title>Transcoder</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div id="dim"></div>
     <div id="header">
-      <span id="title">Ffmpeg Web UI</span>
+      <span id="title">Transcoder</span>
       <div id="header-button-group">
         <span id="stop-all" class="header-button">すべて停止</span>
         <span id="delete-all" class="header-button">動画削除</span>
@@ -28,7 +28,7 @@
           <span class="block-title">アップロード</span>
           <form>
             <div class="formitem">
-              <label for="ffmpegargs">Ffmpeg引数</label>
+              <label for="ffmpegargs">引数</label>
               <textarea id="ffmpegargs" type="text">
               </textarea>
             </div>
@@ -37,11 +37,10 @@
             </div>
           </form>
 
-          <table id="upload-table">
+          <table id="upload-table" style="display: none">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>時刻</th>
                 <th>ファイル名</th>
                 <th>状態</th>
               </tr>
@@ -51,8 +50,10 @@
 
         </div>
 
+        <hr>
+
         <div id="thumbnail-block" class="block">
-          <span class="block-title">エンコード</span>
+          <span class="block-title">トランスコード</span>
           <div id="thumbnail-top"></div>
 
         </div>
