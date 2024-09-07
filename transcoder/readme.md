@@ -1,7 +1,6 @@
 # モバイル向けの動画トランスコードシステム
 
-![image](https://github.com/noyuno/tv/blob/master/transcoder/images/screenshot.png)
-
+<image src="https://github.com/noyuno/tv/blob/master/transcoder/images/screenshot.png" width="300px">
 
 モバイルの画面収録機能は、ファイルサイズが非常に大きいため、ストレージを大量に消費してしまいます。
 このシステムを使ってサーバ側でトランスコードすれば、元のファイルサイズの半分程度まで圧縮できます。
@@ -12,10 +11,9 @@
 1. 動画ファイルをアップロードすると、自動でトランスコードが始まります。
 2. トランスコードが完了したら、サムネイルをタップして保存するか、以下のiOSショートカットを作成しすべてのファイルを一括保存します。
 
-![image](https://github.com/noyuno/tv/blob/master/transcoder/images/ios-shortcut-1.png)
-![image](https://github.com/noyuno/tv/blob/master/transcoder/images/ios-shortcut-2.png)
-![image](https://github.com/noyuno/tv/blob/master/transcoder/images/ios-shortcut-3.png)
-
+<image src="https://github.com/noyuno/tv/blob/master/transcoder/images/ios-shortcut-1.png" width="300px">
+<image src="https://github.com/noyuno/tv/blob/master/transcoder/images/ios-shortcut-2.png" width="300px">
+<image src="https://github.com/noyuno/tv/blob/master/transcoder/images/ios-shortcut-3.png" width="300px">
 
 ## 実行方法
 
